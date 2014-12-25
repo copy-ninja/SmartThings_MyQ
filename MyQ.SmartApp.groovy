@@ -48,7 +48,7 @@ def prefLogIn() {
         	input(name: "brand", title: "Brand", type: "enum",  metadata:[values:["Liftmaster","Chamberlain","Craftsman"]] )
         }
         section("Connectivity"){
-        	input(name: "polling", title: "Server Polling", type: "number", description: "in seconds", defaultValue: "300", required:false )
+        	input(name: "polling", title: "Server Polling (in Minutes)", type: "int", description: "in minutes", defaultValue: "5" )
         }              
     }
 }
@@ -67,6 +67,7 @@ def prefListDoor() {
 def installed() {
 	log.info  "installed()"
 	log.debug "Installed with settings: " + settings
+    unschedule()
     forceLogin()
 	initialize()
 }
@@ -74,6 +75,7 @@ def installed() {
 def updated() {
 	log.info  "updated()"
 	log.debug "Updated with settings: " + settings
+    unschedule()
 	unsubscribe()
 	login()
     initialize()
@@ -84,16 +86,8 @@ def uninstalled() {
 	delete.each { deleteChildDevice(it.deviceNetworkId) }
 }	
 
-
-
 def initialize() {    
 	log.info  "initialize()"
-    
-	// Set initial polling run
-    state.polling = [ 
-    	last: now(),
-        runNow: true
-    ]
     
     // Get initial device status in state.data
     refresh()
@@ -116,24 +110,22 @@ def initialize() {
     selectedDoors.each { dni ->    	
     	def childDoorDevice = getChildDevice(dni)
         if (!childDoorDevice) {
-            addChildDevice("copy-ninja", "MyQ Garage Door", dni, location.hubs[0].id, ["name": "MyQ: " + doorsList[dni], "label": "MyQ: " + doorsList[dni], "completedSetup": true])
-        }         
+            addChildDevice("copy-ninja", "MyQ Garage Door", dni, null, ["name": "MyQ: " + doorsList[dni],  "completedSetup": true])
+        } 
     }
-    def allChildDoors = getAllChildDevices()
-    log.debug "allChildDoors: " + allChildDoors
     
     //Remove devices that are not selected in the settings
     if (!selectedDoors) {
     	delete = getAllChildDevices()
     } else {
-    	delete = getChildDevices().findAll { 
-        	!selectedDoors.contains(it.deviceNetworkId) 
-        }
+    	delete = getChildDevices().findAll { !selectedDoors.contains(it.deviceNetworkId) }
     }
     delete.each { deleteChildDevice(it.deviceNetworkId) } 
 	
-    allChildDoors = getAllChildDevices()
+    def allChildDoors = getAllChildDevices()
     log.debug "allChildDoors: " + allChildDoors
+    
+
 }
 
 /* Access Management */
@@ -146,6 +138,12 @@ private forceLogin() {
 		securityToken: null,
 		expiration: 0
 	]
+    
+    state.polling = [ 
+		last: now(),
+		runNow: true
+	]
+    
     //Reset data
     state.data = [:]
     
@@ -202,8 +200,8 @@ private getDoorList() {
 			}
 		}
 	}    
-    log.debug doorList
-    log.debug state.data
+    log.debug "Door List: " + doorList
+    log.debug "state data: " + state.data
     return doorList
 }
 
@@ -257,10 +255,10 @@ private apiGet(apiPath, apiQuery = [], callback = {}) {
 }
 // HTTP POST call
 private apiPut(apiPath, apiBody = [], callback = {}) {
-	log.info "Calling HTTP PUT" 
+	log.debug "Calling HTTP PUT"
     
     // set up body
-    apiBody = [ appId: getApiAppID() ] + apiBody
+    apiBody = [ ApplicationId: getApiAppID() ] + apiBody
     if (state.session.securityToken) { apiBody = apiBody + [securityToken: state.session.securityToken ] }
     
     // set up final parameters
@@ -270,6 +268,7 @@ private apiPut(apiPath, apiBody = [], callback = {}) {
         contentType: "application/json; charset=utf-8",
         body: apiBody
 	]
+    log.debug "apiParams: " + apiParams 
     
     try {
 		httpPut(apiParams) { response ->
@@ -286,14 +285,14 @@ private apiPut(apiPath, apiBody = [], callback = {}) {
 
 // Updates data for devices
 private updateDeviceData() {    
+	log.info "updateDeviceData()"
     // automatically checks if the token has expired, if so login again
     if (login()) {        
         // Next polling time, defined in settings
-        def now = now()
-        def next = (state.polling.last?:0) + ((settings.polling?:600) * 1000)
-        if ((now > next) || (state.polling.runNow)) {
+        def next = (state.polling.last?:0) + ((settings.polling.toInteger() > 0 ? settings.polling.toInteger() : 1) * 60 * 1000)
+        if ((now() > next) || (state.polling.runNow)) {
             // set polling states
-            state.polling.last = now
+            state.polling.last = now()
             state.polling.runNow = false
 
             // Get all the door information, updated to state.data
@@ -302,8 +301,19 @@ private updateDeviceData() {
     }
 }
 
+// Get Door ID
 private getChildDeviceID(child) {
 	return child.device.deviceNetworkId.split("\\|")[1]
+}
+
+//Poll all the child
+def pollAllChild() {
+    // get all the children and send updates
+    def childDevice = getAllChildDevices()
+    childDevice.each { 
+        log.debug "Polling " + it.deviceNetworkId
+        it.poll()
+    }
 }
 
 
@@ -312,23 +322,34 @@ private getChildDeviceID(child) {
 // Refresh data
 def refresh() {
 	log.info "refresh()"
-	state.polling.runNow = true
+	state.polling = [ 
+    	last: now(),
+        runNow: true
+    ]
     state.data = [:]
+    
+    //update device to state data
     updateDeviceData()
+    
+    //force devices to poll to get the latest status
+    pause(1000)
+    pollAllChild()
 }
 
 // Get single device status
 def getDeviceStatus(child) {
 	log.info "getDeviceStatus()"
-	//tries to get latest data if polling limitation allows
-	updateDeviceData()
-	if (state.data[child.device.deviceNetworkId]) {
-		return state.data[child.device.deviceNetworkId].status
-    }
+	return state.data[child.device.deviceNetworkId].status
+}
+// Get single device last activity
+def getDeviceLastActivity(child) {
+	log.info "getDeviceLastActivity()"
+	return state.data[child.device.deviceNetworkId].lastAction
 }
 
 // Send command to start or stop
 def sendCommand(child, apiCommand) {
+	log.debug "received command: " + apiCommand
 	def apiPath = "/api/deviceattribute/putdeviceattribute"
 	def apiBody = [
     	DeviceId: getChildDeviceID(child),
@@ -343,10 +364,8 @@ def sendCommand(child, apiCommand) {
     apiPut(apiPath, apiBody) 	
 	
 	//Forcefully get the latest data after waiting for 2.5 seconds
-	pause(2500)
+	pause(12000)
 	refresh()
 	
 	return true
 }
-
-
