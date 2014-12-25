@@ -2,7 +2,7 @@
  *	MyQ Smart Device
  *
  *	Author: Jason Mok
- *	Date: 2014-12-20
+ *	Date: 2014-12-26
  *
  ***************************
  *
@@ -32,55 +32,69 @@
 metadata {
 	definition (name: "MyQ Garage Door", namespace: "copy-ninja", author: "Jason Mok") {
 		capability "Door Control"
-		capability "Refresh"
-		capability "Polling"
-	        
-		attribute "lastAction", "string"
-	    
+        capability "Refresh"
+        capability "Polling"
+		
+        attribute "lastActivity", "string"
 	}
 
-	simulator { }
+	simulator {	}
 
 	tiles {
-		standardTile("door", "device.door", width: 2, height: 2, canChangeIcon: false) {
-			state "closed",  label: "closed",  action: "doorControl.open",  icon: "st.doors.garage.garage-closed",  backgroundColor: "#ffffff", nextState: "opening"
-            state "closing", label: "closing", action: "doorControl.open",  icon: "st.doors.garage.garage-closing", backgroundColor: "#D4741A", nextState: "closed"
-			state "open",    label: "open",    action: "doorControl.close", icon: "st.doors.garage.garage-open",    backgroundColor: "#57BF17", nextState: "closing"
-			state "opening", label: "opening", action: "doorControl.close", icon: "st.doors.garage.garage-opening", backgroundColor: "#D4741A", nextState: "open"
+		standardTile("door", "device.door", width: 2, height: 2) {
+			state("closed",  label:'${name}', action:"door control.open",  icon:"st.doors.garage.garage-closed",  backgroundColor:"#79b821", nextState:"opening")
+			state("open",    label:'${name}', action:"door control.close", icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e", nextState:"closing")
+			state("opening", label:'${name}', action:"refresh.refresh",    icon:"st.doors.garage.garage-opening", backgroundColor:"#ffe71e")
+			state("closing", label:'${name}', action:"refresh.refresh",    icon:"st.doors.garage.garage-closing", backgroundColor:"#ffe71e")
+            state("unknown", label:'${name}', action:"refresh.refresh",    icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e")
 		}
-		standardTile("refresh", "device.switch", inactiveLabel: false, decoration: "flat") {
+		standardTile("refresh", "device.door", inactiveLabel: false, decoration: "flat") {
 			state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
 		}
-        valueTile("lastAction", "device.lastAction", inactiveLabel: false, decoration: "flat") {
+        valueTile("lastActivity", "device.lastActivity", inactiveLabel: false, decoration: "flat") {
 			state "default", label:'${currentValue}', backgroundColor:"#ffffff"
 		}
 
 		main "door"
-		details(["door","refresh","runTime"])
+		details(["door", "lastActivity", "refresh"])
 	}
 }
-
-def installed() { }
+def installed() { poll() }
 
 def parse(String description) {}
 
 def open()  { 
-    parent.sendCommand(this, "1") 
+	log.debug "opening.."
+    parent.sendCommand(this, 1) 
     poll()  
 }
 def close() { 
-    parent.sendCommand(this, "2") 
+	log.debug "closing.."
+    parent.sendCommand(this, 2) 
     poll()  
 }
 
 def refresh() {
+	log.debug "refreshing.."
     parent.refresh()
     poll()
 }
 
 def poll() {
-	def deviceStatus = parent.getDeviceStatus(this)
+	log.debug "polling.."
+    
+    //update device
+	updateDeviceStatus(parent.getDeviceStatus(this))
+    
+    //get last activity
+    def lastActivity = parent.getDeviceLastActivity(this)
+    sendEvent(name: "lastActivity", value: lastActivity, display: true, descriptionText: device.displayName + " was open")
 	
+}
+
+// update status
+def updateDeviceStatus(status) {
+	log.debug "Current Device Status: " + status
 	if (deviceStatus == "1") {
 		sendEvent(name: "door", value: "open", display: true, descriptionText: device.displayName + " was open")
 	}   
@@ -96,5 +110,4 @@ def poll() {
     if (deviceStatus == "5") {
 		sendEvent(name: "door", value: "closing", display: true)
 	}  
-
 }
