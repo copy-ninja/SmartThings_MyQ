@@ -1,5 +1,5 @@
 /**
- *	MyQ Smart Device
+ *	MyQ Garage Door Opener SmartDevice
  *
  *	Author: Jason Mok
  *	Date: 2014-12-26
@@ -30,7 +30,7 @@
  *
  */
 metadata {
-	definition (name: "MyQ Garage Door", namespace: "copy-ninja", author: "Jason Mok") {
+	definition (name: "MyQ Garage Door Opener", namespace: "copy-ninja", author: "Jason Mok") {
 		capability "Door Control"
         capability "Refresh"
         capability "Polling"
@@ -52,7 +52,7 @@ metadata {
 			state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
 		}
         valueTile("lastActivity", "device.lastActivity", inactiveLabel: false, decoration: "flat") {
-			state "default", label:'${currentValue}', backgroundColor:"#ffffff"
+			state "default", label:'Last activity: ${currentValue}', action:"refresh.refresh", backgroundColor:"#ffffff"
 		}
 
 		main "door"
@@ -64,50 +64,61 @@ def installed() { poll() }
 def parse(String description) {}
 
 def open()  { 
-	log.debug "opening.."
     parent.sendCommand(this, 1) 
     poll()  
 }
 def close() { 
-	log.debug "closing.."
     parent.sendCommand(this, 2) 
     poll()  
 }
 
 def refresh() {
-	log.debug "refreshing.."
     parent.refresh()
     poll()
 }
 
 def poll() {
-	log.debug "polling.."
-    
     //update device
 	updateDeviceStatus(parent.getDeviceStatus(this))
     
-    //get last activity
-    def lastActivity = parent.getDeviceLastActivity(this)
-    sendEvent(name: "lastActivity", value: lastActivity, display: true, descriptionText: device.displayName + " was open")
-	
+    //update last activity 
+    updateDeviceLastActivity(parent.getDeviceLastActivity(this))
 }
 
 // update status
 def updateDeviceStatus(status) {
-	log.debug "Current Device Status: " + status
-	if (deviceStatus == "1") {
+	if (status == "1") {
 		sendEvent(name: "door", value: "open", display: true, descriptionText: device.displayName + " was open")
 	}   
-    if (deviceStatus == "2") {
+    if (status == "2") {
 		sendEvent(name: "door", value: "closed", display: true, descriptionText: device.displayName + " was closed")
 	}
-    if (deviceStatus == "3") {
+    if (status == "3") {
 		sendEvent(name: "door", value: "open", display: true, descriptionText: device.displayName + " was open")
 	}
-	if (deviceStatus == "4") {
+	if (status == "4") {
 		sendEvent(name: "door", value: "opening", display: true)
 	}  
-    if (deviceStatus == "5") {
+    if (status == "5") {
 		sendEvent(name: "door", value: "closing", display: true)
 	}  
+}
+
+def updateDeviceLastActivity(long lastActivity) {
+	def lastActivityValue = ""
+	def diffTotal = now() - lastActivity       
+	def diffDays  = (diffTotal / 86400000) as long
+	def diffHours = (diffTotal % 86400000 / 3600000) as long
+    def diffMins  = (diffTotal % 86400000 % 3600000 / 60000) as long
+    
+    if      (diffDays == 1)  lastActivityValue += "${diffDays} Day "
+	else if (diffDays > 1)   lastActivityValue += "${diffDays} Days "
+    
+    if      (diffHours == 1) lastActivityValue += "${diffHours} Hour "
+	else if (diffHours > 1)  lastActivityValue += "${diffHours} Hours "
+    
+    if      (diffMins == 1)  lastActivityValue += "${diffMins} Min"
+	else if (diffMins > 1)   lastActivityValue += "${diffMins} Mins"    
+    
+    sendEvent(name: "lastActivity", value: lastActivityValue, display: false , displayed: false)
 }
