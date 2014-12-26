@@ -35,7 +35,7 @@ metadata {
 		capability "Refresh"
 		capability "Polling"
 		
-    attribute "lastActivity", "string"
+		attribute "lastActivity", "string"
 	}
 
 	simulator {	}
@@ -46,7 +46,7 @@ metadata {
 			state("open",    label:'${name}', action:"door control.close", icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e", nextState:"closing")
 			state("opening", label:'${name}', action:"refresh.refresh",    icon:"st.doors.garage.garage-opening", backgroundColor:"#ffe71e")
 			state("closing", label:'${name}', action:"refresh.refresh",    icon:"st.doors.garage.garage-closing", backgroundColor:"#ffe71e")
-      state("unknown", label:'${name}', action:"refresh.refresh",    icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e")
+			state("unknown", label:'${name}', action:"refresh.refresh",    icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e")
 		}
 		standardTile("refresh", "device.door", inactiveLabel: false, decoration: "flat") {
 			state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
