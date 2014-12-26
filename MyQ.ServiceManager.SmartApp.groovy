@@ -1,8 +1,8 @@
 /**
- *	MyQ Service Manager SmartApp
+ *  MyQ Service Manager SmartApp
  * 
  *  Author: Jason Mok
- *  Date: 2014-12-20
+ *  Date: 2014-12-26
  *
  ***************************
  *
@@ -20,14 +20,14 @@
  **************************
  */
 definition(
-  name: "MyQ",
-  namespace: "copy-ninja",
-  author: "Jason Mok",
-  description: "Connect MyQ to control your devices",
-  category: "SmartThings Labs",
-  iconUrl:   "http://smartthings.copyninja.net/icons/MyQ@1x.png",
-  iconX2Url: "http://smartthings.copyninja.net/icons/MyQ@2x.png",
-  iconX3Url: "http://smartthings.copyninja.net/icons/MyQ@3x.png"
+	name: "MyQ",
+	namespace: "copy-ninja",
+	author: "Jason Mok",
+	description: "Connect MyQ to control your devices",
+	category: "SmartThings Labs",
+	iconUrl:   "http://smartthings.copyninja.net/icons/MyQ@1x.png",
+	iconX2Url: "http://smartthings.copyninja.net/icons/MyQ@2x.png",
+	iconX3Url: "http://smartthings.copyninja.net/icons/MyQ@3x.png"
 )
 
 preferences {
@@ -122,7 +122,7 @@ def initialize() {
 	}
     
 	//Remove devices that are not selected in the settings
-	if (!selectedDoors) {
+	if (!selectedDevices) {
 		deleteDevices = getAllChildDevices()
 	} else {
 		deleteDevices = getChildDevices().findAll { !selectedDevices.contains(it.deviceNetworkId) }
@@ -166,7 +166,6 @@ private doLogin() {
 				state.session.brandName = response.data.BrandName
 				state.session.securityToken = response.data.SecurityToken
 				state.session.expiration = now() + 300000
-				log.debug "Log in success: " + state.session
 				return true
 			} else {
 				return false
