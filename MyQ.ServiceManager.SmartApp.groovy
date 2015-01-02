@@ -1,5 +1,5 @@
 /**
- *  MyQ Service Manager SmartApp
+ *	MyQ Service Manager SmartApp
  * 
  *  Author: Jason Mok
  *  Date: 2014-12-26
@@ -20,50 +20,61 @@
  **************************
  */
 definition(
-	name: "MyQ",
-	namespace: "copy-ninja",
-	author: "Jason Mok",
-	description: "Connect MyQ to control your devices",
-	category: "SmartThings Labs",
-	iconUrl:   "http://smartthings.copyninja.net/icons/MyQ@1x.png",
-	iconX2Url: "http://smartthings.copyninja.net/icons/MyQ@2x.png",
-	iconX3Url: "http://smartthings.copyninja.net/icons/MyQ@3x.png"
+  name: "MyQ",
+  namespace: "copy-ninja",
+  author: "Jason Mok",
+  description: "Connect MyQ to control your devices",
+  category: "SmartThings Labs",
+  iconUrl:   "http://smartthings.copyninja.net/icons/MyQ@1x.png",
+  iconX2Url: "http://smartthings.copyninja.net/icons/MyQ@2x.png",
+  iconX3Url: "http://smartthings.copyninja.net/icons/MyQ@3x.png"
 )
 
 preferences {
 	page(name: "prefLogIn", title: "MyQ")    
-	page(name: "prefListDoor", title: "MyQ")
+	page(name: "prefListDevices", title: "MyQ")
 }
 
 /* Preferences */
 def prefLogIn() {
 	def showUninstall = username != null && password != null 
-	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDoor", uninstall:showUninstall, install: false) {
+	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:showUninstall, install: false) {
 		section("Login Credentials"){
 			input("username", "text", title: "Username", description: "MyQ Username (email address)")
 			input("password", "password", title: "Password", description: "MyQ password")
 		}
 		section("Brand"){
-			input(name: "brand", title: "Brand", type: "enum",  metadata:[values:["Liftmaster","Chamberlain","Craftsman"]] )
+			input(name: "brand", title: "Gateway Brand", type: "enum",  metadata:[values:["Liftmaster","Chamberlain","Craftsman"]] )
 		}
 		section("Connectivity"){
 			input(name: "polling", title: "Server Polling (in Minutes)", type: "int", description: "in minutes", defaultValue: "5" )
 		}              
-  }
+	}
 }
 
-def prefListDoor() {
+def prefListDevices() {
 	if (forceLogin()) {
 		def doorList = getDoorList()
-		return dynamicPage(name: "prefListDoor",  title: "Doors", install:true, uninstall:true) {
+		def lightList = getLightList()
+		return dynamicPage(name: "prefListDevices",  title: "Devices", install:true, uninstall:true) {
 			if (doorList) {
-				section("Select which door to use"){
+				section("Select which garage door to use"){
 					input(name: "doors", type: "enum", required:false, multiple:true, metadata:[values:doorList])
+				}
+			} 
+			if (lightList) {
+				section("Select which light controller to use"){
+					input(name: "lights", type: "enum", required:false, multiple:true, metadata:[values:lightList])
+				}
+			} 
+			if (!(doorList && lightList)) {
+				section(""){
+					paragraph "Could not find any devices" 
 				}
 			}
 		}  
 	} else {
-		return dynamicPage(name: "prefListDoor",  title: "Error!", install:false, uninstall:true) {
+		return dynamicPage(name: "prefListDevices",  title: "Error!", install:false, uninstall:true) {
 			section(""){
 				paragraph "The username or password you entered is incorrect. Try again. " 
 			}
@@ -102,6 +113,7 @@ def initialize() {
 	// Create new devices for each selected doors
 	def selectedDevices = []
 	def doorsList = getDoorList()
+	def lightsList = getLightList()
 	def deleteDevices 
    	 
 	if (settings.doors) {
@@ -111,12 +123,23 @@ def initialize() {
 			selectedDevices.add(settings.doors)
 		}
 	}
+    
+	if (settings.lights) {
+		if (settings.lights[0].size() > 1) {
+			settings.lights.each { selectedDevices.add(it) }
+		} else {
+			selectedDevices.add(settings.lights)
+		}
+	}
      
 	selectedDevices.each { dni ->    	
 		def childDevice = getChildDevice(dni)
 		if (!childDevice) {
 			if (dni.contains("GarageDoorOpener")) {
 				addChildDevice("copy-ninja", "MyQ Garage Door Opener", dni, null, ["name": "MyQ: " + doorsList[dni],  "completedSetup": true])
+			}
+			if (dni.contains("LightController")) {
+				addChildDevice("copy-ninja", "MyQ Light Controller", dni, null, ["name": "MyQ: " + lightsList[dni],  "completedSetup": true])
 			}
 		} 
 	}
@@ -178,7 +201,7 @@ private doLogin() {
 
 // Listing all the garage doors you have in MyQ
 private getDoorList() { 	    
-	def doorList = [:]
+	def deviceList = [:]
 	apiGet("/api/userdevicedetails", []) { response ->
 		if (response.status == 200) {
 			response.data.Devices.each { device ->
@@ -186,21 +209,47 @@ private getDoorList() {
 					def dni = [ app.id, "GarageDoorOpener", device.DeviceId ].join('|')
 					device.Attributes.each { 
 						if (it.Name=="desc") {
-							doorList[dni] = it.Value
+							deviceList[dni] = it.Value
 						}
 						if (it.Name=="doorstate") { 
 							state.data[dni] = [ 
 								status: it.Value,
 								lastAction: it.UpdatedTime
 							]
-						}     
+						}
 					}                    
 				}
 			}
 		}
 	}    
-  return doorList
+	return deviceList
 }
+
+// Listing all the light controller you have in MyQ
+private getLightList() { 	    
+	def deviceList = [:]
+	apiGet("/api/userdevicedetails", []) { response ->
+		if (response.status == 200) {
+			response.data.Devices.each { device ->
+				if (device.TypeId == 48) {
+					def dni = [ app.id, "LightController", device.DeviceId ].join('|')
+					device.Attributes.each { 
+						if (it.Name=="desc") {
+							deviceList[dni] = it.Value
+						}
+						if (it.Name=="lightstate") { 
+							state.data[dni] = [ 
+								status: it.Value
+							]
+						}
+					}                    
+				}
+			}
+		}
+	}    
+	return deviceList
+}
+
 
 /* api connection */
 // get URL 
@@ -232,13 +281,11 @@ private apiGet(apiPath, apiQuery = [], callback = {}) {
 		path: apiPath,
 		query: apiQuery
 	]
-	
+	//log.debug "HTTP GET request: " + apiParams  
 	// try to call 
 	try {
 		httpGet(apiParams) { response ->
-			if (response.data.ErrorMessage) {
-				log.debug "API Error: $response.data"
-			}            
+        	//log.debug "HTTP GET response: " + response.data          
 			callback(response)
 		}
 	}	catch (Error e)	{
@@ -260,11 +307,10 @@ private apiPut(apiPath, apiBody = [], callback = {}) {
 		body: apiBody
 	]
     
+    //log.debug "HTTP PUT request: " + apiParams         
 	try {
 		httpPut(apiParams) { response ->
-			if (response.data.ErrorMessage) {
-				log.debug "API Error: $response.data"
-			}            
+			//log.debug "HTTP PUT response: " + response.data            
 			callback(response)
 		}
 	} catch (Error e)	{
@@ -284,18 +330,17 @@ private updateDeviceData() {
 			state.polling.runNow = false
 			
 			// Get all the door information, updated to state.data
-			getDoorList()
-		}
-	}
-}
-
-//Poll all the child
-def pollAllChild() {
-	// get all the children and send updates
-	def childDevice = getAllChildDevices()
-	childDevice.each { 
-		log.debug "Polling " + it.deviceNetworkId
-		it.poll()
+			def doorList = getDoorList()
+			def lightList = getLightList()
+			if (doorList||lightList) { 
+				return true 
+			} else {
+				return false
+			}
+		} 
+		return true
+	} else {
+		return false
 	}
 }
 
@@ -306,12 +351,21 @@ def refresh() {
 		last: now(),
 		runNow: true
 	]
-	
+	//log.debug "state: " + state.data
 	//update device to state data
-	updateDeviceData()
-	
+	def updated = updateDeviceData()
+	//log.debug "state update: " + updated
 	//force devices to poll to get the latest status
-	pollAllChild()
+	if (updated) { 
+		// get all the children and send updates
+		def childDevice = getAllChildDevices()
+		childDevice.each { 
+			//log.debug "Polling " + it.deviceNetworkId
+			//it.poll()
+			//instead of polling, update the status directly
+			it.updateDeviceStatus(state.data[it.deviceNetworkId].status)
+		}
+	}
 }
 
 // Get Device ID
@@ -332,17 +386,14 @@ def getDeviceLastActivity(child) {
 }
 
 // Send command to start or stop
-def sendCommand(child, apiCommand) {
+def sendCommand(child, attributeName, attributeValue) {
 	def apiPath = "/api/deviceattribute/putdeviceattribute"
 	def apiBody = [
 		DeviceId: getChildDeviceID(child),
-		AttributeName: "desireddoorstate",
-		AttributeValue: apiCommand
+		AttributeName: attributeName,
+		AttributeValue: attributeValue
 	]    
-    
-	//Try to get the latest data first
-	updateDeviceData()    
-	
+    	
 	//Send command
 	apiPut(apiPath, apiBody) 	
 	
