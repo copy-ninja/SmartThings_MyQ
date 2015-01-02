@@ -32,8 +32,14 @@
 metadata {
 	definition (name: "MyQ Garage Door Opener", namespace: "copy-ninja", author: "Jason Mok") {
 		capability "Door Control"
+		capability "Contact Sensor"
 		capability "Refresh"
 		capability "Polling"
+
+		capability "Actuator"
+		capability "Switch"
+		capability "Momentary"
+		capability "Sensor"
 		
 		attribute "lastActivity", "string"
 	}
@@ -49,9 +55,17 @@ metadata {
 			state("unknown", label:'${name}', action:"refresh.refresh",    icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e")
 		}
 		standardTile("refresh", "device.door", inactiveLabel: false, decoration: "flat") {
-			state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
+			state("default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh")
 		}
-			valueTile("lastActivity", "device.lastActivity", inactiveLabel: false, decoration: "flat") {
+		standardTile("contact", "device.contact") {
+			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
+			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
+		}
+		standardTile("button", "device.switch") {
+			state("on", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
+			state("off", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
+		}
+		valueTile("lastActivity", "device.lastActivity", inactiveLabel: false, decoration: "flat") {
 			state "default", label:'Last activity: ${currentValue}', action:"refresh.refresh", backgroundColor:"#ffffff"
 		}
 
@@ -63,13 +77,29 @@ def installed() { poll() }
 
 def parse(String description) {}
 
+def on() { 
+	push() 
+	sendEvent(name: "button", value: "on", isStateChange: true, display: false, displayed: false)
+}
+def off() { 
+	sendEvent(name: "button", value: "off", isStateChange: true, display: false, displayed: false)
+}
+
+def push() { 
+	def doorState = device.currentState("door").value
+	if (doorState == "open" || doorState == "opening") {
+		close()
+	} else if (doorState == "closed" || doorState == "closing") {
+		open()
+	}
+	sendEvent(name: "momentary", value: "pushed", display: false, displayed: false)
+}
+
 def open()  { 
-	parent.sendCommand(this, 1) 
-	poll()  
+	parent.sendCommand(this, "desireddoorstate", 1) 
 }
 def close() { 
-	parent.sendCommand(this, 2) 
-	poll()  
+	parent.sendCommand(this, "desireddoorstate", 2) 
 }
 
 def refresh() {
@@ -78,20 +108,23 @@ def refresh() {
 }
 
 def poll() {
-	//update device
 	updateDeviceStatus(parent.getDeviceStatus(this))
-	
-	//update last activity 
 	updateDeviceLastActivity(parent.getDeviceLastActivity(this))
 }
 
 // update status
 def updateDeviceStatus(status) {
-	if (status == "1") { sendEvent(name: "door", value: "open", display: true, descriptionText: device.displayName + " was open") }   
-	if (status == "2") { sendEvent(name: "door", value: "closed", display: true, descriptionText: device.displayName + " was closed") }
+	if (status == "1") { 
+		sendEvent(name: "door", value: "open", display: true, descriptionText: device.displayName + " was open") 
+		sendEvent(name: "contact", value: "open", display: false, displayed: false)
+	}   
+	if (status == "2") {
+		sendEvent(name: "door", value: "closed", display: true, descriptionText: device.displayName + " was closed")
+		sendEvent(name: "contact", value: "closed", display: false, displayed: false)
+	}
 	if (status == "3") { sendEvent(name: "door", value: "open", display: true, descriptionText: device.displayName + " was open") }
-	if (status == "4") { sendEvent(name: "door", value: "opening", display: true) }  
-	if (status == "5") { sendEvent(name: "door", value: "closing", display: true) }  
+	if (status == "4") { sendEvent(name: "door", value: "opening", display: false, displayed: false) }  
+	if (status == "5") { sendEvent(name: "door", value: "closing", display: false, displayed: false) }  
 }
 
 def updateDeviceLastActivity(long lastActivity) {
