@@ -48,11 +48,13 @@ metadata {
 
 	tiles {
 		standardTile("door", "device.door", width: 2, height: 2) {
+			state("unknown", label:'${name}', action:"refresh.refresh",    icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e")
 			state("closed",  label:'${name}', action:"door control.open",  icon:"st.doors.garage.garage-closed",  backgroundColor:"#79b821", nextState:"opening")
 			state("open",    label:'${name}', action:"door control.close", icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e", nextState:"closing")
 			state("opening", label:'${name}', action:"refresh.refresh",    icon:"st.doors.garage.garage-opening", backgroundColor:"#ffe71e")
 			state("closing", label:'${name}', action:"refresh.refresh",    icon:"st.doors.garage.garage-closing", backgroundColor:"#ffe71e")
-			state("unknown", label:'${name}', action:"refresh.refresh",    icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e")
+			state("stopped1", label:'stopped', action:"refresh.refresh",    icon:"st.doors.garage.garage-closing", backgroundColor:"#ffe71e")
+			state("stopped2", label:'stopped', action:"refresh.refresh",    icon:"st.doors.garage.garage-opening", backgroundColor:"#ffe71e")
 		}
 		standardTile("refresh", "device.door", inactiveLabel: false, decoration: "flat") {
 			state("default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh")
@@ -114,17 +116,30 @@ def poll() {
 
 // update status
 def updateDeviceStatus(status) {
-	if (status == "1") { 
+	def currentState = device.currentState("door").value
+	if (status == "1" || status == "9") { 
 		sendEvent(name: "door", value: "open", display: true, descriptionText: device.displayName + " was open") 
-		sendEvent(name: "contact", value: "open", display: false, displayed: false)
+		sendEvent(name: "contact", value: "open", display: false, displayed: false)	
 	}   
 	if (status == "2") {
 		sendEvent(name: "door", value: "closed", display: true, descriptionText: device.displayName + " was closed")
 		sendEvent(name: "contact", value: "closed", display: false, displayed: false)
 	}
-	if (status == "3") { sendEvent(name: "door", value: "open", display: true, descriptionText: device.displayName + " was open") }
-	if (status == "4") { sendEvent(name: "door", value: "opening", display: false, displayed: false) }  
-	if (status == "5") { sendEvent(name: "door", value: "closing", display: false, displayed: false) }  
+	if (status == "3") { 
+		if (currentState == "opening") {
+			sendEvent(name: "door", value: "stopped2", display: true, descriptionText: device.displayName + " was stopped") 
+		} else if (currentState == "closing") {
+			sendEvent(name: "door", value: "stopped1", display: true, descriptionText: device.displayName + " was stopped") 
+		} else {
+			sendEvent(name: "door", value: "unknown", display: true, descriptionText: device.displayName + " was stopped") 
+		}
+	}
+	if (status == "4" || (status=="8" && currentState=="closed")) { 
+		sendEvent(name: "door", value: "opening", display: false, displayed: false) 
+	}  
+	if (status == "5" || (status=="8" && currentState=="open")) { 
+		sendEvent(name: "door", value: "closing", display: false, displayed: false) 
+	}  
 }
 
 def updateDeviceLastActivity(long lastActivity) {
