@@ -39,25 +39,26 @@ metadata {
 	simulator {	}
 
 	tiles {
-		standardTile("button", "device.switch", width: 2, height: 2, canChangeIcon: true) {
+		standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true) {
 			state("off", label: 'Off', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff", nextState: "on")
 			state("on", label: 'On', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#79b821", nextState: "off")
 		}
 		standardTile("refresh", "device.switch", inactiveLabel: false, decoration: "flat") {
 			state("default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh")
 		}
-		main "button"
-		details(["button", "refresh"])
+		main "switch"
+		details(["switch", "refresh"])
 	}
 }
+
 def parse(String description) {}
 
 def on() { 
-	parent.sendCommand(this, "desiredlightstate", 1) 
+	parent.sendCommand(this, "desiredlightstate", 1)
 	updateDeviceStatus(1)
 }
 def off() { 
-	parent.sendCommand(this, "desiredlightstate", 0) 
+	parent.sendCommand(this, "desiredlightstate", 0)
 	updateDeviceStatus(0)
 }
 
@@ -71,9 +72,9 @@ def poll() {
 
 def updateDeviceStatus(status) {
 	if (status == "0") { 
-		sendEvent(name: "button", value: "off", display: true, descriptionText: device.displayName + " was off") 
+		sendEvent(name: "switch", value: "off", display: true, descriptionText: device.displayName + " was off") 
 	}   
 	if (status == "1") {
-		sendEvent(name: "button", value: "on", display: true, descriptionText: device.displayName + " was off") 
+		sendEvent(name: "switch", value: "on", display: true, descriptionText: device.displayName + " was on") 
 	}
 }
