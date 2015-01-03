@@ -33,10 +33,7 @@ metadata {
 	definition (name: "MyQ Light Controller", namespace: "copy-ninja", author: "Jason Mok") {
 		capability "Refresh"
 		capability "Polling"
-
-		capability "Actuator"
 		capability "Switch"
-		capability "Sensor"
 	}
 
 	simulator {	}
@@ -53,32 +50,26 @@ metadata {
 		details(["button", "refresh"])
 	}
 }
-def installed() { poll() }
-
 def parse(String description) {}
 
 def on() { 
-	//log.debug "On.."
 	parent.sendCommand(this, "desiredlightstate", 1) 
+	updateDeviceStatus(1)
 }
 def off() { 
-	//log.debug "Off.."
 	parent.sendCommand(this, "desiredlightstate", 0) 
+	updateDeviceStatus(0)
 }
 
 def refresh() {
-	//log.debug "Refresh.."
 	parent.refresh()
-	//poll()
 }
 
 def poll() {
 	updateDeviceStatus(parent.getDeviceStatus(this))
 }
 
-// update status
 def updateDeviceStatus(status) {
-	//log.debug "Status : " + status
 	if (status == "0") { 
 		sendEvent(name: "button", value: "off", display: true, descriptionText: device.displayName + " was off") 
 	}   
