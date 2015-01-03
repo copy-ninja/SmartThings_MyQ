@@ -20,14 +20,14 @@
  **************************
  */
 definition(
-  name: "MyQ",
-  namespace: "copy-ninja",
-  author: "Jason Mok",
-  description: "Connect MyQ to control your devices",
-  category: "SmartThings Labs",
-  iconUrl:   "http://smartthings.copyninja.net/icons/MyQ@1x.png",
-  iconX2Url: "http://smartthings.copyninja.net/icons/MyQ@2x.png",
-  iconX3Url: "http://smartthings.copyninja.net/icons/MyQ@3x.png"
+	name: "MyQ",
+	namespace: "copy-ninja",
+	author: "Jason Mok",
+	description: "Connect MyQ to control your devices",
+	category: "SmartThings Labs",
+	iconUrl:   "http://smartthings.copyninja.net/icons/MyQ@1x.png",
+	iconX2Url: "http://smartthings.copyninja.net/icons/MyQ@2x.png",
+	iconX3Url: "http://smartthings.copyninja.net/icons/MyQ@3x.png"
 )
 
 preferences {
@@ -151,6 +151,9 @@ def initialize() {
 		deleteDevices = getChildDevices().findAll { !selectedDevices.contains(it.deviceNetworkId) }
 	}
 	deleteDevices.each { deleteChildDevice(it.deviceNetworkId) } 
+	
+	//Push status to devices after installation
+	refresh()
 }
 
 /* Access Management */
@@ -188,7 +191,7 @@ private doLogin() {
 				state.session.brandID = response.data.BrandId
 				state.session.brandName = response.data.BrandName
 				state.session.securityToken = response.data.SecurityToken
-				state.session.expiration = now() + 300000
+				state.session.expiration = now() + 150000
 				return true
 			} else {
 				return false
@@ -387,15 +390,17 @@ def getDeviceLastActivity(child) {
 
 // Send command to start or stop
 def sendCommand(child, attributeName, attributeValue) {
-	def apiPath = "/api/deviceattribute/putdeviceattribute"
-	def apiBody = [
-		DeviceId: getChildDeviceID(child),
-		AttributeName: attributeName,
-		AttributeValue: attributeValue
-	]    
-    	
-	//Send command
-	apiPut(apiPath, apiBody) 	
-	
-	return true
+	if (login()) {
+		def apiPath = "/api/deviceattribute/putdeviceattribute"
+		def apiBody = [
+			DeviceId: getChildDeviceID(child),
+			AttributeName: attributeName,
+			AttributeValue: attributeValue
+		]    
+	    	
+		//Send command
+		apiPut(apiPath, apiBody) 	
+		
+		return true
+	} 
 }
