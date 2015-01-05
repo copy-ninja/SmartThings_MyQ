@@ -43,7 +43,7 @@ def prefLogIn() {
 			input("username", "text", title: "Username", description: "MyQ Username (email address)")
 			input("password", "password", title: "Password", description: "MyQ password")
 		}
-		section("Brand"){
+		section("Gateway Brand"){
 			input(name: "brand", title: "Gateway Brand", type: "enum",  metadata:[values:["Liftmaster","Chamberlain","Craftsman"]] )
 		}
 		section("Connectivity"){
@@ -58,7 +58,7 @@ def prefListDevices() {
 		def lightList = getLightList()
 		return dynamicPage(name: "prefListDevices",  title: "Devices", install:true, uninstall:true) {
 			if (doorList) {
-				section("Select which garage door to use"){
+				section("Select which garage door/gate to use"){
 					input(name: "doors", type: "enum", required:false, multiple:true, metadata:[values:doorList])
 				}
 			} 
@@ -208,7 +208,7 @@ private getDoorList() {
 	apiGet("/api/userdevicedetails", []) { response ->
 		if (response.status == 200) {
 			response.data.Devices.each { device ->
-				if ((device.TypeId == 47)||(device.TypeId == 259)) {
+				if ((device.MyQDeviceTypeId == 2)||(device.MyQDeviceTypeId == 5)) {
 					def dni = [ app.id, "GarageDoorOpener", device.DeviceId ].join('|')
 					device.Attributes.each { 
 						if (it.Name=="desc") {
@@ -234,7 +234,7 @@ private getLightList() {
 	apiGet("/api/userdevicedetails", []) { response ->
 		if (response.status == 200) {
 			response.data.Devices.each { device ->
-				if (device.TypeId == 48) {
+				if (device.MyQDeviceTypeId == 3) {
 					def dni = [ app.id, "LightController", device.DeviceId ].join('|')
 					device.Attributes.each { 
 						if (it.Name=="desc") {
