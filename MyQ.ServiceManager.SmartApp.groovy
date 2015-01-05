@@ -56,20 +56,24 @@ def prefListDevices() {
 	if (forceLogin()) {
 		def doorList = getDoorList()
 		def lightList = getLightList()
-		return dynamicPage(name: "prefListDevices",  title: "Devices", install:true, uninstall:true) {
-			if (doorList) {
-				section("Select which garage door/gate to use"){
-					input(name: "doors", type: "enum", required:false, multiple:true, metadata:[values:doorList])
-				}
-			} 
-			if (lightList) {
-				section("Select which light controller to use"){
-					input(name: "lights", type: "enum", required:false, multiple:true, metadata:[values:lightList])
-				}
-			} 
-			if (!(doorList && lightList)) {
+		if ((doorList) || (lightList)) {
+			return dynamicPage(name: "prefListDevices",  title: "Devices", install:true, uninstall:true) {
+				if (doorList) {
+					section("Select which garage door/gate to use"){
+						input(name: "doors", type: "enum", required:false, multiple:true, metadata:[values:doorList])
+					}
+				} 
+				if (lightList) {
+					section("Select which light controller to use"){
+						input(name: "lights", type: "enum", required:false, multiple:true, metadata:[values:lightList])
+					}
+				} 
+			}
+		} else {
+			def devList = getDeviceList()
+			return dynamicPage(name: "prefListDevices",  title: "Error!", install:true, uninstall:true) {
 				section(""){
-					paragraph "Could not find any devices" 
+					paragraph "Could not find any supported device(s). Please report to author about these devices: " +  devList
 				}
 			}
 		}  
@@ -221,6 +225,20 @@ private getDoorList() {
 							]
 						}
 					}                    
+				}
+			}
+		}
+	}    
+	return deviceList
+}
+
+private getDeviceList() { 	    
+	def deviceList = []
+	apiGet("/api/userdevicedetails", []) { response ->
+		if (response.status == 200) {
+			response.data.Devices.each { device ->
+				if (!(device.MyQDeviceTypeId == 1||device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 3||device.MyQDeviceTypeId == 5)) {
+					deviceList.add( device.MyQDeviceTypeId.toString() + "|" + device.MyQDeviceTypeName )
 				}
 			}
 		}
