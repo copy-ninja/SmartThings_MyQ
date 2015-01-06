@@ -212,7 +212,7 @@ private getDoorList() {
 	apiGet("/api/userdevicedetails", []) { response ->
 		if (response.status == 200) {
 			response.data.Devices.each { device ->
-				if ((device.MyQDeviceTypeId == 2)||(device.MyQDeviceTypeId == 5)) {
+				if (device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7) {
 					def dni = [ app.id, "GarageDoorOpener", device.DeviceId ].join('|')
 					device.Attributes.each { 
 						if (it.Name=="desc") {
@@ -237,7 +237,7 @@ private getDeviceList() {
 	apiGet("/api/userdevicedetails", []) { response ->
 		if (response.status == 200) {
 			response.data.Devices.each { device ->
-				if (!(device.MyQDeviceTypeId == 1||device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 3||device.MyQDeviceTypeId == 5)) {
+				if (!(device.MyQDeviceTypeId == 1||device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 3||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7)) {
 					deviceList.add( device.MyQDeviceTypeId.toString() + "|" + device.MyQDeviceTypeName )
 				}
 			}
