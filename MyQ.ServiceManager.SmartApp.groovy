@@ -89,10 +89,6 @@ def prefListDevices() {
 /* Initialization */
 def installed() {
 	initialize()
-    
-	// Schedule polling
-	unschedule()
-	schedule("0 0/" + ((settings.polling.toInteger() > 0 )? settings.polling.toInteger() : 1)  + " * * * ?", refresh )
 }
 
 def updated() { initialize() }
@@ -158,6 +154,10 @@ def initialize() {
 	
 	//Push status to devices after installation
 	refresh()
+	
+	// Schedule polling
+	unschedule()
+	schedule("0 0/" + ((settings.polling.toInteger() > 0 )? settings.polling.toInteger() : 1)  + " * * * ?", refresh )
 }
 
 /* Access Management */
@@ -382,10 +382,13 @@ def refresh() {
 		// get all the children and send updates
 		def childDevice = getAllChildDevices()
 		childDevice.each { 
-			//log.debug "Polling " + it.deviceNetworkId
+			log.debug "Polling " + it.deviceNetworkId
 			//it.poll()
 			//instead of polling, update the status directly
 			it.updateDeviceStatus(state.data[it.deviceNetworkId].status)
+			if (it.deviceNetworkId.contains("GarageDoorOpener")) {
+				it.updateDeviceLastActivity(state.data[it.deviceNetworkId].lastAction.toLong())
+			}
 		}
 	}
 }
