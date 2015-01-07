@@ -129,7 +129,7 @@ def stop() {
 def refresh() {
 	state.polling.runNow = true
 	parent.refresh()
-    updateDeviceLastActivity(parent.getDeviceLastActivity(this))
+	updateDeviceLastActivity(parent.getDeviceLastActivity(this))
 }
 
 def poll() {
@@ -140,7 +140,7 @@ def poll() {
 // update status
 def updateDeviceStatus(status) {
 	//update the state data 
-	def next = (state.polling.last?:0) + 20000  //will not update if it's not more than 20 seconds. this is to stop polling from updating all the state data. 
+	def next = (state.polling.last?:0) + 10000  //will not update if it's not more than 20 seconds. this is to stop polling from updating all the state data. 
 	if ((now() > next) || (state.polling.runNow)) { 
 		state.polling.last = now()
 		state.polling.runNow = false
@@ -170,6 +170,7 @@ def updateDeviceStatus(status) {
 			sendEvent(name: "door", value: "closing", display: false, displayed: false) 
 		}  
 	}
+	updateDeviceLastActivity(parent.getDeviceLastActivity(this))
 }
 
 def updateDeviceLastActivity(long lastActivity) {
