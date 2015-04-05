@@ -422,6 +422,9 @@ def sendCommand(child, attributeName, attributeValue) {
 	    	
 		//Send command
 		apiPut(apiPath, apiBody) 	
+
+		// Schedule a refresh to verify it has been completed we give it 45 seconds
+		runIn(45, refresh, [overwrite: false])
 		
 		return true
 	} 
