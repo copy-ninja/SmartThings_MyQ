@@ -190,7 +190,7 @@ private login() {
 private doLogin() { 
 	apiGet("/api/user/validatewithculture", [username: settings.username, password: settings.password, culture: "en"] ) { response ->
 		if (response.status == 200) {
-			if (response.data.UserId != 0) {
+			if (response.data.UserId != null) {
 				state.session.userID = response.data.UserId
 				state.session.brandID = response.data.BrandId
 				state.session.brandName = response.data.BrandName
