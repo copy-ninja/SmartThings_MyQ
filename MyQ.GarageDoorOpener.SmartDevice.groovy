@@ -115,7 +115,7 @@ def open()  {
 	updateDeviceStatus(4)
 }
 def close() { 
-	parent.sendCommand(this, "desireddoorstate", 2) 
+	parent.sendCommand(this, "desireddoorstate", 0) 
 	state.polling.runNow = true
 	updateDeviceStatus(5)
 }
