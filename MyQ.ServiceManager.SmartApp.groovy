@@ -164,7 +164,6 @@ def initialize() {
 private forceLogin() {
 	//Reset token and expiry
 	state.session = [ 
-		userID: 0,
 		brandID: 0,
 		brandName: settings.brand,
 		securityToken: null,
@@ -190,8 +189,7 @@ private login() {
 private doLogin() { 
 	apiGet("/api/user/validatewithculture", [username: settings.username, password: settings.password, culture: "en"] ) { response ->
 		if (response.status == 200) {
-			if (response.data.UserId != null) {
-				state.session.userID = response.data.UserId
+			if (response.data.securityToken != null) {
 				state.session.brandID = response.data.BrandId
 				state.session.brandName = response.data.BrandName
 				state.session.securityToken = response.data.SecurityToken
@@ -209,12 +207,12 @@ private doLogin() {
 // Listing all the garage doors you have in MyQ
 private getDoorList() { 	    
 	def deviceList = [:]
-	apiGet("/api/userdevicedetails", []) { response ->
+	apiGet("/api/v4/userdevicedetails/get", []) { response ->
 		if (response.status == 200) {
 			response.data.Devices.each { device ->
 				// 2 = garage door, 5 = gate, 7 = MyQGarage(no gateway)
 				if (device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7) {
-					def dni = [ app.id, "GarageDoorOpener", device.DeviceId ].join('|')
+					def dni = [ app.id, "GarageDoorOpener", device.MyQDeviceId ].join('|')
 					device.Attributes.each { 
 						if (it.Name=="desc") {
 							deviceList[dni] = it.Value
@@ -235,7 +233,7 @@ private getDoorList() {
 
 private getDeviceList() { 	    
 	def deviceList = []
-	apiGet("/api/userdevicedetails", []) { response ->
+	apiGet("/api/v4/userdevicedetails/get", []) { response ->
 		if (response.status == 200) {
 			response.data.Devices.each { device ->
 				if (!(device.MyQDeviceTypeId == 1||device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 3||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7)) {
@@ -250,11 +248,11 @@ private getDeviceList() {
 // Listing all the light controller you have in MyQ
 private getLightList() { 	    
 	def deviceList = [:]
-	apiGet("/api/userdevicedetails", []) { response ->
+	apiGet("/api/v4/userdevicedetails/get", []) { response ->
 		if (response.status == 200) {
 			response.data.Devices.each { device ->
 				if (device.MyQDeviceTypeId == 3) {
-					def dni = [ app.id, "LightController", device.DeviceId ].join('|')
+					def dni = [ app.id, "LightController", device.MyQDeviceId ].join('|')
 					device.Attributes.each { 
 						if (it.Name=="desc") {
 							deviceList[dni] = it.Value
@@ -285,9 +283,9 @@ private getApiURL() {
 
 private getApiAppID() {
 	if (settings.brand == "Craftsman") {
-		return "eU97d99kMG4t3STJZO/Mu2wt69yTQwM0WXZA5oZ74/ascQ2xQrLD/yjeVhEQccBZ"
+		return "QH5AzY8MurrilYsbcG1f6eMTffMCm3cIEyZaSdK/TD/8SvlKAWUAmodIqa5VqVAs"
 	} else {
-		return "NWknvuBd7LoFHfXmKNMBcgajXtZEgKUh4V7WNzMidrpUUluDpVYVZx+xT4PCM5Kx"
+		return "JVM/G9Nwih5BwKgNCjLxiFUQxQijAebyyg8QUHr7JOrP+tuPb8iHfRHKwTmDzHOu"
 	}
 }
 	
@@ -413,9 +411,9 @@ def getDeviceLastActivity(child) {
 // Send command to start or stop
 def sendCommand(child, attributeName, attributeValue) {
 	if (login()) {
-		def apiPath = "/api/deviceattribute/putdeviceattribute"
+		def apiPath = "/api/v4/deviceattribute/putdeviceattribute"
 		def apiBody = [
-			DeviceId: getChildDeviceID(child),
+			MyQDeviceId: getChildDeviceID(child),
 			AttributeName: attributeName,
 			AttributeValue: attributeValue
 		]    
