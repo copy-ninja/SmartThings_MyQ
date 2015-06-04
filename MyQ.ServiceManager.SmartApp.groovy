@@ -44,7 +44,7 @@ def prefLogIn() {
 			input("password", "password", title: "Password", description: "MyQ password")
 		}
 		section("Gateway Brand"){
-			input(name: "brand", title: "Gateway Brand", type: "enum",  metadata:[values:["Liftmaster","Chamberlain","Craftsman"]] )
+			input(name: "brand", title: "Gateway Brand", type: "enum",  metadata:[values:["Liftmaster","Chamberlain","Craftsman","Troubleshoot", "Troubleshoot-Craftsman"]] )
 		}
 		section("Connectivity"){
 			input(name: "polling", title: "Server Polling (in Minutes)", type: "int", description: "in minutes", defaultValue: "5" )
@@ -272,6 +272,10 @@ private getLightList() {
 private getApiURL() {
 	if (settings.brand == "Craftsman") {
 		return "https://craftexternal.myqdevice.com"
+	} else if (settings.brand == "Troubleshoot" ) {
+		return "https://myqexternal-myqdevice-com-a488dujmhryx.runscope.net"
+	} else if (settings.brand == "Troubleshoot-Craftsman") {
+		return "https://craftexternal-myqdevice-com-a488dujmhryx.runscope.net"
 	} else {
 		return "https://myqexternal.myqdevice.com"
 	}
