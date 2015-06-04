@@ -136,10 +136,10 @@ def initialize() {
 		def childDevice = getChildDevice(dni)
 		if (!childDevice) {
 			if (dni.contains("GarageDoorOpener")) {
-				addChildDevice("copy-ninja", "MyQ Garage Door Opener", dni, null, ["name": "MyQ: " + doorsList[dni],  "completedSetup": true])
+				addChildDevice("copy-ninja", "MyQ Garage Door Opener", dni, null, ["name": "MyQ: " + doorsList[dni]])
 			}
 			if (dni.contains("LightController")) {
-				addChildDevice("copy-ninja", "MyQ Light Controller", dni, null, ["name": "MyQ: " + lightsList[dni],  "completedSetup": true])
+				addChildDevice("copy-ninja", "MyQ Light Controller", dni, null, ["name": "MyQ: " + lightsList[dni]])
 			}
 		} 
 	}
@@ -158,6 +158,7 @@ def initialize() {
 	// Schedule polling
 	unschedule()
 	schedule("0 0/" + ((settings.polling.toInteger() > 0 )? settings.polling.toInteger() : 1)  + " * * * ?", refresh )
+    
 }
 
 /* Access Management */
@@ -187,9 +188,9 @@ private login() {
 }
 
 private doLogin() { 
-	apiGet("/api/user/validatewithculture", [username: settings.username, password: settings.password, culture: "en"] ) { response ->
+	apiGet("/api/user/validate", [username: settings.username, password: settings.password] ) { response ->
 		if (response.status == 200) {
-			if (response.data.securityToken != null) {
+			if (response.data.SecurityToken != null) {
 				state.session.brandID = response.data.BrandId
 				state.session.brandName = response.data.BrandName
 				state.session.securityToken = response.data.SecurityToken
@@ -213,11 +214,10 @@ private getDoorList() {
 				// 2 = garage door, 5 = gate, 7 = MyQGarage(no gateway)
 				if (device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7) {
 					def dni = [ app.id, "GarageDoorOpener", device.MyQDeviceId ].join('|')
+					log.debug "Door DNI : " +  dni
 					device.Attributes.each { 
-						if (it.Name=="desc") {
-							deviceList[dni] = it.Value
-						}
-						if (it.Name=="doorstate") { 
+						if (it.AttributeDisplayName=="desc")	deviceList[dni] = it.Value
+						if (it.AttributeDisplayName=="doorstate") { 
 							state.data[dni] = [ 
 								status: it.Value,
 								lastAction: it.UpdatedTime
@@ -236,6 +236,7 @@ private getDeviceList() {
 	apiGet("/api/v4/userdevicedetails/get", []) { response ->
 		if (response.status == 200) {
 			response.data.Devices.each { device ->
+				log.debug "MyQDeviceTypeId : " + device.MyQDeviceTypeId.toString()
 				if (!(device.MyQDeviceTypeId == 1||device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 3||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7)) {
 					deviceList.add( device.MyQDeviceTypeId.toString() + "|" + device.TypeID )
 				}
@@ -251,17 +252,12 @@ private getLightList() {
 	apiGet("/api/v4/userdevicedetails/get", []) { response ->
 		if (response.status == 200) {
 			response.data.Devices.each { device ->
-				if (device.MyQDeviceTypeId == 3) {
+				if (device.MyQDeviceTypeId.toString() == "3") {
 					def dni = [ app.id, "LightController", device.MyQDeviceId ].join('|')
+					log.debug "Light DNI: " + dni
 					device.Attributes.each { 
-						if (it.Name=="desc") {
-							deviceList[dni] = it.Value
-						}
-						if (it.Name=="lightstate") { 
-							state.data[dni] = [ 
-								status: it.Value
-							]
-						}
+						if (it.AttributeDisplayName=="desc") { deviceList[dni] = it.Value }
+						if (it.AttributeDisplayName=="lightstate") {  state.data[dni] = [ status: it.Value ] }
 					}                    
 				}
 			}
@@ -293,7 +289,7 @@ private getApiAppID() {
 private apiGet(apiPath, apiQuery = [], callback = {}) {	
 	// set up query
 	apiQuery = [ appId: getApiAppID() ] + apiQuery
-	if (state.session.securityToken) { apiQuery = apiQuery + [securityToken: state.session.securityToken ] }
+	if (state.session.securityToken) { apiQuery = apiQuery + [SecurityToken: state.session.securityToken ] }
     
 	// set up parameters
 	def apiParams = [ 
@@ -313,24 +309,30 @@ private apiGet(apiPath, apiQuery = [], callback = {}) {
 	}
 }
 
-// HTTP POST call
+// HTTP PUT call
 private apiPut(apiPath, apiBody = [], callback = {}) {    
+	def encodedAppID = URLEncoder.encode(getApiAppID(), "UTF-8")
 	// set up body
 	apiBody = [ ApplicationId: getApiAppID() ] + apiBody
-	if (state.session.securityToken) { apiBody = apiBody + [securityToken: state.session.securityToken ] }
+	if (state.session.securityToken) { apiBody = apiBody + [SecurityToken: state.session.securityToken ] }
+    
+	// set up query
+	def apiQuery = [ appId: getApiAppID() ]
+	if (state.session.securityToken) { apiQuery = apiQuery + [SecurityToken: state.session.securityToken ] }
     
 	// set up final parameters
 	def apiParams = [ 
 		uri: getApiURL(),
 		path: apiPath,
 		contentType: "application/json; charset=utf-8",
-		body: apiBody
+		body: apiBody,
+        query: apiQuery
 	]
     
-    //log.debug "HTTP PUT request: " + apiParams         
+    log.debug "HTTP PUT request: " + apiParams         
 	try {
 		httpPut(apiParams) { response ->
-			//log.debug "HTTP PUT response: " + response.data            
+			log.debug "HTTP PUT response: " + response.data            
 			callback(response)
 		}
 	} catch (Error e)	{
@@ -411,7 +413,7 @@ def getDeviceLastActivity(child) {
 // Send command to start or stop
 def sendCommand(child, attributeName, attributeValue) {
 	if (login()) {
-		def apiPath = "/api/v4/deviceattribute/putdeviceattribute"
+		def apiPath = "/api/v4/DeviceAttribute/PutDeviceAttribute"
 		def apiBody = [
 			MyQDeviceId: getChildDeviceID(child),
 			AttributeName: attributeName,
