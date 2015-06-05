@@ -46,11 +46,9 @@ def prefLogIn() {
 		section("Gateway Brand"){
 			input(name: "brand", title: "Gateway Brand", type: "enum",  metadata:[values:["Liftmaster","Chamberlain","Craftsman"]] )
 		}
-		section("Connectivity"){
-			input(name: "polling", title: "Server Polling (in Minutes)", type: "int", description: "in minutes", defaultValue: "5" )
-		}  
-//		section(""){
-//			paragraph "This option enables author to troubleshoot if you have problem adding devices. It allows the app to send information exchanged with MyQ server to the author. DO NOT TURN IT ON unless you have contacted author at jason@copyninja.net"
+//		section("Advanced Options"){
+//			input(name: "polling", title: "Server Polling (in Minutes)", type: "int", description: "in minutes", defaultValue: "5" )
+//			paragraph "This option enables author to troubleshoot if you have problem adding devices. It allows the app to send information exchanged with MyQ server to the author. DO NOT ENABLE unless you have contacted author at jason@copyninja.net"
 //			input(name:"troubleshoot", title: "Troubleshoot", type: "boolean")
 //		}
 	}
@@ -91,10 +89,7 @@ def prefListDevices() {
 }
 
 /* Initialization */
-def installed() {
-	initialize()
-}
-
+def installed() { initialize() }
 def updated() { initialize() }
 
 def uninstalled() {
@@ -108,10 +103,7 @@ def initialize() {
 	login()
     
 	// Get initial device status in state.data
-	state.polling = [ 
-		last: now(),
-		runNow: true
-	]
+	state.polling = [  last: 0,  runNow: true ]
 	state.data = [:]
     
 	// Create new devices for each selected doors
@@ -156,13 +148,12 @@ def initialize() {
 	}
 	deleteDevices.each { deleteChildDevice(it.deviceNetworkId) } 
 	
-	//Push status to devices after installation
-	refresh()
-	
-	// Schedule polling
-	unschedule()
-	schedule("0 0/" + ((settings.polling.toInteger() > 0 )? settings.polling.toInteger() : 1)  + " * * * ?", refresh )
+	// Schedule refreshes
+	runEvery30Minutes(scheduleRefresh)
+	runEvery5Minutes(refresh)
     
+	//refresh after installation
+	refresh()
 }
 
 /* Access Management */
@@ -218,15 +209,32 @@ private getDoorList() {
 				// 2 = garage door, 5 = gate, 7 = MyQGarage(no gateway)
 				if (device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7) {
 					def dni = [ app.id, "GarageDoorOpener", device.MyQDeviceId ].join('|')
-					log.debug "Door DNI : " +  dni
+					//log.debug "Door DNI : " +  dni
 					device.Attributes.each { 
 						if (it.AttributeDisplayName=="desc")	deviceList[dni] = it.Value
 						if (it.AttributeDisplayName=="doorstate") { 
-							state.data[dni] = [ 
-								status: it.Value,
-								lastAction: it.UpdatedTime
-							]
+							state.data[dni] = [ status: it.Value, lastAction: it.UpdatedTime ]
 						}
+					}                    
+				}
+			}
+		}
+	}    
+	return deviceList
+}
+
+// Listing all the light controller you have in MyQ
+private getLightList() { 	    
+	def deviceList = [:]
+	apiGet("/api/v4/userdevicedetails/get", []) { response ->
+		if (response.status == 200) {
+			response.data.Devices.each { device ->
+				if (device.MyQDeviceTypeId == 3) {
+					def dni = [ app.id, "LightController", device.MyQDeviceId ].join('|')
+					//log.debug "Light DNI: " + dni
+					device.Attributes.each { 
+						if (it.AttributeDisplayName=="desc") { deviceList[dni] = it.Value }
+						if (it.AttributeDisplayName=="lightstate") {  state.data[dni] = [ status: it.Value ] }
 					}                    
 				}
 			}
@@ -250,42 +258,21 @@ private getDeviceList() {
 	return deviceList
 }
 
-// Listing all the light controller you have in MyQ
-private getLightList() { 	    
-	def deviceList = [:]
-	apiGet("/api/v4/userdevicedetails/get", []) { response ->
-		if (response.status == 200) {
-			response.data.Devices.each { device ->
-				if (device.MyQDeviceTypeId.toString() == "3") {
-					def dni = [ app.id, "LightController", device.MyQDeviceId ].join('|')
-					log.debug "Light DNI: " + dni
-					device.Attributes.each { 
-						if (it.AttributeDisplayName=="desc") { deviceList[dni] = it.Value }
-						if (it.AttributeDisplayName=="lightstate") {  state.data[dni] = [ status: it.Value ] }
-					}                    
-				}
-			}
-		}
-	}    
-	return deviceList
-}
-
-
 /* api connection */
 // get URL 
 private getApiURL() {
 	if (settings.brand == "Craftsman") {
-    	if (settings.troubleshoot == true) {
-        	return "https://craftexternal-myqdevice-com-a488dujmhryx.runscope.net"
-        } else {
+		if (settings.troubleshoot == true) {
+			return "https://craftexternal-myqdevice-com-a488dujmhryx.runscope.net"
+		} else {
 			return "https://craftexternal.myqdevice.com"
-        }
+		}
 	} else {
 		if (settings.troubleshoot == true) {
-        	return "https://myqexternal-myqdevice-com-a488dujmhryx.runscope.net"
-        } else {
-        	return "https://myqexternal.myqdevice.com"
-        }
+			return "https://myqexternal-myqdevice-com-a488dujmhryx.runscope.net"
+		} else {
+		return "https://myqexternal.myqdevice.com"
+		}
 	}
 }
 
@@ -310,10 +297,9 @@ private apiGet(apiPath, apiQuery = [], callback = {}) {
 		query: apiQuery
 	]
 	//log.debug "HTTP GET request: " + apiParams  
-	// try to call 
 	try {
 		httpGet(apiParams) { response ->
-        	//log.debug "HTTP GET response: " + response.data          
+			//log.debug "HTTP GET response: " + response.data          
 			callback(response)
 		}
 	}	catch (Error e)	{
@@ -341,10 +327,10 @@ private apiPut(apiPath, apiBody = [], callback = {}) {
         query: apiQuery
 	]
     
-    log.debug "HTTP PUT request: " + apiParams         
+    //log.debug "HTTP PUT request: " + apiParams         
 	try {
 		httpPut(apiParams) { response ->
-			log.debug "HTTP PUT response: " + response.data            
+			//log.debug "HTTP PUT response: " + response.data            
 			callback(response)
 		}
 	} catch (Error e)	{
@@ -357,7 +343,7 @@ private updateDeviceData() {
 	// automatically checks if the token has expired, if so login again
 	if (login()) {        
 		// Next polling time, defined in settings
-		def next = (state.polling.last?:0) + ((settings.polling.toInteger() > 0 ? settings.polling.toInteger() : 1) * 60 * 1000)
+		def next = (state.polling.last?:0) +  275000 //((settings.polling.toInteger() > 0 ? settings.polling.toInteger() : 1) * 60 * 1000)
 		if ((now() > next) || (state.polling.runNow)) {
 			// set polling states
 			state.polling.last = now()
@@ -380,29 +366,27 @@ private updateDeviceData() {
 
 /* for SmartDevice to call */
 // Refresh data
-def refresh() {
+def refresh() {   
+	//Update last run
 	state.polling = [ 
 		last: now(),
 		runNow: true
 	]
-	//log.debug "state: " + state.data
+    
 	//update device to state data
 	def updated = updateDeviceData()
-	//log.debug "state update: " + updated
 	//force devices to poll to get the latest status
 	if (updated) { 
 		// get all the children and send updates
 		def childDevice = getAllChildDevices()
 		childDevice.each { 
 			log.debug "Polling " + it.deviceNetworkId
-			//it.poll()
-			//instead of polling, update the status directly
 			it.updateDeviceStatus(state.data[it.deviceNetworkId].status)
 			if (it.deviceNetworkId.contains("GarageDoorOpener")) {
 				it.updateDeviceLastActivity(state.data[it.deviceNetworkId].lastAction.toLong())
 			}
 		}
-	}
+	}    
 }
 
 // Get Device ID
@@ -424,20 +408,25 @@ def getDeviceLastActivity(child) {
 
 // Send command to start or stop
 def sendCommand(child, attributeName, attributeValue) {
-	if (login()) {
-		def apiPath = "/api/v4/DeviceAttribute/PutDeviceAttribute"
-		def apiBody = [
-			MyQDeviceId: getChildDeviceID(child),
-			AttributeName: attributeName,
-			AttributeValue: attributeValue
-		]    
-	    	
+	if (login()) {	    	
 		//Send command
-		apiPut(apiPath, apiBody) 	
+		apiPut("/api/v4/deviceattribute/putdeviceattribute", [ MyQDeviceId: getChildDeviceID(child), AttributeName: attributeName, AttributeValue: attributeValue ]) 	
 
-		// Schedule a refresh to verify it has been completed we give it 45 seconds
-		runIn(45, refresh, [overwrite: false])
+		// Schedule a refresh to verify it has been completed
+		runIn(90, refresh, [overwrite: false])
 		
 		return true
 	} 
+}
+
+// Reschedule if original schedule died off 25 minutes later
+def scheduleRefresh() {
+	log.debug "Last poll was "  + ((now() - state.polling.last)/60000) + " minutes ago"
+	if (((state.polling.last?:0) + 1500000) < now()) {
+    	if (!canSchedule()) unschedule("refresh")
+		if (canSchedule()) {
+			runEvery5Minutes(refresh)
+			log.debug "Auto Refresh Scheduled" 
+		}
+	}
 }
