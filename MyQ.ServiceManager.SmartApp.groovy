@@ -49,7 +49,7 @@ def prefLogIn() {
 		section("Advanced Options"){
 			input(name: "polling", title: "Server Polling (in Minutes)", type: "int", description: "in minutes", defaultValue: "5" )
 			input(name: "contactSensorTrigger", title: "Contact Sensor to trigger refresh ", type: "capability.contactSensor", required: "false")
-            input(name: "multiSensorTrigger", title: "Multi Sensor to trigger refresh ", type: "capability.threeAxis", required: "false")
+			input(name: "multiSensorTrigger", title: "Multi Sensor to trigger refresh ", type: "capability.threeAxis", required: "false")
 //			paragraph "This option enables author to troubleshoot if you have problem adding devices. It allows the app to send information exchanged with MyQ server to the author. DO NOT ENABLE unless you have contacted author at jason@copyninja.net"
 //			input(name:"troubleshoot", title: "Troubleshoot", type: "boolean")
 		}
@@ -74,10 +74,9 @@ def prefListDevices() {
 				} 
 			}
 		} else {
-			def devList = getDeviceList()
 			return dynamicPage(name: "prefListDevices",  title: "Error!", install:true, uninstall:true) {
 				section(""){
-					paragraph "Could not find any supported device(s). Please report to author about these devices: " +  devList
+					paragraph "Could not find any supported device(s). Please report to author about these devices: " +  getDeviceList()
 				}
 			}
 		}  
@@ -159,7 +158,7 @@ def initialize() {
 		subscribe(settings.contactSensorTrigger, "contact", runRefresh)
 	}
 	
-    //Subscribe to events from contact sensor
+	//Subscribe to events from contact sensor
 	if (settings.threeAxisSensorTrigger) {
 		subscribe(settings.multiSensorTrigger, "acceleration", runRefresh)
 	}
@@ -280,7 +279,7 @@ private getApiURL() {
 		if (settings.troubleshoot == true) {
 			return "https://myqexternal-myqdevice-com-a488dujmhryx.runscope.net"
 		} else {
-		return "https://myqexternal.myqdevice.com"
+			return "https://myqexternal.myqdevice.com"
 		}
 	}
 }
@@ -298,20 +297,10 @@ private apiGet(apiPath, apiQuery = [], callback = {}) {
 	// set up query
 	apiQuery = [ appId: getApiAppID() ] + apiQuery
 	if (state.session.securityToken) { apiQuery = apiQuery + [SecurityToken: state.session.securityToken ] }
-    
-	// set up parameters
-	def apiParams = [ 
-		uri: getApiURL(),
-		path: apiPath,
-		query: apiQuery
-	]
-	//log.debug "HTTP GET request: " + apiParams  
+
 	try {
-		httpGet(apiParams) { response ->
-			//log.debug "HTTP GET response: " + response.data          
-			callback(response)
-		}
-	}	catch (Error e)	{
+		httpGet([ uri: getApiURL(), path: apiPath, query: apiQuery ]) { response -> callback(response) }
+	} catch (Error e) {
 		log.debug "API Error: $e"
 	}
 }
@@ -327,21 +316,8 @@ private apiPut(apiPath, apiBody = [], callback = {}) {
 	def apiQuery = [ appId: getApiAppID() ]
 	if (state.session.securityToken) { apiQuery = apiQuery + [SecurityToken: state.session.securityToken ] }
     
-	// set up final parameters
-	def apiParams = [ 
-		uri: getApiURL(),
-		path: apiPath,
-		contentType: "application/json; charset=utf-8",
-		body: apiBody,
-        query: apiQuery
-	]
-    
-    //log.debug "HTTP PUT request: " + apiParams         
 	try {
-		httpPut(apiParams) { response ->
-			//log.debug "HTTP PUT response: " + response.data            
-			callback(response)
-		}
+		httpPut([  uri: getApiURL(), path: apiPath, contentType: "application/json; charset=utf-8", body: apiBody, query: apiQuery ]) { response -> callback(response) }
 	} catch (Error e)	{
 		log.debug "API Error: $e"
 	}
@@ -351,17 +327,17 @@ private apiPut(apiPath, apiBody = [], callback = {}) {
 private updateDeviceData() {    
 	// automatically checks if the token has expired, if so login again
 	if (login()) {       
-        // set polling states
-        state.polling.last = now()
+		// set polling states
+		state.polling.last = now()
 
-        // Get all the door information, updated to state.data
-        def doorList = getDoorList()
-        def lightList = getLightList()
-        if (doorList||lightList) { 
-            return true 
-        } else {
-            return false
-        }
+		// Get all the door information, updated to state.data
+		def doorList = getDoorList()
+		def lightList = getLightList()
+		if (doorList||lightList) { 
+			return true 
+		} else {
+			return false
+		}
 	} else {
 		return false
 	}
@@ -375,7 +351,11 @@ def refresh() {
 		// get all the children and send updates
 		getAllChildDevices().each { 
 			log.debug "Polling " + it.deviceNetworkId
+			
+			//update statuses
 			it.updateDeviceStatus(state.data[it.deviceNetworkId].status)
+			
+			//update timestamp for garage doors
 			if (it.deviceNetworkId.contains("GarageDoorOpener")) {
 				it.updateDeviceLastActivity(state.data[it.deviceNetworkId].lastAction.toLong())
 			}
@@ -388,12 +368,10 @@ def getChildDeviceID(child) {
 	return child.device.deviceNetworkId.split("\\|")[2]
 }
 
-
 // Get single device status
 def getDeviceStatus(child) {
 	return state.data[child.device.deviceNetworkId].status
 }
-
 
 // Get single device last activity
 def getDeviceLastActivity(child) {
@@ -413,10 +391,11 @@ def sendCommand(child, attributeName, attributeValue) {
 	} 
 }
 
-
+//Schedule refresh
 def runRefresh(event) {
 	log.info "Last refresh was "  + ((now() - state.polling.last)/60000) + " minutes ago"
-    // Reschedule if  didn't update for more than 10 minutes plus specified polling
+	
+	// Reschedule if didn't update for more than 10 minutes plus specified polling
 	if (((state.polling.last?:0) + (((settings.polling.toInteger() > 0 )? settings.polling.toInteger() : 1) * 60000) + 600000) < now()) {
     	if (!canSchedule()) unschedule("refresh")
 		if (canSchedule()) {
@@ -425,9 +404,9 @@ def runRefresh(event) {
 		}
 	}
     
-    // Force Refresh NOWWW!!!!
-    refresh()
-    
-    // Try to run one more to verify door status
-    if (canSchedule()) runIn(45, refresh, [overwrite: false])
+	// Force Refresh NOWWW!!!!
+	refresh()
+	
+	// Try to run once more to verify door status
+	if (canSchedule()) runIn(45, refresh, [overwrite: false])
 }
