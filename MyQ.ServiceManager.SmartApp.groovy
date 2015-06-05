@@ -427,4 +427,7 @@ def runRefresh(event) {
     
     // Force Refresh NOWWW!!!!
     refresh()
+    
+    // Try to run one more to verify door status
+    if (canSchedule()) runIn(45, refresh, [overwrite: false])
 }
