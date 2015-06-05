@@ -40,11 +40,14 @@ def prefLogIn() {
 	def showUninstall = username != null && password != null 
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:showUninstall, install: false) {
 		section("Login Credentials"){
-			input("username", "text", title: "Username", description: "MyQ Username (email address)")
+			input("username", "email", title: "Username", description: "MyQ Username (email address)")
 			input("password", "password", title: "Password", description: "MyQ password")
 		}
 		section("Gateway Brand"){
 			input(name: "brand", title: "Gateway Brand", type: "enum",  metadata:[values:["Liftmaster","Chamberlain","Craftsman","Troubleshoot", "Troubleshoot-Craftsman"]] )
+		}
+		section("Troubleshoot"){
+			input(name:"troubleshoot", type: "boolean")
 		}
 		section("Connectivity"){
 			input(name: "polling", title: "Server Polling (in Minutes)", type: "int", description: "in minutes", defaultValue: "5" )
