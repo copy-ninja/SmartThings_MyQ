@@ -49,7 +49,7 @@ def prefLogIn() {
 		section("Advanced Options"){
 			input(name: "polling", title: "Server Polling (in Minutes)", type: "int", description: "in minutes", defaultValue: "5" )
 			input(name: "contactSensorTrigger", title: "Contact Sensor to trigger refresh ", type: "capability.contactSensor", required: "false")
-            input(name: "3AxisSensorTrigger", title: "Three Axis Sensor to trigger refresh ", type: "capability.threeAxis", required: "false")
+            input(name: "threeAxisSensorTrigger", title: "Three Axis Sensor to trigger refresh ", type: "capability.threeAxis", required: "false")
 //			paragraph "This option enables author to troubleshoot if you have problem adding devices. It allows the app to send information exchanged with MyQ server to the author. DO NOT ENABLE unless you have contacted author at jason@copyninja.net"
 //			input(name:"troubleshoot", title: "Troubleshoot", type: "boolean")
 		}
@@ -160,8 +160,8 @@ def initialize() {
 	}
 	
     //Subscribe to events from contact sensor
-	if (settings.3AxisSensorTrigger) {
-		subscribe(settings.3AxisSensorTrigger, "threeAxis", runRefresh)
+	if (settings.threeAxisSensorTrigger) {
+		subscribe(settings.threeAxisSensorTrigger, "threeAxis", runRefresh)
 	}
     
 	// Run refresh after installation
