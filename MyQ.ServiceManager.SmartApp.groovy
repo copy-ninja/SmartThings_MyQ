@@ -74,9 +74,10 @@ def prefListDevices() {
 				} 
 			}
 		} else {
+			def devList = getDeviceList()
 			return dynamicPage(name: "prefListDevices",  title: "Error!", install:true, uninstall:true) {
 				section(""){
-					paragraph "Could not find any supported device(s). Please report to author about these devices: " +  getDeviceList()
+					paragraph "Could not find any supported device(s). Please report to author about these devices: " +  devList
 				}
 			}
 		}  
@@ -91,7 +92,11 @@ def prefListDevices() {
 
 /* Initialization */
 def installed() { initialize() }
-def updated() { initialize() }
+
+def updated() { 
+	unsubscribe()
+	initialize() 
+}
 
 def uninstalled() {
 	unsubscribe()
@@ -100,7 +105,6 @@ def uninstalled() {
 }	
 
 def initialize() {    
-	unsubscribe()
 	login()
     
 	// Get initial device status in state.data
@@ -142,16 +146,19 @@ def initialize() {
 	}
     
 	//Remove devices that are not selected in the settings
-    if (!selectedDevices) {
-        deleteDevices = getAllChildDevices()
-    } else {
-        deleteDevices = getChildDevices().findAll { !selectedDevices.contains(it.deviceNetworkId) }
-    }
-    deleteDevices.each { deleteChildDevice(it.deviceNetworkId) } 
+	if (!selectedDevices) {
+		deleteDevices = getAllChildDevices()
+	} else {
+		deleteDevices = getChildDevices().findAll { !selectedDevices.contains(it.deviceNetworkId) }
+	}
+	deleteDevices.each { deleteChildDevice(it.deviceNetworkId) } 
 	
 	//Subscribes to sunrise and sunset event to trigger refreshes
 	subscribe(location, "sunrise", runRefresh)
 	subscribe(location, "sunset", runRefresh)
+	subscribe(location, "mode", runRefresh)
+	subscribe(location, "sunriseTime", runRefresh)
+	subscribe(location, "sunsetTime", runRefresh)
     
 	//Subscribe to events from contact sensor
 	if (settings.contactSensorTrigger) {
@@ -164,31 +171,21 @@ def initialize() {
 	}
     
 	// Run refresh after installation
+	runEvery30Minutes(runRefresh)
 	runRefresh("")
 }
 
 /* Access Management */
 private forceLogin() {
 	//Reset token and expiry
-	state.session = [ 
-		brandID: 0,
-		brandName: settings.brand,
-		securityToken: null,
-		expiration: 0
-	]
+	state.session = [ brandID: 0, brandName: settings.brand, securityToken: null, expiration: 0 ]
 	state.polling = [ last: now() ]  
 	state.data = [:]
     
 	return doLogin()
 }
 
-private login() {
-	if (!(state.session.expiration > now())) {
-		return doLogin()
-	} else {
-		return true
-	}
-}
+private login() { return (!(state.session.expiration > now())) ? doLogin() : true }
 
 private doLogin() { 
 	apiGet("/api/user/validate", [username: settings.username, password: settings.password] ) { response ->
@@ -297,17 +294,16 @@ private apiGet(apiPath, apiQuery = [], callback = {}) {
 	// set up query
 	apiQuery = [ appId: getApiAppID() ] + apiQuery
 	if (state.session.securityToken) { apiQuery = apiQuery + [SecurityToken: state.session.securityToken ] }
-
+    
 	try {
 		httpGet([ uri: getApiURL(), path: apiPath, query: apiQuery ]) { response -> callback(response) }
-	} catch (Error e) {
+	}	catch (Error e)	{
 		log.debug "API Error: $e"
 	}
 }
 
 // HTTP PUT call
 private apiPut(apiPath, apiBody = [], callback = {}) {    
-	def encodedAppID = URLEncoder.encode(getApiAppID(), "UTF-8")
 	// set up body
 	apiBody = [ ApplicationId: getApiAppID() ] + apiBody
 	if (state.session.securityToken) { apiBody = apiBody + [SecurityToken: state.session.securityToken ] }
@@ -317,7 +313,7 @@ private apiPut(apiPath, apiBody = [], callback = {}) {
 	if (state.session.securityToken) { apiQuery = apiQuery + [SecurityToken: state.session.securityToken ] }
     
 	try {
-		httpPut([  uri: getApiURL(), path: apiPath, contentType: "application/json; charset=utf-8", body: apiBody, query: apiQuery ]) { response -> callback(response) }
+		httpPut([ uri: getApiURL(), path: apiPath, contentType: "application/json; charset=utf-8", body: apiBody, query: apiQuery ]) { response -> callback(response) }
 	} catch (Error e)	{
 		log.debug "API Error: $e"
 	}
@@ -329,15 +325,9 @@ private updateDeviceData() {
 	if (login()) {       
 		// set polling states
 		state.polling.last = now()
-
+	
 		// Get all the door information, updated to state.data
-		def doorList = getDoorList()
-		def lightList = getLightList()
-		if (doorList||lightList) { 
-			return true 
-		} else {
-			return false
-		}
+		return (getDoorList()||getLightList())? true : false
 	} else {
 		return false
 	}
@@ -348,14 +338,11 @@ private updateDeviceData() {
 def refresh() {   
 	//force devices to poll to get the latest status
 	if (updateDeviceData()) { 
+		log.info "Refreshing data..."
 		// get all the children and send updates
 		getAllChildDevices().each { 
-			log.debug "Polling " + it.deviceNetworkId
-			
-			//update statuses
+			//log.debug "Polling " + it.deviceNetworkId
 			it.updateDeviceStatus(state.data[it.deviceNetworkId].status)
-			
-			//update timestamp for garage doors
 			if (it.deviceNetworkId.contains("GarageDoorOpener")) {
 				it.updateDeviceLastActivity(state.data[it.deviceNetworkId].lastAction.toLong())
 			}
@@ -383,30 +370,18 @@ def sendCommand(child, attributeName, attributeValue) {
 	if (login()) {	    	
 		//Send command
 		apiPut("/api/v4/deviceattribute/putdeviceattribute", [ MyQDeviceId: getChildDeviceID(child), AttributeName: attributeName, AttributeValue: attributeValue ]) 	
-
-		// Schedule a refresh to verify it has been completed
-		runIn(45, refresh, [overwrite: false])
-		
 		return true
 	} 
 }
 
-//Schedule refresh
 def runRefresh(event) {
 	log.info "Last refresh was "  + ((now() - state.polling.last)/60000) + " minutes ago"
-	
-	// Reschedule if didn't update for more than 10 minutes plus specified polling
-	if (((state.polling.last?:0) + (((settings.polling.toInteger() > 0 )? settings.polling.toInteger() : 1) * 60000) + 600000) < now()) {
-    	if (!canSchedule()) unschedule("refresh")
-		if (canSchedule()) {
-			schedule("0 0/" + ((settings.polling.toInteger() > 0 )? settings.polling.toInteger() : 1) + " * * * ?", refresh)
-			log.info "Auto Refresh Scheduled" 
-		}
+	// Reschedule if  didn't update for more than 5 minutes plus specified polling
+	if ((((state.polling.last?:0) + (((settings.polling.toInteger() > 0 )? settings.polling.toInteger() : 1) * 60000) + 300000) < now()) && canSchedule()) {
+		log.info "Scheduling Auto Refresh.."
+		schedule("* */" + ((settings.polling.toInteger() > 0 )? settings.polling.toInteger() : 1) + " * * * ?", refresh)
 	}
     
 	// Force Refresh NOWWW!!!!
 	refresh()
-	
-	// Try to run once more to verify door status
-	if (canSchedule()) runIn(45, refresh, [overwrite: false])
 }
