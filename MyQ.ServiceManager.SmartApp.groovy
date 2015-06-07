@@ -349,6 +349,7 @@ def refresh() {
 	if ((state.polling.rescheduler?:0) + 2400000 < now()) {
 		log.info "Scheduling Auto Rescheduler.."
 		runEvery30Minutes(runRefresh)
+		state.polling.rescheduler = now()
 	}
 }
 
