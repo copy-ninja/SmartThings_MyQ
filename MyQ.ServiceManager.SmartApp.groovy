@@ -108,7 +108,7 @@ def initialize() {
 	login()
     
 	// Get initial device status in state.data
-	state.polling = [ last: 0, rescheduler: 0 ]
+	state.polling = [ last: 0, rescheduler: now() ]
 	state.data = [:]
     
 	// Create new devices for each selected doors
@@ -178,7 +178,7 @@ def initialize() {
 private forceLogin() {
 	//Reset token and expiry
 	state.session = [ brandID: 0, brandName: settings.brand, securityToken: null, expiration: 0 ]
-	state.polling = [ last: 0, rescheduler: 0 ]
+	state.polling = [ last: 0, rescheduler: now() ]
 	state.data = [:]
 	return doLogin()
 }
