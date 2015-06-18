@@ -31,6 +31,7 @@
  */
 metadata {
 	definition (name: "MyQ Garage Door Opener", namespace: "copy-ninja", author: "Jason Mok") {
+		capability "Garage Door Control"
 		capability "Door Control"
 		capability "Contact Sensor"
 		capability "Refresh"
