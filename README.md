@@ -1,6 +1,14 @@
 SmartThings MyQ
 ===============
-<a href="http://www.amazon.com/gp/product/B00FWYESVQ/ref=as_li_tl?ie=UTF8&camp=1789&creative=390957&creativeASIN=B00FWYESVQ&linkCode=as2&tag=githubcoderep-20&linkId=YOONR7PTA4FKDFZC"><img border="0" src="http://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B00FWYESVQ&Format=_SL110_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&tag=githubcoderep-20" ></a><img src="http://ir-na.amazon-adsystem.com/e/ir?t=githubcoderep-20&l=as2&o=1&a=B00FWYESVQ" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
-<a href="http://www.amazon.com/gp/product/B005FT4N2M/ref=as_li_tl?ie=UTF8&camp=1789&creative=390957&creativeASIN=B005FT4N2M&linkCode=as2&tag=githubcoderep-20&linkId=RXBI7YA3BLAA4FIE"><img border="0" src="http://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B005FT4N2M&Format=_SL110_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&tag=githubcoderep-20" ></a><img src="http://ir-na.amazon-adsystem.com/e/ir?t=githubcoderep-20&l=as2&o=1&a=B005FT4N2M" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
-<a href="http://www.amazon.com/gp/product/B00B7CDSQ8/ref=as_li_tl?ie=UTF8&camp=1789&creative=390957&creativeASIN=B00B7CDSQ8&linkCode=as2&tag=githubcoderep-20&linkId=MRBEM5YTUYSWLIYO"><img border="0" src="http://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=B00B7CDSQ8&Format=_SL110_&ID=AsinImage&MarketPlace=US&ServiceVersion=20070822&WS=1&tag=githubcoderep-20" ></a><img src="http://ir-na.amazon-adsystem.com/e/ir?t=githubcoderep-20&l=as2&o=1&a=B00B7CDSQ8" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" />
 
+SmartThings installation instructions:
+--------------------------------------
+1) Log in to your the <a href="https://graph.api.smartthings.com/ide/">SmartThings IDE</a>. If you don't have a login yet, create one.
+
+2) Load contents of <a href="https://raw.githubusercontent.com/copy-ninja/SmartThings_MyQ/master/MyQ.ServiceManager.SmartApp.groovy">MyQ Service Manager</a> in SmartApps section. From IDE, navigate to <a href="https://graph.api.smartthings.com/ide/app/create#from-code">My SmartApps > + New SmartApp > From Code</a>. Click Save. Click Publish > "For Me"
+
+3) Load contents of <a href="https://raw.githubusercontent.com/copy-ninja/SmartThings_MyQ/master/MyQ.GarageDoorOpener.SmartDevice.groovy">MyQ Garage Door Opener</a> and <a href="https://raw.githubusercontent.com/copy-ninja/SmartThings_MyQ/master/MyQ.LightController.SmartDevice.groovy">MyQ Light Controller</a> in SmartDevices section. From IDE, navigate to <a href="https://graph.api.smartthings.com/ide/device/create#from-code">My Device Type > + New SmartDevice > From Code</a>.  Click Save. Click Publish "For Me" for both devices
+
+4) In your mobile app, tap the "+", go to "My Apps", furnish your log in details and pick your gateway brand, and a list of devices will be available for you to pick
+
+[![](https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=jasonmok83%40gmail%2ecom&lc=US&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted)
