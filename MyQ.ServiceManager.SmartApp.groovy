@@ -378,7 +378,10 @@ def sendCommand(child, attributeName, attributeValue) {
 }
 
 def runRefresh(evt) {
-	if (evt) log.info "Event " + evt.displayName + " triggered refresh"
+	if (evt) { 
+		log.info "Event " + evt.displayName + " triggered refresh" 
+		runIn(30, delayedRefresh) //schedule a refresh 
+	}
 	log.info "Last refresh was "  + ((now() - state.polling.last)/60000) + " minutes ago"
 	// Reschedule if  didn't update for more than 5 minutes plus specified polling
 	if ((((state.polling.last?:0) + (((settings.polling.toInteger() > 0 )? settings.polling.toInteger() : 1) * 60000) + 300000) < now()) && canSchedule()) {
@@ -389,6 +392,10 @@ def runRefresh(evt) {
 	// Force Refresh NOWWW!!!!
 	refresh()
 	
-	//Update rescheduler's last run
-	if (!evt) state.polling.rescheduler = now()
+	if (!evt)  state.polling.rescheduler = now() //Update rescheduler's last run
+}
+
+def delayedRefresh() { 
+	log.info "Delayed refresh triggered"
+	refresh() 
 }
