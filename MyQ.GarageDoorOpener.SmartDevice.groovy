@@ -1,12 +1,7 @@
 /**
- *	MyQ Garage Door Opener SmartDevice
+ *  MyQ Garage Door Opener
  *
- *	Author: Jason Mok
- *	Date: 2014-12-26
- *
- ***************************
- *
- *  Copyright 2014 Jason Mok
+ *  Copyright 2015 Jason Mok
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -17,16 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- **************************
- *
- * REQUIREMENTS:
- * Refer to MyQ Service Manager SmartApp
- *
- **************************
- * 
- * USAGE:
- * Put this in Device Type. Don't install until you have all other device types scripts added
- * Refer to MyQ Service Manager SmartApp
+ *  Last Updated : 7/15/2015
  *
  */
 metadata {
@@ -43,6 +29,8 @@ metadata {
 		capability "Sensor"
 		
 		attribute "lastActivity", "string"
+		command "updateDeviceStatus", ["string"]
+		command "updateDeviceLastActivity", ["number"]
 	}
 
 	simulator {	}
@@ -52,8 +40,8 @@ metadata {
 			state("unknown", label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e", nextState: "closing")
 			state("closed",  label:'${name}', action:"door control.open",   icon:"st.doors.garage.garage-closed",  backgroundColor:"#79b821", nextState: "opening")
 			state("open",    label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e", nextState: "closing")
-			state("opening", label:'${name}',		                icon:"st.doors.garage.garage-opening", backgroundColor:"#ffe71e", nextState: "open")
-			state("closing", label:'${name}',		                icon:"st.doors.garage.garage-closing", backgroundColor:"#ffe71e", nextState: "closed")
+			state("opening", label:'${name}', icon:"st.doors.garage.garage-opening", backgroundColor:"#ffe71e", nextState: "open")
+			state("closing", label:'${name}', icon:"st.doors.garage.garage-closing", backgroundColor:"#ffe71e", nextState: "closed")
 			state("stopped", label:'stopped', action:"door control.close",  icon:"st.doors.garage.garage-opening", backgroundColor:"#1ee3ff", nextState: "closing")
 		}
 		standardTile("refresh", "device.door", inactiveLabel: false, decoration: "flat") {
