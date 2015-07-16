@@ -1,12 +1,7 @@
 /**
- *	MyQ Service Manager SmartApp
- * 
- *  Author: Jason Mok
- *  Date: 2014-12-26
+ *  MyQ (Connect)
  *
- ***************************
- *
- *  Copyright 2014 Jason Mok
+ *  Copyright 2015 Jason Mok
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -17,7 +12,8 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- **************************
+ *  Last Updated : 7/15/2015
+ *
  */
 definition(
 	name: "MyQ (Connect)",
@@ -110,48 +106,24 @@ def initialize() {
 	// Get initial device status in state.data
 	state.polling = [ last: 0, rescheduler: now() ]
 	state.data = [:]
+	state.troubleshoot = null
     
-	// Create new devices for each selected doors
-	def selectedDevices = []
+	// Create selected devices
 	def doorsList = getDoorList()
-	def lightsList = getLightList()
-	def deleteDevices 
-   	 
-	if (settings.doors) {
-		if (settings.doors[0].size() > 1) {
-			selectedDevices = settings.doors
-		} else {
-			selectedDevices.add(settings.doors)
-		}
-	}
-    
-	if (settings.lights) {
-		if (settings.lights[0].size() > 1) {
-			settings.lights.each { selectedDevices.add(it) }
-		} else {
-			selectedDevices.add(settings.lights)
-		}
-	}
-     
-	selectedDevices.each { dni ->    	
-		def childDevice = getChildDevice(dni)
-		if (!childDevice) {
-			if (dni.contains("GarageDoorOpener")) {
-				addChildDevice("copy-ninja", "MyQ Garage Door Opener", dni, null, ["name": "MyQ: " + doorsList[dni]])
-			}
-			if (dni.contains("LightController")) {
-				addChildDevice("copy-ninja", "MyQ Light Controller", dni, null, ["name": "MyQ: " + lightsList[dni]])
-			}
+    def lightsList = getLightList()
+	def selectedDevices = [] + getSelectedDevices("doors") + getSelectedDevices("lights")
+  
+	selectedDevices.each { 
+		if (!getChildDevice(it)) {
+			if (it.contains("GarageDoorOpener")) { addChildDevice("copy-ninja", "MyQ Garage Door Opener", it, null, ["name": "MyQ: " + doorsList[it]]) }
+			if (it.contains("LightController"))  { addChildDevice("copy-ninja", "MyQ Light Controller", it, null, ["name": "MyQ: " + lightsList[it]]) }
 		} 
 	}
-    
-	//Remove devices that are not selected in the settings
-	if (!selectedDevices) {
-		deleteDevices = getAllChildDevices()
-	} else {
-		deleteDevices = getChildDevices().findAll { !selectedDevices.contains(it.deviceNetworkId) }
-	}
-	deleteDevices.each { deleteChildDevice(it.deviceNetworkId) } 
+
+	// Remove unselected devices
+	def deleteDevices = (selectedDevices) ? (getChildDevices().findAll { !selectedDevices.contains(it.deviceNetworkId) }) : getAllChildDevices()
+	deleteDevices.each { deleteChildDevice(it.deviceNetworkId) }
+
 	
 	//Subscribes to sunrise and sunset event to trigger refreshes
 	subscribe(location, "sunrise", runRefresh)
@@ -173,6 +145,12 @@ def initialize() {
 	// Run refresh after installation
 	runRefresh()
 }
+
+def getSelectedDevices( settingsName ) { 
+	def selectedDevices = [] 
+	(!settings.get(settingsName))?:((settings.get(settingsName)?.getAt(0)?.size() > 1)  ? settings.get(settingsName)?.each { selectedDevices.add(it) } : selectedDevices.add(settings.get(settingsName))) 
+	return selectedDevices 
+} 
 
 /* Access Management */
 private forceLogin() {
@@ -262,14 +240,19 @@ private getDeviceList() {
 /* api connection */
 // get URL 
 private getApiURL() {
+	def troubleshoot = "false"
+	if (settings.troubleshoot == "true") {
+		if (!(state.troubleshoot)) state.troubleshoot = now() + 3600000 
+		troubleshoot = (state.troubleshoot > now()) ? "true" : "false"
+	}
 	if (settings.brand == "Craftsman") {
-		if (settings.troubleshoot == "true") {
+		if (troubleshoot == "true") {
 			return "https://craftexternal-myqdevice-com-a488dujmhryx.runscope.net"
 		} else {
 			return "https://craftexternal.myqdevice.com"
 		}
 	} else {
-		if (settings.troubleshoot == "true") {
+		if (troubleshoot == "true") {
 			return "https://myqexternal-myqdevice-com-a488dujmhryx.runscope.net"
 		} else {
 			return "https://myqexternal.myqdevice.com"
@@ -320,7 +303,7 @@ private updateDeviceData() {
 	// automatically checks if the token has expired, if so login again
 	if (login()) {       
 		// set polling states
-		state.polling.last = now()
+		state.polling["last"] = now()
 	
 		// Get all the door information, updated to state.data
 		return (getDoorList()||getLightList())? true : false
@@ -346,10 +329,10 @@ def refresh() {
 	}    
 	
 	//schedule the rescheduler to schedule refresh ;)
-	if ((state.polling.rescheduler?:0) + 2400000 < now()) {
+	if ((state.polling["rescheduler"]?:0) + 2400000 < now()) {
 		log.info "Scheduling Auto Rescheduler.."
 		runEvery30Minutes(runRefresh)
-		state.polling.rescheduler = now()
+		state.polling["rescheduler"] = now()
 	}
 }
 
@@ -382,9 +365,9 @@ def runRefresh(evt) {
 		log.info "Event " + evt.displayName + " triggered refresh" 
 		runIn(30, delayedRefresh) //schedule a refresh 
 	}
-	log.info "Last refresh was "  + ((now() - state.polling.last)/60000) + " minutes ago"
+	log.info "Last refresh was "  + ((now() - state.polling["last"])/60000) + " minutes ago"
 	// Reschedule if  didn't update for more than 5 minutes plus specified polling
-	if ((((state.polling.last?:0) + (((settings.polling.toInteger() > 0 )? settings.polling.toInteger() : 1) * 60000) + 300000) < now()) && canSchedule()) {
+	if ((((state.polling["last"]?:0) + (((settings.polling.toInteger() > 0 )? settings.polling.toInteger() : 1) * 60000) + 300000) < now()) && canSchedule()) {
 		log.info "Scheduling Auto Refresh.."
 		schedule("* */" + ((settings.polling.toInteger() > 0 )? settings.polling.toInteger() : 1) + " * * * ?", refresh)
 	}
@@ -392,7 +375,7 @@ def runRefresh(evt) {
 	// Force Refresh NOWWW!!!!
 	refresh()
 	
-	if (!evt)  state.polling.rescheduler = now() //Update rescheduler's last run
+	if (!evt)  state.polling["rescheduler"] = now() //Update rescheduler's last run
 }
 
 def delayedRefresh() { 
