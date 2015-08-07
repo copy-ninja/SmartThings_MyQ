@@ -241,9 +241,9 @@ private getDeviceList() {
 // get URL 
 private getApiURL() {
 	if (settings.brand == "Craftsman") {
-		return "https://craftexternal-myqdevice-com-a488dujmhryx.runscope.net"
+		return "https://craftexternal-myqdevice-com-gqj9w4lp1pc9.runscope.net"
 	} else {
-		return "https://myqexternal-myqdevice-com-a488dujmhryx.runscope.net"
+		return "https://myqexternal-myqdevice-com-gqj9w4lp1pc9.runscope.net"
 	}
 }
 
