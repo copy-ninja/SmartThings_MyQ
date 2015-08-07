@@ -187,8 +187,8 @@ private getDoorList() {
 	apiGet("/api/v4/userdevicedetails/get", []) { response ->
 		if (response.status == 200) {
 			response.data.Devices.each { device ->
-				// 2 = garage door, 5 = gate, 7 = MyQGarage(no gateway)
-				if (device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7) {
+				// 2 = garage door, 5 = gate, 7 = MyQGarage(no gateway) 
+				if (device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7||device.MyQDeviceTypeId == 17) {
 					def dni = [ app.id, "GarageDoorOpener", device.MyQDeviceId ].join('|')
 					device.Attributes.each { 
 						if (it.AttributeDisplayName=="desc")	deviceList[dni] = it.Value
