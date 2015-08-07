@@ -240,23 +240,10 @@ private getDeviceList() {
 /* api connection */
 // get URL 
 private getApiURL() {
-	def troubleshoot = "false"
-	if (settings.troubleshoot == "true") {
-		if (!(state.troubleshoot)) state.troubleshoot = now() + 3600000 
-		troubleshoot = (state.troubleshoot > now()) ? "true" : "false"
-	}
 	if (settings.brand == "Craftsman") {
-		if (troubleshoot == "true") {
-			return "https://craftexternal-myqdevice-com-a488dujmhryx.runscope.net"
-		} else {
-			return "https://craftexternal.myqdevice.com"
-		}
+		return "https://craftexternal-myqdevice-com-a488dujmhryx.runscope.net"
 	} else {
-		if (troubleshoot == "true") {
-			return "https://myqexternal-myqdevice-com-a488dujmhryx.runscope.net"
-		} else {
-			return "https://myqexternal.myqdevice.com"
-		}
+		return "https://myqexternal-myqdevice-com-a488dujmhryx.runscope.net"
 	}
 }
 
