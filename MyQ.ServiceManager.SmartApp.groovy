@@ -46,8 +46,6 @@ def prefLogIn() {
 			input(name: "polling", title: "Server Polling (in Minutes)", type: "int", description: "in minutes", defaultValue: "5" )
 			input(name: "contactSensorTrigger", title: "Contact Sensor to trigger refresh ", type: "capability.contactSensor", required: "false", multiple: "true")
 			input(name: "accelerationSensorTrigger", title: "Acceleration Sensor to trigger refresh ", type: "capability.accelerationSensor", required: "false", multiple: "true")
-			paragraph "This option enables author to troubleshoot if you have problem adding devices. It allows the app to send information exchanged with MyQ server to the author. DO NOT ENABLE unless you have contacted author at jason@copyninja.net"
-			input(name:"troubleshoot", title: "Troubleshoot", type: "boolean")
 		}
 	}
 }
@@ -106,11 +104,10 @@ def initialize() {
 	// Get initial device status in state.data
 	state.polling = [ last: 0, rescheduler: now() ]
 	state.data = [:]
-	state.troubleshoot = null
     
 	// Create selected devices
 	def doorsList = getDoorList()
-    def lightsList = getLightList()
+	def lightsList = getLightList()
 	def selectedDevices = [] + getSelectedDevices("doors") + getSelectedDevices("lights")
   
 	selectedDevices.each { 
@@ -187,8 +184,8 @@ private getDoorList() {
 	apiGet("/api/v4/userdevicedetails/get", []) { response ->
 		if (response.status == 200) {
 			response.data.Devices.each { device ->
-				// 2 = garage door, 5 = gate, 7 = MyQGarage(no gateway)
-				if (device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7) {
+				// 2 = garage door, 5 = gate, 7 = MyQGarage(no gateway), 17 = Garage Door Opener WGDO
+				if (device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7||device.MyQDeviceTypeId == 17) {
 					def dni = [ app.id, "GarageDoorOpener", device.MyQDeviceId ].join('|')
 					device.Attributes.each { 
 						if (it.AttributeDisplayName=="desc")	deviceList[dni] = it.Value
@@ -240,23 +237,10 @@ private getDeviceList() {
 /* api connection */
 // get URL 
 private getApiURL() {
-	def troubleshoot = "false"
-	if (settings.troubleshoot == "true") {
-		if (!(state.troubleshoot)) state.troubleshoot = now() + 3600000 
-		troubleshoot = (state.troubleshoot > now()) ? "true" : "false"
-	}
 	if (settings.brand == "Craftsman") {
-		if (troubleshoot == "true") {
-			return "https://craftexternal-myqdevice-com-a488dujmhryx.runscope.net"
-		} else {
-			return "https://craftexternal.myqdevice.com"
-		}
+		return "https://craftexternal.myqdevice.com"
 	} else {
-		if (troubleshoot == "true") {
-			return "https://myqexternal-myqdevice-com-a488dujmhryx.runscope.net"
-		} else {
-			return "https://myqexternal.myqdevice.com"
-		}
+		return "https://myqexternal.myqdevice.com"
 	}
 }
 
