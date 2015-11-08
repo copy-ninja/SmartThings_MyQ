@@ -135,7 +135,7 @@ def initialize() {
 	}
 	
 	//Subscribe to events from contact sensor
-	if (settings.threeAxisSensorTrigger) {
+	if (settings.accelerationSensorTrigger) {
 		subscribe(settings.accelerationSensorTrigger, "acceleration", runRefresh)
 	}
     
