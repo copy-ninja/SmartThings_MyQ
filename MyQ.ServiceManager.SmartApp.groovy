@@ -43,7 +43,7 @@ def prefLogIn() {
 			input(name: "brand", title: "Gateway Brand", type: "enum",  metadata:[values:["Liftmaster","Chamberlain","Craftsman"]] )
 		}
 		section("Advanced Options"){
-			input(name: "polling", title: "Server Polling (in Minutes)", type: "int", description: "in minutes", defaultValue: "5" )
+			//input(name: "polling", title: "Server Polling (in Minutes)", type: "int", description: "in minutes", defaultValue: "5" )
 			input(name: "contactSensorTrigger", title: "Contact Sensor to trigger refresh ", type: "capability.contactSensor", required: "false", multiple: "true")
 			input(name: "accelerationSensorTrigger", title: "Acceleration Sensor to trigger refresh ", type: "capability.accelerationSensor", required: "false", multiple: "true")
 		}
@@ -351,9 +351,11 @@ def runRefresh(evt) {
 	}
 	log.info "Last refresh was "  + ((now() - state.polling["last"])/60000) + " minutes ago"
 	// Reschedule if  didn't update for more than 5 minutes plus specified polling
-	if ((((state.polling["last"]?:0) + (((settings.polling.toInteger() > 0 )? settings.polling.toInteger() : 1) * 60000) + 300000) < now()) && canSchedule()) {
+	//if ((((state.polling["last"]?:0) + ((((!settings.polling)?:(settings.polling.toInteger() > 0 )? settings.polling.toInteger() : 5)) * 60000) + 300000) < now()) && canSchedule()) {
+	if ((((state.polling["last"]?:0) + 600000) < now()) && canSchedule()) {
 		log.info "Scheduling Auto Refresh.."
-		schedule("* */" + ((settings.polling.toInteger() > 0 )? settings.polling.toInteger() : 1) + " * * * ?", refresh)
+		//schedule("* */" + ((settings.polling.toInteger() > 0 )? settings.polling.toInteger() : 5) + " * * * ?", refresh)
+		schedule("* */5 * * * ?", refresh)
 	}
 	
 	// Force Refresh NOWWW!!!!
