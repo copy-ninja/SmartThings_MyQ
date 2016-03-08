@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 11/30/2015
+ *  Last Updated : 03/08/2016
  *
  */
 definition(
@@ -260,7 +260,7 @@ private apiGet(apiPath, apiQuery = [], callback = {}) {
        
 	try {
 		httpGet([ uri: getApiURL(), path: apiPath, query: apiQuery ]) { response -> callback(response) }
-	}	catch (Error e)	{
+	}	catch (SocketException e)	{
 		log.debug "API Error: $e"
 	}
 }
@@ -277,7 +277,7 @@ private apiPut(apiPath, apiBody = [], callback = {}) {
     
 	try {
 		httpPut([ uri: getApiURL(), path: apiPath, contentType: "application/json; charset=utf-8", body: apiBody, query: apiQuery ]) { response -> callback(response) }
-	} catch (Error e)	{
+	} catch (SocketException e)	{
 		log.debug "API Error: $e"
 	}
 }
