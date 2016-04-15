@@ -1,4 +1,4 @@
-/**
+ /**
  *  MyQ Garage Door Opener
  *
  *  Copyright 2015 Jason Mok
@@ -35,17 +35,25 @@ metadata {
 
 	simulator {	}
 
-	tiles {
-		standardTile("door", "device.door", width: 2, height: 2) {
-			state("unknown", label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e", nextState: "closing")
-			state("closed",  label:'${name}', action:"door control.open",   icon:"st.doors.garage.garage-closed",  backgroundColor:"#79b821", nextState: "opening")
-			state("open",    label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e", nextState: "closing")
-			state("opening", label:'${name}', icon:"st.doors.garage.garage-opening", backgroundColor:"#ffe71e", nextState: "open")
-			state("closing", label:'${name}', icon:"st.doors.garage.garage-closing", backgroundColor:"#ffe71e", nextState: "closed")
-			state("stopped", label:'stopped', action:"door control.close",  icon:"st.doors.garage.garage-opening", backgroundColor:"#1ee3ff", nextState: "closing")
-		}
-		standardTile("refresh", "device.door", inactiveLabel: false, decoration: "flat") {
+	tiles(scale: 2) {
+  		multiAttributeTile(name:"door", type:"generic", width:6, height:4) {
+    		tileAttribute("device.door", key: "PRIMARY_CONTROL") {
+				attributeState("unknown", label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e", nextState: "closing")
+				attributeState("closed",  label:'${name}', action:"door control.open",   icon:"st.doors.garage.garage-closed",  backgroundColor:"#79b821", nextState: "opening")
+				attributeState("open",    label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e", nextState: "closing")
+				attributeState("opening", label:'${name}', icon:"st.doors.garage.garage-opening", backgroundColor:"#ffe71e", nextState: "open")
+				attributeState("closing", label:'${name}', icon:"st.doors.garage.garage-closing", backgroundColor:"#ffe71e", nextState: "closed")
+				attributeState("stopped", label:'stopped', action:"door control.close",  icon:"st.doors.garage.garage-opening", backgroundColor:"#1ee3ff", nextState: "closing")
+			}
+            tileAttribute("device.lastActivity", key: "SECONDARY_CONTROL") {
+				attributeState "default", label:'Last activity: ${currentValue}'
+			}
+        }
+		standardTile("refresh", "device.door", inactiveLabel: false, width: 1, height: 1, decoration: "flat") {
 			state("default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh")
+		}
+        valueTile("lastActivity", "device.lastActivity", width: 3, height: 1, decoration: "flat") {
+		    state "default", label:'Last activity:\n${currentValue}'
 		}
 		standardTile("contact", "device.contact") {
 			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
@@ -55,12 +63,10 @@ metadata {
 			state("on", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
 			state("off", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
 		}
-		valueTile("lastActivity", "device.lastActivity", inactiveLabel: false, decoration: "flat") {
-			state "default", label:'Last activity: ${currentValue}', action:"refresh.refresh", backgroundColor:"#ffffff"
-		}
 
 		main "door"
-		details(["door", "lastActivity", "refresh"])
+		details(["door", "refresh", "lastActivity"])
+		
 	}
 }
 def parse(String description) {}
