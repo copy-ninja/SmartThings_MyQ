@@ -1,7 +1,7 @@
 /**
  *  MyQ Garage Door Opener
  *
- *  Copyright 2015 Jason Mok
+ *  Copyright 2015 Jason Mok/Brian Beaird
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -16,7 +16,7 @@
  *
  */
 metadata {
-	definition (name: "MyQ Garage Door Opener", namespace: "copy-ninja", author: "Jason Mok") {
+	definition (name: "MyQ Garage Door Opener", namespace: "brbeaird", author: "Jason Mok/Brian Beaird") {
 		capability "Garage Door Control"
 		capability "Door Control"
 		capability "Contact Sensor"
@@ -85,31 +85,39 @@ def push() {
 
 def open()  { 
 	parent.sendCommand(this, "desireddoorstate", 1) 
-	updateDeviceStatus(4)
-	updateDeviceLastActivity(parent.getDeviceLastActivity(this))
+	updateDeviceStatus("opening")	
 }
 def close() { 
 	parent.sendCommand(this, "desireddoorstate", 0) 
-	updateDeviceStatus(5)
-	updateDeviceLastActivity(parent.getDeviceLastActivity(this))
+	updateDeviceStatus("closing")	
 }
 
-def refresh() {
-	parent.refresh()
-	updateDeviceLastActivity(parent.getDeviceLastActivity(this))
+def refresh() {	
+    parent.syncDoorsWithSensors()
 }
 
 def poll() { refresh() }
 
 // update status
-def updateDeviceStatus(status) {
-	def currentState = device.currentState("door")?.value
-	if (status == "1" || status == "9") { 
+def updateDeviceStatus(status) {	
+    
+    def currentState = device.currentState("door")?.value
+    log.debug "Door status updated to : " + status
+    
+    //Don't do anything if nothing changed
+    if (currentState == status){
+    	log.debug "No change; door is already set to " + status
+        status = ""
+    }
+    
+	if (status == "open") {
+    	log.debug "Door is now open"
 		sendEvent(name: "door", value: "open", display: true, descriptionText: device.displayName + " is open") 
 		sendEvent(name: "contact", value: "open", display: false, displayed: false)	
 	}   
-	if (status == "2") {
-		sendEvent(name: "door", value: "closed", display: true, descriptionText: device.displayName + " is closed")
+	if (status == "closed") {
+		log.debug "Door is now closed"
+        sendEvent(name: "door", value: "closed", display: true, descriptionText: device.displayName + " is closed")
 		sendEvent(name: "contact", value: "closed", display: false, displayed: false)
 	}
 	if (status == "3") { 
@@ -124,21 +132,11 @@ def updateDeviceStatus(status) {
 	}  
 }
 
-def updateDeviceLastActivity(long lastActivity) {
-	def lastActivityValue = ""
-	def diffTotal = now() - lastActivity       
-	def diffDays  = (diffTotal / 86400000) as long
-	def diffHours = (diffTotal % 86400000 / 3600000) as long
-	def diffMins  = (diffTotal % 86400000 % 3600000 / 60000) as long
-    
-	if      (diffDays == 1)  lastActivityValue += "${diffDays} Day "
-	else if (diffDays > 1)   lastActivityValue += "${diffDays} Days "
-    
-	if      (diffHours == 1) lastActivityValue += "${diffHours} Hour "
-	else if (diffHours > 1)  lastActivityValue += "${diffHours} Hours "
-    
-	if      (diffMins == 1 || diffMins == 0 )  lastActivityValue += "${diffMins} Min"
-	else if (diffMins > 1)   lastActivityValue += "${diffMins} Mins"    
-    
-	sendEvent(name: "lastActivity", value: lastActivityValue, display: false , displayed: false)
+def updateDeviceLastActivity(lastActivity) {
+	def finalString = lastActivity.format('MM/d/yyyy hh:mm a',location.timeZone)    
+	sendEvent(name: "lastActivity", value: finalString, display: false , displayed: false)
+}
+
+def log(msg){
+	log.debug msg
 }

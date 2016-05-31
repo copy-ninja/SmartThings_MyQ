@@ -1,7 +1,7 @@
 /**
- *  MyQ (Connect)
+ *  MyQ Lite
  *
- *  Copyright 2015 Jason Mok
+ *  Copyright 2015 Jason Mok/Brian Beaird
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -12,14 +12,14 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 03/08/2016
+ *  Last Updated : 05/30/2016
  *
  */
 definition(
-	name: "MyQ (Connect)",
-	namespace: "copy-ninja",
-	author: "Jason Mok",
-	description: "Connect MyQ to control your devices",
+	name: "MyQ Lite",
+	namespace: "brbeaird",
+	author: "Jason Mok/Brian Beaird",
+	description: "Integrate MyQ with Smartthings",
 	category: "SmartThings Labs",
 	iconUrl:   "http://smartthings.copyninja.net/icons/MyQ@1x.png",
 	iconX2Url: "http://smartthings.copyninja.net/icons/MyQ@2x.png",
@@ -29,6 +29,10 @@ definition(
 preferences {
 	page(name: "prefLogIn", title: "MyQ")    
 	page(name: "prefListDevices", title: "MyQ")
+    page(name: "prefSensor1", title: "MyQ")
+    page(name: "prefSensor2", title: "MyQ")
+    page(name: "prefSensor3", title: "MyQ")
+    page(name: "prefSensor4", title: "MyQ")
 }
 
 /* Preferences */
@@ -42,34 +46,23 @@ def prefLogIn() {
 		section("Gateway Brand"){
 			input(name: "brand", title: "Gateway Brand", type: "enum",  metadata:[values:["Liftmaster","Chamberlain","Craftsman"]] )
 		}
-		section("Advanced Options"){
-			//input(name: "polling", title: "Server Polling (in Minutes)", type: "int", description: "in minutes", defaultValue: "5" )
-			input(name: "contactSensorTrigger", title: "Contact Sensor to trigger refresh ", type: "capability.contactSensor", required: "false", multiple: "true")
-			input(name: "accelerationSensorTrigger", title: "Acceleration Sensor to trigger refresh ", type: "capability.accelerationSensor", required: "false", multiple: "true")
-		}
 	}
 }
 
 def prefListDevices() {
 	if (forceLogin()) {
-		def doorList = getDoorList()
-		def lightList = getLightList()
-		if ((doorList) || (lightList)) {
-			return dynamicPage(name: "prefListDevices",  title: "Devices", install:true, uninstall:true) {
+		def doorList = getDoorList()		
+		if ((doorList)) {
+			return dynamicPage(name: "prefListDevices",  title: "Devices", nextPage:"prefSensor1", install:false, uninstall:true) {
 				if (doorList) {
 					section("Select which garage door/gate to use"){
 						input(name: "doors", type: "enum", required:false, multiple:true, metadata:[values:doorList])
 					}
 				} 
-				if (lightList) {
-					section("Select which light controller to use"){
-						input(name: "lights", type: "enum", required:false, multiple:true, metadata:[values:lightList])
-					}
-				} 
 			}
 		} else {
 			def devList = getDeviceList()
-			return dynamicPage(name: "prefListDevices",  title: "Error!", install:true, uninstall:true) {
+			return dynamicPage(name: "prefListDevices",  title: "Error!", install:false, uninstall:true) {
 				section(""){
 					paragraph "Could not find any supported device(s). Please report to author about these devices: " +  devList
 				}
@@ -84,63 +77,173 @@ def prefListDevices() {
 	}
 }
 
+
+def prefSensor1() {
+	log.debug "Doors chosen: " + doors
+    
+    //Set defaults
+    def nextPage = ""
+    def showInstall = true
+    def titleText = ""
+    
+    //Determine if we have multiple doors and need to send to another page
+    if (doors instanceof String){ //simulator seems to just make a single door a string. For that reason we have this weird check.
+    	log.debug "Single door detected (string)."
+        titleText = "Select Contact Sensor for Door 1 (" + state.data[doors].name + ")"
+    }
+    else if (doors.size() == 1){
+    	log.debug "Single door detected (array)."
+        titleText = "Select Contact Sensor for Door 1 (" + state.data[doors[0]].name + ")"
+    }
+    else{
+    	log.debug "Multiple doors detected."
+        nextPage = "prefSensor2"
+        titleText = "Select Contact Sensor for Door 1 (" + state.data[doors[0]].name + ")"
+        showInstall = false;
+    }    
+    
+    return dynamicPage(name: "prefSensor1",  title: "Sensors", nextPage:nextPage, install:showInstall, uninstall:true) {        
+        section(titleText){			
+			input(name: "door1Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: "true", multiple: "false")			
+		}
+    }
+}
+
+def prefSensor2() {	   
+    def nextPage = ""
+    def showInstall = true
+    def titleText = "Contact Sensor for Door 2 (" + state.data[doors[1]].name + ")"
+     
+    if (doors.size() > 2){
+    	nextPage = "prefSensor3"
+        showInstall = false;
+    }
+    
+    return dynamicPage(name: "prefSensor2",  title: "Sensors", nextPage:nextPage, install:showInstall, uninstall:true) {
+        section(titleText){			
+			input(name: "door2Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: "true", multiple: "false")			
+		}
+    }
+}
+
+def prefSensor3() {	   
+    def nextPage = ""
+    def showInstall = true
+    def titleText = "Contact Sensor for Door 3 (" + state.data[doors[2]].name + ")"
+     
+    if (doors.size() > 3){
+    	nextPage = "prefSensor4"
+        showInstall = false;
+    }
+    
+    return dynamicPage(name: "prefSensor3",  title: "Sensors", nextPage:nextPage, install:showInstall, uninstall:true) {
+        section(titleText){			
+			input(name: "door3Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: "true", multiple: "false")			
+		}
+    }
+}
+
+def prefSensor4() {	   
+	def titleText = "Contact Sensor for Door 4 (" + state.data[doors[3]].name + ")"
+    return dynamicPage(name: "prefSensor4",  title: "Sensors", install:true, uninstall:true) {
+        section(titleText){			
+			input(name: "door4Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: "true", multiple: "false")			
+		}
+    }
+}
+
+
+
 /* Initialization */
 def installed() { initialize() }
 
 def updated() { 
 	unsubscribe()
-	initialize() 
+	initialize()
 }
 
-def uninstalled() {
-	unsubscribe()
-	unschedule()
-	getAllChildDevices().each { deleteChildDevice(it.deviceNetworkId) }
-}	
+def uninstalled() {}	
 
 def initialize() {    
 	login()
+    state.sensorMap = [:]
     
-	// Get initial device status in state.data
+    // Get initial device status in state.data
 	state.polling = [ last: 0, rescheduler: now() ]
 	state.data = [:]
     
 	// Create selected devices
 	def doorsList = getDoorList()
-	def lightsList = getLightList()
-	def selectedDevices = [] + getSelectedDevices("doors") + getSelectedDevices("lights")
+	//def lightsList = getLightList()
+	def selectedDevices = [] + getSelectedDevices("doors")
   
 	selectedDevices.each { 
+    	log.debug "Creating child device: " + it
 		if (!getChildDevice(it)) {
-			if (it.contains("GarageDoorOpener")) { addChildDevice("copy-ninja", "MyQ Garage Door Opener", it, null, ["name": "MyQ: " + doorsList[it]]) }
-			if (it.contains("LightController"))  { addChildDevice("copy-ninja", "MyQ Light Controller", it, null, ["name": "MyQ: " + lightsList[it]]) }
+			if (it.contains("GarageDoorOpener")) { addChildDevice("brbeaird", "MyQ Garage Door Opener", it, null, ["name": "MyQLite: " + doorsList[it]]) }			
 		} 
 	}
 
 	// Remove unselected devices
 	def deleteDevices = (selectedDevices) ? (getChildDevices().findAll { !selectedDevices.contains(it.deviceNetworkId) }) : getAllChildDevices()
-	deleteDevices.each { deleteChildDevice(it.deviceNetworkId) }
+	deleteDevices.each { deleteChildDevice(it.deviceNetworkId) }    
+    
+    
+    //Create subscriptions
+    if (door1Sensor)
+        subscribe(door1Sensor, "contact", sensorHandler)    
+    if (door2Sensor)    	
+        subscribe(door2Sensor, "contact", sensorHandler)
+    if (door3Sensor)        
+        subscribe(door3Sensor, "contact", sensorHandler)        
+    if (door4Sensor)    	
+        subscribe(door4Sensor, "contact", sensorHandler)
+        
+	//Set initial values
+    syncDoorsWithSensors()    
 
-	
-	//Subscribes to sunrise and sunset event to trigger refreshes
-	subscribe(location, "sunrise", runRefresh)
-	subscribe(location, "sunset", runRefresh)
-	subscribe(location, "mode", runRefresh)
-	subscribe(location, "sunriseTime", runRefresh)
-	subscribe(location, "sunsetTime", runRefresh)
+}
+
+def syncDoorsWithSensors(){	
+    def firstDoor = doors[0]
+        
+    //Handle single door (sometimes it's just a dumb string thanks to the simulator)
+    if (doors instanceof String)
+    firstDoor = doors
     
-	//Subscribe to events from contact sensor
-	if (settings.contactSensorTrigger) {
-		subscribe(settings.contactSensorTrigger, "contact", runRefresh)
-	}
+    if (door1Sensor)
+    	updateDoorStatus(firstDoor, door1Sensor)
+    if (door2Sensor)
+    	updateDoorStatus(doors[1], door2Sensor)
+    if (door3Sensor)
+    	updateDoorStatus(doors[2], door2Sensor)
+    if (door4Sensor)
+        updateDoorStatus(doors[3], door2Sensor)
+}
+
+
+def updateDoorStatus(doorDNI, sensor){
 	
-	//Subscribe to events from contact sensor
-	if (settings.accelerationSensorTrigger) {
-		subscribe(settings.accelerationSensorTrigger, "acceleration", runRefresh)
-	}
+    //Get latest activity timestamp for the sensor
+    def eventsSinceYesterday = sensor.eventsSince(new Date() - 1)    
+    def latestEvent = eventsSinceYesterday[0].date
+    def value = sensor.currentcontact
     
-	// Run refresh after installation
-	runRefresh()
+    log.debug "Updating door " + doorDNI + " with " + value + " last activity: " + latestEvent
+    def doorToUpdate = getChildDevice(doorDNI)
+    doorToUpdate.updateDeviceStatus(value)
+	doorToUpdate.updateDeviceLastActivity(latestEvent)    
+}
+
+def refresh(child){	
+    def door = child.device.deviceNetworkId
+    child.log("refresh called from " + door)
+    syncDoorsWithSensors()
+}
+
+def sensorHandler(evt) {    
+    //log.debug "Event name  " + evt.name + " value: " + evt.value    
+    syncDoorsWithSensors()    
 }
 
 def getSelectedDevices( settingsName ) { 
@@ -162,7 +265,8 @@ private login() { return (!(state.session.expiration > now())) ? doLogin() : tru
 
 private doLogin() { 
 	apiGet("/api/user/validate", [username: settings.username, password: settings.password] ) { response ->
-		if (response.status == 200) {
+		log.debug "got login response: " + response
+        if (response.status == 200) {
 			if (response.data.SecurityToken != null) {
 				state.session.brandID = response.data.BrandId
 				state.session.brandName = response.data.BrandName
@@ -183,35 +287,35 @@ private getDoorList() {
 	def deviceList = [:]
 	apiGet("/api/v4/userdevicedetails/get", []) { response ->
 		if (response.status == 200) {
+        //log.debug "response data: " + response.data.Devices
+        //sendAlert("response data: " + response.data.Devices)
 			response.data.Devices.each { device ->
 				// 2 = garage door, 5 = gate, 7 = MyQGarage(no gateway), 17 = Garage Door Opener WGDO
 				if (device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7||device.MyQDeviceTypeId == 17) {
-					def dni = [ app.id, "GarageDoorOpener", device.MyQDeviceId ].join('|')
-					device.Attributes.each { 
-						if (it.AttributeDisplayName=="desc")	deviceList[dni] = it.Value
+					log.debug "Found door: " + device.MyQDeviceId
+                    def dni = [ app.id, "GarageDoorOpener", device.MyQDeviceId ].join('|')
+					def description = ''
+                    def doorState = ''
+                    def updatedTime = ''
+                    device.Attributes.each { 
+						
+                        if (it.AttributeDisplayName=="desc")	//deviceList[dni] = it.Value                        	
+                        {
+                        	description = it.Value
+                        }
+                        	
 						if (it.AttributeDisplayName=="doorstate") { 
-							state.data[dni] = [ status: it.Value, lastAction: it.UpdatedTime ]
+                        	doorState = it.Value
+                            updatedTime = it.UpdatedTime							
 						}
-					}                    
-				}
-			}
-		}
-	}    
-	return deviceList
-}
-
-// Listing all the light controller you have in MyQ
-private getLightList() { 	    
-	def deviceList = [:]
-	apiGet("/api/v4/userdevicedetails/get", []) { response ->
-		if (response.status == 200) {
-			response.data.Devices.each { device ->
-				if (device.MyQDeviceTypeId == 3) {
-					def dni = [ app.id, "LightController", device.MyQDeviceId ].join('|')
-					device.Attributes.each { 
-						if (it.AttributeDisplayName=="desc") { deviceList[dni] = it.Value }
-						if (it.AttributeDisplayName=="lightstate") {  state.data[dni] = [ status: it.Value ] }
-					}                    
+					}
+                    
+                    //Ignore any doors with blank descriptions
+                    if (description != ''){
+                        log.debug "adding door: " + description + "type: " + device.MyQDeviceTypeId + " status: " + doorState
+                        deviceList[dni] = description
+                        state.data[dni] = [ status: doorState, lastAction: updatedTime, name: description ]
+                    }
 				}
 			}
 		}
@@ -225,8 +329,20 @@ private getDeviceList() {
 		if (response.status == 200) {
 			response.data.Devices.each { device ->
 				log.debug "MyQDeviceTypeId : " + device.MyQDeviceTypeId.toString()
-				if (!(device.MyQDeviceTypeId == 1||device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 3||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7)) {
-					deviceList.add( device.MyQDeviceTypeId.toString() + "|" + device.TypeID )
+				if (!(device.MyQDeviceTypeId == 1||device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 3||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7)) {					
+                    device.Attributes.each { 
+						def description = ''
+                        def doorState = ''
+                        def updatedTime = ''
+                        if (it.AttributeDisplayName=="desc")	//deviceList[dni] = it.Value
+                        	description = it.Value
+						
+                        //Ignore any doors with blank descriptions
+                        if (description != ''){
+                        	log.debug "found device: " + description
+                        	deviceList.add( device.MyQDeviceTypeId.toString() + "|" + device.TypeID )
+                        }
+					}
 				}
 			}
 		}
@@ -261,7 +377,8 @@ private apiGet(apiPath, apiQuery = [], callback = {}) {
 	try {
 		httpGet([ uri: getApiURL(), path: apiPath, query: apiQuery ]) { response -> callback(response) }
 	}	catch (SocketException e)	{
-		log.debug "API Error: $e"
+		//sendAlert("API Error: $e")
+        log.debug "API Error: $e"
 	}
 }
 
@@ -279,44 +396,6 @@ private apiPut(apiPath, apiBody = [], callback = {}) {
 		httpPut([ uri: getApiURL(), path: apiPath, contentType: "application/json; charset=utf-8", body: apiBody, query: apiQuery ]) { response -> callback(response) }
 	} catch (SocketException e)	{
 		log.debug "API Error: $e"
-	}
-}
-
-// Updates data for devices
-private updateDeviceData() {    
-	// automatically checks if the token has expired, if so login again
-	if (login()) {       
-		// set polling states
-		state.polling["last"] = now()
-	
-		// Get all the door information, updated to state.data
-		return (getDoorList()||getLightList())? true : false
-	} else {
-		return false
-	}
-}
-
-/* for SmartDevice to call */
-// Refresh data
-def refresh() {   
-	//force devices to poll to get the latest status
-	if (updateDeviceData()) { 
-		log.info "Refreshing data..."
-		// get all the children and send updates
-		getAllChildDevices().each { 
-			//log.debug "Polling " + it.deviceNetworkId
-			it.updateDeviceStatus(state.data[it.deviceNetworkId].status)
-			if (it.deviceNetworkId.contains("GarageDoorOpener")) {
-				it.updateDeviceLastActivity(state.data[it.deviceNetworkId].lastAction.toLong())
-			}
-		}
-	}    
-	
-	//schedule the rescheduler to schedule refresh ;)
-	if ((state.polling["rescheduler"]?:0) + 2400000 < now()) {
-		log.info "Scheduling Auto Rescheduler.."
-		runEvery30Minutes(runRefresh)
-		state.polling["rescheduler"] = now()
 	}
 }
 
@@ -342,29 +421,4 @@ def sendCommand(child, attributeName, attributeValue) {
 		apiPut("/api/v4/deviceattribute/putdeviceattribute", [ MyQDeviceId: getChildDeviceID(child), AttributeName: attributeName, AttributeValue: attributeValue ]) 	
 		return true
 	} 
-}
-
-def runRefresh(evt) {
-	if (evt) { 
-		log.info "Event " + evt.displayName + " triggered refresh" 
-		runIn(30, delayedRefresh) //schedule a refresh 
-	}
-	log.info "Last refresh was "  + ((now() - state.polling["last"])/60000) + " minutes ago"
-	// Reschedule if  didn't update for more than 5 minutes plus specified polling
-	//if ((((state.polling["last"]?:0) + ((((!settings.polling)?:(settings.polling.toInteger() > 0 )? settings.polling.toInteger() : 5)) * 60000) + 300000) < now()) && canSchedule()) {
-	if ((((state.polling["last"]?:0) + 600000) < now()) && canSchedule()) {
-		log.info "Scheduling Auto Refresh.."
-		//schedule("* */" + ((settings.polling.toInteger() > 0 )? settings.polling.toInteger() : 5) + " * * * ?", refresh)
-		schedule("* */5 * * * ?", refresh)
-	}
-	
-	// Force Refresh NOWWW!!!!
-	refresh()
-	
-	if (!evt)  state.polling["rescheduler"] = now() //Update rescheduler's last run
-}
-
-def delayedRefresh() { 
-	log.info "Delayed refresh triggered"
-	refresh() 
 }
