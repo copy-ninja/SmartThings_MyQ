@@ -1,12 +1,7 @@
 /**
- *	MyQ Light Controller SmartDevice
+ *  MyQ Light Controller
  *
- *	Author: Jason Mok
- *	Date: 2014-12-26
- *
- ***************************
- *
- *  Copyright 2014 Jason Mok
+ *  Copyright 2015 Jason Mok
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -17,23 +12,18 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- **************************
- *
- * REQUIREMENTS:
- * Refer to MyQ Service Manager SmartApp
- *
- **************************
- * 
- * USAGE:
- * Put this in Device Type. Don't install until you have all other device types scripts added
- * Refer to MyQ Service Manager SmartApp
+ *  Last Updated : 7/15/2015
  *
  */
 metadata {
 	definition (name: "MyQ Light Controller", namespace: "copy-ninja", author: "Jason Mok") {
+		capability "Actuator"
+		capability "Sensor"
 		capability "Refresh"
 		capability "Polling"
 		capability "Switch"
+
+		command "updateDeviceStatus", ["string"]
 	}
 
 	simulator {	}
@@ -62,19 +52,11 @@ def off() {
 	updateDeviceStatus(0)
 }
 
-def refresh() {
-	parent.refresh()
-}
+def refresh() { parent.refresh() }
 
-def poll() {
-	updateDeviceStatus(parent.getDeviceStatus(this))
-}
+def poll() { updateDeviceStatus(parent.getDeviceStatus(this)) }
 
 def updateDeviceStatus(status) {
-	if (status == "0") { 
-		sendEvent(name: "switch", value: "off", display: true, descriptionText: device.displayName + " was off") 
-	}   
-	if (status == "1") {
-		sendEvent(name: "switch", value: "on", display: true, descriptionText: device.displayName + " was on") 
-	}
+	if (status == "0") {  sendEvent(name: "switch", value: "off", display: true, descriptionText: device.displayName + " was off")  }   
+	if (status == "1") { sendEvent(name: "switch", value: "on", display: true, descriptionText: device.displayName + " was on")  }
 }
