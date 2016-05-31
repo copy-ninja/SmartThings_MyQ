@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 7/15/2015
+ *  Last Updated : 5/31/2016
  *
  */
 metadata {
@@ -66,18 +66,19 @@ metadata {
 def parse(String description) {}
 
 def on() { 
-	push() 
+	push("open")
 	sendEvent(name: "button", value: "on", isStateChange: true, display: false, displayed: false)
 }
 def off() { 
+    push("closed")
 	sendEvent(name: "button", value: "off", isStateChange: true, display: false, displayed: false)
 }
 
-def push() { 
+def push(String desiredstate) { 
 	def doorState = device.currentState("door")?.value
-	if (doorState == "open" || doorState == "stopped") {
+	if ((doorState == "open" || doorState == "stopped") && desiredstate == "closed") {
 		close()
-	} else if (doorState == "closed") {
+	} else if (doorState == "closed" && desiredstate == "open") {
 		open()
 	} 
 	sendEvent(name: "momentary", value: "pushed", display: false, displayed: false)
