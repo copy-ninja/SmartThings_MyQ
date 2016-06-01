@@ -242,7 +242,7 @@ def refresh(child){
 }
 
 def sensorHandler(evt) {    
-    //log.debug "Event name  " + evt.name + " value: " + evt.value    
+    log.debug "Sensor change detected: Event name  " + evt.name + " value: " + evt.value    
     syncDoorsWithSensors()    
 }
 
