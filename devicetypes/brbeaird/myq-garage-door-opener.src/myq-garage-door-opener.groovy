@@ -66,19 +66,31 @@ metadata {
 def parse(String description) {}
 
 def on() { 
-	push("open")
+	def doorState = device.currentState("door")?.value
+    if (doorState != "open"){
+    	push()
+    }
+    else{
+    	log.debug "Door is already open."
+    }    
 	sendEvent(name: "button", value: "on", isStateChange: true, display: false, displayed: false)
 }
 def off() { 
-    push("closed")
+    def doorState = device.currentState("door")?.value
+    if (doorState != "closed"){
+    	push()
+    }
+    else{
+    	log.debug "Door is already closed."
+    }
 	sendEvent(name: "button", value: "off", isStateChange: true, display: false, displayed: false)
 }
 
-def push(String desiredstate) { 
+def push() {
 	def doorState = device.currentState("door")?.value
-	if ((doorState == "open" || doorState == "stopped") && desiredstate == "closed") {
+	if (doorState == "open" || doorState == "stopped") {
 		close()
-	} else if (doorState == "closed" && desiredstate == "open") {
+	} else if (doorState == "closed") {
 		open()
 	} 
 	sendEvent(name: "momentary", value: "pushed", display: false, displayed: false)
