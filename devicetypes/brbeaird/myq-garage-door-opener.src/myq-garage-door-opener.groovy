@@ -94,7 +94,7 @@ def close() {
 }
 
 def refresh() {	
-    parent.syncDoorsWithSensors()
+    parent.refresh(this)
 }
 
 def poll() { refresh() }
@@ -103,7 +103,7 @@ def poll() { refresh() }
 def updateDeviceStatus(status) {	
     
     def currentState = device.currentState("door")?.value
-    log.debug "Door status updated to : " + status
+    log.debug "Request received to update door status to : " + status
     
     //Don't do anything if nothing changed
     if (currentState == status){
@@ -120,15 +120,11 @@ def updateDeviceStatus(status) {
 		log.debug "Door is now closed"
         sendEvent(name: "door", value: "closed", display: true, descriptionText: device.displayName + " is closed")
 		sendEvent(name: "contact", value: "closed", display: false, displayed: false)
-	}
-	if (status == "3") { 
-		sendEvent(name: "door", value: "stopped", display: true, descriptionText: device.displayName + " has stopped")
-		sendEvent(name: "contact", value: "closed", display: false, displayed: false)
-	}
-	if (status == "4" || (status=="8" && currentState=="closed")) { 
+	}	
+	if (status == "opening") {
 		sendEvent(name: "door", value: "opening", display: false, displayed: false) 
 	}  
-	if (status == "5" || (status=="8" && currentState=="open")) { 
+	if (status == "closing") { 
 		sendEvent(name: "door", value: "closing", display: false, displayed: false) 
 	}  
 }
