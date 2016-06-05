@@ -199,12 +199,19 @@ def initialize() {
     if (door4Sensor)    	
         subscribe(door4Sensor, "contact", sensorHandler)
         
-	//Set initial values
+	//Subscribe to mode changes and sunrise/sunset to help keep doors in sync
+	subscribe(location, "sunrise", sensorHandler)
+	subscribe(location, "sunset", sensorHandler)
+	subscribe(location, "mode", sensorHandler)
+	subscribe(location, "sunriseTime", sensorHandler)
+	subscribe(location, "sunsetTime", sensorHandler)
+    
+    //Set initial values
     syncDoorsWithSensors()    
 
 }
 
-def syncDoorsWithSensors(){	
+def syncDoorsWithSensors(child){	
     def firstDoor = doors[0]
         
     //Handle single door (sometimes it's just a dumb string thanks to the simulator)
@@ -212,22 +219,26 @@ def syncDoorsWithSensors(){
     firstDoor = doors
     
     if (door1Sensor)
-    	updateDoorStatus(firstDoor, door1Sensor)
+    	updateDoorStatus(firstDoor, door1Sensor, child)
     if (door2Sensor)
-    	updateDoorStatus(doors[1], door2Sensor)
+    	updateDoorStatus(doors[1], door2Sensor, child)
     if (door3Sensor)
-    	updateDoorStatus(doors[2], door2Sensor)
+    	updateDoorStatus(doors[2], door2Sensor, child)
     if (door4Sensor)
-        updateDoorStatus(doors[3], door2Sensor)
+        updateDoorStatus(doors[3], door2Sensor, child)
 }
 
 
-def updateDoorStatus(doorDNI, sensor){
+def updateDoorStatus(doorDNI, sensor, child){
 	
     //Get latest activity timestamp for the sensor
     def eventsSinceYesterday = sensor.eventsSince(new Date() - 1)    
-    def latestEvent = eventsSinceYesterday[0].date
+    def latestEvent = eventsSinceYesterday[0]?.date
     def value = sensor.currentcontact
+    
+    //Write to child log if this was initiated from one of the doors
+    if (child)
+    	child.log("Updating door " + doorDNI + " with " + value + " last activity: " + latestEvent)
     
     log.debug "Updating door " + doorDNI + " with " + value + " last activity: " + latestEvent
     def doorToUpdate = getChildDevice(doorDNI)
@@ -238,7 +249,7 @@ def updateDoorStatus(doorDNI, sensor){
 def refresh(child){	
     def door = child.device.deviceNetworkId
     child.log("refresh called from " + door)
-    syncDoorsWithSensors()
+    syncDoorsWithSensors(child)
 }
 
 def sensorHandler(evt) {    
