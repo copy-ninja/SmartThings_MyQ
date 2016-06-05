@@ -98,14 +98,16 @@ def push() {
 
 def open()  { 
 	parent.sendCommand(this, "desireddoorstate", 1) 
-	updateDeviceStatus("opening")	
+	updateDeviceStatus("opening")
+    runIn(20, refresh)	//Force a sync with tilt sensor after 20 seconds
 }
 def close() { 
 	parent.sendCommand(this, "desireddoorstate", 0) 
-	updateDeviceStatus("closing")	
+	updateDeviceStatus("closing")
+    runIn(20, refresh) //Force a sync with tilt sensor after 20 seconds
 }
 
-def refresh() {	
+def refresh() {	    
     parent.refresh(this)
 }
 
@@ -134,15 +136,25 @@ def updateDeviceStatus(status) {
 		sendEvent(name: "contact", value: "closed", display: false, displayed: false)
 	}	
 	if (status == "opening") {
-		sendEvent(name: "door", value: "opening", display: false, displayed: false) 
+		if (currentState == "open"){
+        	log.debug "Door is already open. Leaving status alone."
+        }
+        else{
+        	sendEvent(name: "door", value: "opening", display: false, displayed: false)
+        }
 	}  
-	if (status == "closing") { 
-		sendEvent(name: "door", value: "closing", display: false, displayed: false) 
+	if (status == "closing") {
+    	if(currentState == "closed"){
+        	log.debug "Door is already closed. Leaving status alone."
+        }
+		else{
+        	sendEvent(name: "door", value: "closing", display: false, displayed: false)
+        }
 	}  
 }
 
 def updateDeviceLastActivity(lastActivity) {
-	def finalString = lastActivity.format('MM/d/yyyy hh:mm a',location.timeZone)    
+	def finalString = lastActivity?.format('MM/d/yyyy hh:mm a',location.timeZone)    
 	sendEvent(name: "lastActivity", value: finalString, display: false , displayed: false)
 }
 
