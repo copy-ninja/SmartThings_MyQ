@@ -200,11 +200,11 @@ def initialize() {
         subscribe(door4Sensor, "contact", sensorHandler)
         
 	//Subscribe to mode changes and sunrise/sunset to help keep doors in sync
-	subscribe(location, "sunrise", sensorHandler)
-	subscribe(location, "sunset", sensorHandler)
-	subscribe(location, "mode", sensorHandler)
-	subscribe(location, "sunriseTime", sensorHandler)
-	subscribe(location, "sunsetTime", sensorHandler)
+	subscribe(location, "sunrise", syncDoorsWithSensors)
+	subscribe(location, "sunset", syncDoorsWithSensors)
+	subscribe(location, "mode", syncDoorsWithSensors)
+	subscribe(location, "sunriseTime", syncDoorsWithSensors)
+	subscribe(location, "sunsetTime", syncDoorsWithSensors)
     
     //Set initial values
     syncDoorsWithSensors()    
