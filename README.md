@@ -6,7 +6,7 @@ This version was branched off from copy-ninja's original version. While it works
 
 More details can be found on the wiki: https://github.com/brbeaird/SmartThings_MyQ/wiki
 
-SmartThings thread here: <a href="https://community.smartthings.com/t/beta-myq-lite-for-liftmaster-chamberlain/49150">https://community.smartthings.com/t/beta-myq-lite-for-liftmaster-chamberlain/49150</a>
+SmartThings thread here: <a href="https://community.smartthings.com/t/release-myq-lite-for-liftmaster-chamberlain/49150">https://community.smartthings.com/t/beta-myq-lite-for-liftmaster-chamberlain/49150</a>
 
 ##Tilt Sensor Requirement
 Please note that this version does require that you acquire a separate physical tilt sensor for each of your MyQ doors.  <a href="http://www.amazon.com/Ecolink-Z-Wave-Wireless-Tilt-Sensor/dp/B00HGVJRX2">Here's an example of one you can purchase from Amazon.</a> While this requirement is more costly and not ideal, the status updates tend to be much quicker and more reliable than using MyQ server polling.
