@@ -242,12 +242,12 @@ def updateDoorStatus(doorDNI, sensor, child){
     	child.log("Door: " + doorDNI + ": Updating with status - " + value)
     
     
-    //Get latest activity timestamp for the sensor
-    def eventsSinceYesterday = sensor.eventsSince(new Date() - 1)    
+    //Get latest activity timestamp for the sensor (data saved for up to a week)
+    def eventsSinceYesterday = sensor.eventsSince(new Date() - 7)    
     def latestEvent = eventsSinceYesterday[0]?.date
     def timeStampLogText = "Door: " + doorDNI + ": Updating timestamp to: " + latestEvent
     
-    if (!latestEvent)	//Sometimes the latest value is null, typically if the value has not changed in over 24 hours.
+    if (!latestEvent)	//If the door has been inactive for more than a week, timestamp data will be null. Keep current value in that case.
     	timeStampLogText = "Door: " + doorDNI + ": Null timestamp detected " + latestEvent + " . Keeping current value."
     else
     	doorToUpdate.updateDeviceLastActivity(latestEvent)    	
