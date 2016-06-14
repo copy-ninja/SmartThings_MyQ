@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 6/05/2016
+ *  Last Updated : 6/14/2016
  *
  */
 metadata {
@@ -29,6 +29,7 @@ metadata {
 		capability "Sensor"
 		
 		attribute "lastActivity", "string"
+        attribute "doorSensor", "string"
 		command "updateDeviceStatus", ["string"]
 		command "updateDeviceLastActivity", ["number"]
 	}
@@ -58,9 +59,12 @@ metadata {
 		valueTile("lastActivity", "device.lastActivity", inactiveLabel: false, decoration: "flat") {
 			state "default", label:'Last activity: ${currentValue}', action:"refresh.refresh", backgroundColor:"#ffffff"
 		}
+        valueTile("doorSensor", "device.doorSensor", width: 3, inactiveLabel: false, decoration: "flat") {
+			state "default", label:'Sensor Name: \n ${currentValue}', backgroundColor:"#ffffff"
+		}
 
 		main "door"
-		details(["door", "lastActivity", "refresh"])
+		details(["door", "lastActivity", "refresh", "doorSensor"])
 	}
 }
 def parse(String description) {}
@@ -156,6 +160,10 @@ def updateDeviceStatus(status) {
 def updateDeviceLastActivity(lastActivity) {
 	def finalString = lastActivity?.format('MM/d/yyyy hh:mm a',location.timeZone)    
 	sendEvent(name: "lastActivity", value: finalString, display: false , displayed: false)
+}
+
+def updateDeviceSensor(sensor) {	
+	sendEvent(name: "doorSensor", value: sensor, display: false , displayed: false)
 }
 
 def log(msg){
