@@ -2,7 +2,7 @@
 # SmartThings MyQ
 
 ##Overview
-This version was branched off from copy-ninja's original version. While it works largely the same, the biggest difference is that it relies on a separately installed tilt sensor on each door. This allows the app to get instant status updates without needing poll MyQ at all. This is necessary because MyQ/SmartThings have restricted the ability to poll the MyQ servers, although sending open/close commands still works as normal.
+This version was branched off from copy-ninja's original version. While it works largely the same, the biggest difference is that it relies on a separately installed tilt sensor on each door. This allows the app to get instant status updates without needing to poll MyQ at all. This is necessary because MyQ/SmartThings have restricted the ability to poll the MyQ servers, although sending open/close commands still works as normal.
 
 More details can be found on the wiki: https://github.com/brbeaird/SmartThings_MyQ/wiki
 
