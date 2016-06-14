@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 06/13/2016
+ *  Last Updated : 06/14/2016
  *
  */
 definition(
@@ -232,23 +232,25 @@ def syncDoorsWithSensors(child){
 def updateDoorStatus(doorDNI, sensor, child){
 	
     //Get door to update and set the new value
-    def doorToUpdate = getChildDevice(doorDNI)    
+    def doorToUpdate = getChildDevice(doorDNI)
+    def doorName = state.data[doorDNI].name
     def value = sensor.currentcontact
     doorToUpdate.updateDeviceStatus(value)
-    log.debug "Door: " + doorDNI + ": Updating with status - " + value
+    doorToUpdate.updateDeviceSensor(sensor)
+    log.debug "Door: " + doorName + ": Updating with status - " + value + " -  from sensor " + sensor
     
     //Write to child log if this was initiated from one of the doors    
     if (child)
-    	child.log("Door: " + doorDNI + ": Updating with status - " + value)
+    	child.log("Door: " + doorName + ": Updating with status - " + value + " -  from sensor " + sensor)
     
     
     //Get latest activity timestamp for the sensor (data saved for up to a week)
     def eventsSinceYesterday = sensor.eventsSince(new Date() - 7)    
     def latestEvent = eventsSinceYesterday[0]?.date
-    def timeStampLogText = "Door: " + doorDNI + ": Updating timestamp to: " + latestEvent
+    def timeStampLogText = "Door: " + doorName + ": Updating timestamp to: " + latestEvent + " -  from sensor " + sensor
     
     if (!latestEvent)	//If the door has been inactive for more than a week, timestamp data will be null. Keep current value in that case.
-    	timeStampLogText = "Door: " + doorDNI + ": Null timestamp detected " + latestEvent + " . Keeping current value."
+    	timeStampLogText = "Door: " + doorName + ": Null timestamp detected "  + " -  from sensor " + sensor + " . Keeping current value."
     else
     	doorToUpdate.updateDeviceLastActivity(latestEvent)    	
     	
@@ -262,7 +264,8 @@ def updateDoorStatus(doorDNI, sensor, child){
 
 def refresh(child){	
     def door = child.device.deviceNetworkId
-    child.log("refresh called from " + door)
+    def doorName = state.data[door].name
+    child.log("refresh called from " + doorName + ' (' + door + ')')
     syncDoorsWithSensors(child)
 }
 
