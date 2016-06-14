@@ -223,9 +223,9 @@ def syncDoorsWithSensors(child){
     if (door2Sensor)
     	updateDoorStatus(doors[1], door2Sensor, child)
     if (door3Sensor)
-    	updateDoorStatus(doors[2], door2Sensor, child)
+    	updateDoorStatus(doors[2], door3Sensor, child)
     if (door4Sensor)
-        updateDoorStatus(doors[3], door2Sensor, child)
+        updateDoorStatus(doors[3], door4Sensor, child)
 }
 
 
