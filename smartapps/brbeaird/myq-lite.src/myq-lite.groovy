@@ -1,7 +1,7 @@
 /**
  *  MyQ Lite
  *
- *  Copyright 2015 Jason Mok/Brian Beaird
+ *  Copyright 2015 Jason Mok/Brian Beaird/Barry Burke
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -18,7 +18,7 @@
 definition(
 	name: "MyQ Lite",
 	namespace: "brbeaird",
-	author: "Jason Mok/Brian Beaird",
+	author: "Jason Mok/Brian Beaird/Barry Burke",
 	description: "Integrate MyQ with Smartthings",
 	category: "SmartThings Labs",
 	iconUrl:   "http://smartthings.copyninja.net/icons/MyQ@1x.png",
@@ -89,22 +89,23 @@ def prefSensor1() {
     //Determine if we have multiple doors and need to send to another page
     if (doors instanceof String){ //simulator seems to just make a single door a string. For that reason we have this weird check.
     	log.debug "Single door detected (string)."
-        titleText = "Select Contact Sensor for Door 1 (" + state.data[doors].name + ")"
+        titleText = "Select Sensors for Door 1 (" + state.data[doors].name + ")"
     }
     else if (doors.size() == 1){
     	log.debug "Single door detected (array)."
-        titleText = "Select Contact Sensor for Door 1 (" + state.data[doors[0]].name + ")"
+        titleText = "Select Sensors for Door 1 (" + state.data[doors[0]].name + ")"
     }
     else{
     	log.debug "Multiple doors detected."
         nextPage = "prefSensor2"
-        titleText = "Select Contact Sensor for Door 1 (" + state.data[doors[0]].name + ")"
+        titleText = "Select Sensors for Door 1 (" + state.data[doors[0]].name + ")"
         showInstall = false;
     }    
     
     return dynamicPage(name: "prefSensor1",  title: "Sensors", nextPage:nextPage, install:showInstall, uninstall:true) {        
         section(titleText){			
-			input(name: "door1Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: "true", multiple: "false")			
+			input(name: "door1Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: true, multiple: false)
+			input(name: "door1Acceleration", title: "Acceleration Sensor", type: "capability.accelerationSensor", required: false, multiple: false)
 		}
     }
 }
@@ -112,7 +113,7 @@ def prefSensor1() {
 def prefSensor2() {	   
     def nextPage = ""
     def showInstall = true
-    def titleText = "Contact Sensor for Door 2 (" + state.data[doors[1]].name + ")"
+    def titleText = "Sensors for Door 2 (" + state.data[doors[1]].name + ")"
      
     if (doors.size() > 2){
     	nextPage = "prefSensor3"
@@ -121,7 +122,8 @@ def prefSensor2() {
     
     return dynamicPage(name: "prefSensor2",  title: "Sensors", nextPage:nextPage, install:showInstall, uninstall:true) {
         section(titleText){			
-			input(name: "door2Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: "true", multiple: "false")			
+			input(name: "door2Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: true, multiple: false)
+			input(name: "door2Acceleration", title: "Acceleration Sensor", type: "capability.accelerationSensor", required: false, multiple: false)
 		}
     }
 }
@@ -129,7 +131,7 @@ def prefSensor2() {
 def prefSensor3() {	   
     def nextPage = ""
     def showInstall = true
-    def titleText = "Contact Sensor for Door 3 (" + state.data[doors[2]].name + ")"
+    def titleText = "Sensors for Door 3 (" + state.data[doors[2]].name + ")"
      
     if (doors.size() > 3){
     	nextPage = "prefSensor4"
@@ -138,7 +140,8 @@ def prefSensor3() {
     
     return dynamicPage(name: "prefSensor3",  title: "Sensors", nextPage:nextPage, install:showInstall, uninstall:true) {
         section(titleText){			
-			input(name: "door3Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: "true", multiple: "false")			
+			input(name: "door3Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: true, multiple: false)
+			input(name: "door3Acceleration", title: "Acceleration Sensor", type: "capability.accelerationSensor", required: false, multiple: false)
 		}
     }
 }
@@ -147,12 +150,11 @@ def prefSensor4() {
 	def titleText = "Contact Sensor for Door 4 (" + state.data[doors[3]].name + ")"
     return dynamicPage(name: "prefSensor4",  title: "Sensors", install:true, uninstall:true) {
         section(titleText){			
-			input(name: "door4Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: "true", multiple: "false")			
+			input(name: "door4Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: "true", multiple: "false")
+			input(name: "door4Acceleration", title: "Acceleration Sensor", type: "capability.accelerationSensor", required: false, multiple: false)
 		}
     }
 }
-
-
 
 /* Initialization */
 def installed() { initialize() }
@@ -188,7 +190,6 @@ def initialize() {
 	def deleteDevices = (selectedDevices) ? (getChildDevices().findAll { !selectedDevices.contains(it.deviceNetworkId) }) : getAllChildDevices()
 	deleteDevices.each { deleteChildDevice(it.deviceNetworkId) }    
     
-    
     //Create subscriptions
     if (door1Sensor)
         subscribe(door1Sensor, "contact", sensorHandler)    
@@ -199,16 +200,17 @@ def initialize() {
     if (door4Sensor)    	
         subscribe(door4Sensor, "contact", sensorHandler)
         
-	//Subscribe to mode changes and sunrise/sunset to help keep doors in sync
-	subscribe(location, "sunrise", syncDoorsWithSensors)
-	subscribe(location, "sunset", syncDoorsWithSensors)
-	subscribe(location, "mode", syncDoorsWithSensors)
-	subscribe(location, "sunriseTime", syncDoorsWithSensors)
-	subscribe(location, "sunsetTime", syncDoorsWithSensors)
-    
+    if (door1Acceleration)
+        subscribe(door1Acceleration, "acceleration", sensorHandler)    
+    if (door2Acceleration)    	
+        subscribe(door2Acceleration, "acceleration", sensorHandler)
+    if (door3Acceleration)        
+        subscribe(door3Acceleration, "acceleration", sensorHandler)        
+    if (door4Acceleration)    	
+        subscribe(door4Acceleration, "acceleration", sensorHandler)
+        
     //Set initial values
-    syncDoorsWithSensors()    
-
+    syncDoorsWithSensors()   
 }
 
 def syncDoorsWithSensors(child){	
@@ -218,31 +220,72 @@ def syncDoorsWithSensors(child){
     if (doors instanceof String)
     firstDoor = doors
     
-    if (door1Sensor)
-    	updateDoorStatus(firstDoor, door1Sensor, child)
-    if (door2Sensor)
-    	updateDoorStatus(doors[1], door2Sensor, child)
-    if (door3Sensor)
-    	updateDoorStatus(doors[2], door3Sensor, child)
-    if (door4Sensor)
-        updateDoorStatus(doors[3], door4Sensor, child)
+    def doorDNI = null
+    if (child) {								// refresh only the requesting door (makes things a bit more efficient if you have more than 1 door
+    	doorDNI = child.device.deviceNetworkId
+        switch (doorDNI) {
+        	case firstDoor:
+            	updateDoorStatus(firstDoor, door1Sensor, door1Acceleration, door1ThreeAxis, child)
+                break
+            case doors[1]:
+            	updateDoorStatus(doors[1], door2Sensor, door2Acceleration, door2ThreeAxis, child)
+                break
+            case doors[2]:
+            	updateDoorStatus(doors[2], door3Sensor, door3Acceleration, door3ThreeAxis, child)
+                break
+            case doors[3]:
+            	updateDoorStatus(doors[3], door4Sensor, door4Acceleration, door4ThreeAxis, child)
+     	}
+    } else {           					// refresh ALL the doors
+		if (firstDoor) updateDoorStatus(firstDoor, door1Sensor, door1Acceleration, door1ThreeAxis, null)
+		if (doors[1]) updateDoorStatus(doors[1], door2Sensor, door2Acceleration, door2ThreeAxis, null)
+		if (doors[2]) updateDoorStatus(doors[2], door3Sensor, door3Acceleration, door3ThreeAxis, null)
+		if (doors[3]) updateDoorStatus(doors[3], door4Sensor, door4Acceleration, door4ThreeAxis, null)
+    }
 }
 
-
-def updateDoorStatus(doorDNI, sensor, child){
+def updateDoorStatus(doorDNI, sensor, acceleration, threeAxis, child){
 	
     //Get door to update and set the new value
     def doorToUpdate = getChildDevice(doorDNI)
     def doorName = state.data[doorDNI].name
-    def value = sensor.currentcontact
+    
+    def value = "unknown"
+    def moving = "unknown"
+    def door = doorToUpdate.latestValue("door")
+    
+    if (acceleration) moving = acceleration.latestValue("acceleration")
+    if (sensor) value = sensor.latestValue("contact")
+
+    if (moving == "active") {
+    	if (value == "open") {			
+        	if (door != "opening") value = "closing" else value = "opening"  // if door is "open" or "waiting" change to "closing", else it must be "opening"
+    	} else if (value == "closed") { 
+        	if (door != "closing") 	value = "opening" else value = "closed"
+    	}
+    } else if (moving == "inactive") {
+    	if (door == "closing") {
+    		if (value == "open") { 	// just stopped but door is still open
+    			value = "stopped"
+        	}
+        }
+    }
+    	
     doorToUpdate.updateDeviceStatus(value)
-    doorToUpdate.updateDeviceSensor(sensor)
+    doorToUpdate.updateDeviceSensor("${sensor} is ${sensor.currentContact}")
+    
     log.debug "Door: " + doorName + ": Updating with status - " + value + " -  from sensor " + sensor
     
     //Write to child log if this was initiated from one of the doors    
     if (child)
     	child.log("Door: " + doorName + ": Updating with status - " + value + " -  from sensor " + sensor)
-    
+ 
+     if (acceleration) {
+     	doorToUpdate.updateDeviceMoving("${acceleration} is ${moving}")
+        log.debug "Door: " + doorName + ": Updating with status - " + moving + " - from sensor " + acceleration
+        if (child)
+        	child.log("Door: " + doorName + ": Updating with status - " + moving + " - from sensor " + acceleration)
+     }
     
     //Get latest activity timestamp for the sensor (data saved for up to a week)
     def eventsSinceYesterday = sensor.eventsSince(new Date() - 7)    
@@ -259,7 +302,6 @@ def updateDoorStatus(doorDNI, sensor, child){
     //Write to child log if this was initiated from one of the doors
     if (child)
     	child.log(timeStampLogText)
-	
 }
 
 def refresh(child){	
@@ -270,8 +312,30 @@ def refresh(child){
 }
 
 def sensorHandler(evt) {    
-    log.debug "Sensor change detected: Event name  " + evt.name + " value: " + evt.value    
-    syncDoorsWithSensors()    
+    log.debug "Sensor change detected: Event name  " + evt.name + " value: " + evt.value   + " deviceID: " + evt.deviceId
+    
+    switch (evt.deviceId) {
+    	case door1Sensor.id:
+        case door1Acceleration.id:
+            def firstDoor = doors[0]
+			if (doors instanceof String) firstDoor = doors
+        	updateDoorStatus(firstDoor, door1Sensor, door1Acceleration, door1ThreeAxis, null)
+            break
+    	case door2Sensor.id:
+        case door2Acceleration.id:
+        	updateDoorStatus(doors[1], door2Sensor, door2Acceleration, door2ThreeAxis, null)
+            break    	
+        case door3Sensor.id:
+        case door3Acceleration.id:
+        	updateDoorStatus(doors[2], door3Sensor, door3Acceleration, door3ThreeAxis, null)
+            break        
+    	case door4Sensor.id:
+        case door4Acceleration.id:
+        	updateDoorStatus(doors[3], door4Sensor, door4Acceleration, door4ThreeAxis, null)
+            break
+        default:
+			syncDoorsWithSensors()
+    }
 }
 
 def getSelectedDevices( settingsName ) { 
@@ -446,7 +510,27 @@ def getDeviceLastActivity(child) {
 def sendCommand(child, attributeName, attributeValue) {
 	if (login()) {	    	
 		//Send command
-		apiPut("/api/v4/deviceattribute/putdeviceattribute", [ MyQDeviceId: getChildDeviceID(child), AttributeName: attributeName, AttributeValue: attributeValue ]) 	
+		apiPut("/api/v4/deviceattribute/putdeviceattribute", [ MyQDeviceId: getChildDeviceID(child), AttributeName: attributeName, AttributeValue: attributeValue ]) 
+        
+        if ((attributeName == "desireddoorstate") && (attributeValue == 0)) {		// if we are closing, check if we have an Acceleration sensor, if so, "waiting" until it moves
+            def firstDoor = doors[0]
+    		if (doors instanceof String) firstDoor = doors
+        	def doorDNI = child.device.deviceNetworkId
+        	switch (doorDNI) {
+        		case firstDoor:
+                	if (door1Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("opening")
+                	break
+            	case doors[1]:
+            		if (door2Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("opening")
+                	break
+            	case doors[2]:
+            		if (door3Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("opening")
+                	break
+            	case doors[3]:
+            		if (door4Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("opening")
+        			break
+            }
+        }      
 		return true
 	} 
 }

@@ -11,6 +11,9 @@ SmartThings thread here: <a href="https://community.smartthings.com/t/release-my
 ##Tilt Sensor Requirement
 Please note that this version does require that you acquire a separate physical tilt sensor for each of your MyQ doors.  <a href="http://www.amazon.com/Ecolink-Z-Wave-Wireless-Tilt-Sensor/dp/B00HGVJRX2">Here's an example of one you can purchase from Amazon.</a> While this requirement is more costly and not ideal, the status updates tend to be much quicker and more reliable than using MyQ server polling.
 
+##Optional MultiSensor Support (Accelerometer Only)
+This version now supports the additional use of an Acceleromter, as in a Samsung/SmartThings MultiSensor - again, one per door (not required for every door, either). If configured, the accelerometer will be used to more accurately track states of opening, closing, and waiting (the alarm before closing actually begins). Generally, this will return the visual status updates from the original version, but without making ANY status requests from the MyQ servers.
+
 ## Installation Instructions:
 
 ### Manually:
