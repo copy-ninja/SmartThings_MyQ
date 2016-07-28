@@ -312,25 +312,25 @@ def refresh(child){
 }
 
 def sensorHandler(evt) {    
-    log.debug "Sensor change detected: Event name  " + evt.name + " value: " + evt.value   + " deviceID: " + evt.deviceId
+    log.debug "Sensor change detected: Event name  " + evt.name + " value: " + evt.value   + " deviceID: " + evt.deviceId    
     
     switch (evt.deviceId) {
     	case door1Sensor.id:
-        case door1Acceleration.id:
+        case door1Acceleration?.id:
             def firstDoor = doors[0]
 			if (doors instanceof String) firstDoor = doors
         	updateDoorStatus(firstDoor, door1Sensor, door1Acceleration, door1ThreeAxis, null)
             break
-    	case door2Sensor.id:
-        case door2Acceleration.id:
+    	case door2Sensor?.id:
+        case door2Acceleration?.id:
         	updateDoorStatus(doors[1], door2Sensor, door2Acceleration, door2ThreeAxis, null)
             break    	
-        case door3Sensor.id:
-        case door3Acceleration.id:
+        case door3Sensor?.id:
+        case door3Acceleration?.id:
         	updateDoorStatus(doors[2], door3Sensor, door3Acceleration, door3ThreeAxis, null)
             break        
-    	case door4Sensor.id:
-        case door4Acceleration.id:
+    	case door4Sensor?.id:
+        case door4Acceleration?.id:
         	updateDoorStatus(doors[3], door4Sensor, door4Acceleration, door4ThreeAxis, null)
             break
         default:
