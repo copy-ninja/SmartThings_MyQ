@@ -65,9 +65,9 @@ metadata {
 			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
 			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
 		}
-		standardTile("button", "device.switch") {
-			state("on", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
-			state("off", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
+		standardTile("switch", "device.switch") {
+			state("on", label:'${name}', action: "switch.on",  icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
+			state("off", label:'${name}', action: "switch.off", icon:"st.contact.contact.closed", backgroundColor:"#79b821")
 		}
 //		valueTile("lastActivity", "device.lastActivity", inactiveLabel: false, decoration: "flat") {
 //			state "default", label:'Last activity: ${currentValue}', action:"refresh.refresh", backgroundColor:"#ffffff"
@@ -80,7 +80,7 @@ metadata {
 		}
 
 		main "door"
-		details(["door", /* "lastActivity", "refresh", */ "doorSensor", "doorMoving"])
+		details(["door", "switch",/* "lastActivity", "refresh", */ "doorSensor", "doorMoving"])
 	}
 }
 
@@ -94,7 +94,7 @@ def on() {
     else{
     	log.debug "Door is already open."
     }    
-//	sendEvent(name: "button", value: "on", isStateChange: true, display: false, displayed: false)
+//	sendEvent(name: "switch", value: "on", isStateChange: true, display: false, displayed: false)
 }
 def off() { 
     def doorState = device.currentState("door")?.value
@@ -104,7 +104,7 @@ def off() {
     else{
     	log.debug "Door is already closed."
     }
-//	sendEvent(name: "button", value: "off", isStateChange: true, display: false, displayed: false)
+//	sendEvent(name: "switch", value: "off", isStateChange: true, display: false, displayed: false)
 }
 
 def push() {
@@ -151,14 +151,14 @@ def updateDeviceStatus(status) {
     		log.debug "Door is now open"
 			sendEvent(name: "door", value: "open", display: true, isStateChange: true, descriptionText: device.displayName + " is open") 
 			sendEvent(name: "contact", value: "open", display: false, displayed: false, isStateChange: true)	// make sure we update the hidden states as well
-        	sendEvent(name: "button", value: "on", display: false, displayed: false, isStateChange: true)		// on == open
+        	sendEvent(name: "switch", value: "on", display: false, displayed: false, isStateChange: true)		// on == open
             break
             
         case "closed":
 			log.debug "Door is now closed"
         	sendEvent(name: "door", value: "closed", display: true, isStateChange: true, descriptionText: device.displayName + " is closed")
 			sendEvent(name: "contact", value: "closed", display: false, displayed: false, isStateChange: true)	// update hidden states
-        	sendEvent(name: "button", value: "off", display: false, displayed: false, isStateChange: true)		// off == closed
+        	sendEvent(name: "switch", value: "off", display: false, displayed: false, isStateChange: true)		// off == closed
             break
             
 		case "opening":
