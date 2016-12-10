@@ -9,6 +9,25 @@ This SmartApp integrates Chamberlain/LiftMaster MyQ doors into SmartThings. It c
 * Via switch tiles in a SmartTiles dashboard
 * By asking Alexa or Google Home to turn the door on (open) or off (close)
 
+###Device and SmartTiles
+![Door device](http://i.imgur.com/zBXS6nQm.png "Door device")  ![Routine](http://i.imgur.com/fmDa1t6m.png "Routine") 
+
+
+![With SmartTiles](http://i.imgur.com/WhbN2H9m.png "With SmartTiles")    
+
+
+###Setup
+![Login to MyQ](http://i.imgur.com/PLEbmsdm.png "Login to MyQ")
+![Select Door](http://i.imgur.com/XUDFLucm.png "Door Select")
+
+
+###Sensor Selection
+![Sensor Selection](http://i.imgur.com/aKf14HHm.png "Sensor selection")
+![Push Buttons](http://i.imgur.com/SIkag7Cm.png "Push Buttons")
+
+
+
+
 Credit to copy-ninja, whose version I branched off to create this app to integrate without the need to poll MyQ for the door's status. If you use the optional Tilt/Contact sensor, you can still get status updates on the door. Otherwise, normal control functionality with be the same with or without a sensor. Previous versions of this app relied on polling MyQ for status updates; however, MyQ/SmartThings have restricted the ability to poll the MyQ servers, although sending open/close commands still works as normal.
 
 More details can be found on the wiki: https://github.com/brbeaird/SmartThings_MyQ/wiki
