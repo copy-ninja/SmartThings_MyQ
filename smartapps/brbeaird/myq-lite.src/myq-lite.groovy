@@ -383,7 +383,7 @@ private getDoorList() {
         //sendAlert("response data: " + response.data.Devices)
 			response.data.Devices.each { device ->
 				// 2 = garage door, 5 = gate, 7 = MyQGarage(no gateway), 17 = Garage Door Opener WGDO
-				if (device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7||device.MyQDeviceTypeId == 17) {
+				if (device.MyQDeviceTypeName != 'VGDO' && (device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7||device.MyQDeviceTypeId == 17)) {
 					log.debug "Found door: " + device.MyQDeviceId
                     def dni = [ app.id, "GarageDoorOpener", device.MyQDeviceId ].join('|')
 					def description = ''
@@ -404,7 +404,7 @@ private getDoorList() {
                     
                     //Ignore any doors with blank descriptions
                     if (description != ''){
-                        log.debug "adding door: " + description + "type: " + device.MyQDeviceTypeId + " status: " + doorState
+                        log.debug "adding door: " + description + "type: " + device.MyQDeviceTypeId + " status: " + doorState +  " type: " + device.MyQDeviceTypeName
                         deviceList[dni] = description
                         state.data[dni] = [ status: doorState, lastAction: updatedTime, name: description ]
                     }
