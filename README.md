@@ -2,17 +2,24 @@
 # SmartThings MyQ
 
 ##Overview
-This version was branched off from copy-ninja's original version. While it works largely the same, the biggest difference is that it relies on a separately installed tilt sensor on each door. This allows the app to get instant status updates without needing to poll MyQ at all. This is necessary because MyQ/SmartThings have restricted the ability to poll the MyQ servers, although sending open/close commands still works as normal.
+This SmartApp integrates Chamberlain/LiftMaster MyQ doors into SmartThings. It creates a garage door device in your list of Things and allows you to control the door...
+
+..By pushing the device in the SmartThings mobile app
+..Automatically by your presence (coming or going) in a Routine or other SmartThings rules app
+..Via switch tiles in a SmartTiles dashboard
+..By asking Alexa or Google Home to turn the door on (open) or off (close)
+
+Credit to copy-ninja, whose version I branched off to create this app to integrate without the need to poll MyQ for the door's status. If you use the optional Tilt/Contact sensor, you can still get status updates on the door. Otherwise, normal control functionality with be the same with or without a sensor. Previous versions of this app relied on polling MyQ for status updates; however, MyQ/SmartThings have restricted the ability to poll the MyQ servers, although sending open/close commands still works as normal.
 
 More details can be found on the wiki: https://github.com/brbeaird/SmartThings_MyQ/wiki
 
 SmartThings thread here: <a href="https://community.smartthings.com/t/release-myq-lite-for-liftmaster-chamberlain/49150">https://community.smartthings.com/t/beta-myq-lite-for-liftmaster-chamberlain/49150</a>
 
-##Tilt Sensor Requirement
-Please note that this version does require that you acquire a separate physical tilt sensor for each of your MyQ doors.  <a href="http://www.amazon.com/Ecolink-Z-Wave-Wireless-Tilt-Sensor/dp/B00HGVJRX2">Here's an example of one you can purchase from Amazon.</a> While this requirement is more costly and not ideal, the status updates tend to be much quicker and more reliable than using MyQ server polling.
+##Optional Tilt/Contact Sensor
+This app has the option of interfacing with a tilt sensor on the garage door. When present, a sensor will allow the door status to be known and displayed on the device. This also allows for the "switch" capability on the device, which can be added to other apps such as SmartTiles dashboards. <a href="https://www.amazon.com/gp/product/B00HGVJRX2/ref=as_li_tl?ie=UTF8&tag=brbeaird-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=B00HGVJRX2&linkId=b95bd197703395387d5d0bfe06c4866f">Here's an example of one you can purchase from Amazon.</a>
 
 ##Optional MultiSensor Support (Accelerometer Only)
-This version now supports the additional use of an Acceleromter, as in a Samsung/SmartThings MultiSensor - again, one per door (not required for every door, either). If configured, the accelerometer will be used to more accurately track states of opening, closing, and waiting (the alarm before closing actually begins). Generally, this will return the visual status updates from the original version, but without making ANY status requests from the MyQ servers.
+This version now supports the additional use of an Acceleromter for each door, as in a Samsung/SmartThings MultiSensor. If configured, the accelerometer will be used to more accurately track states of opening, closing, and waiting (the alarm before closing actually begins). Generally, this will return the visual status updates from the original version, but without making ANY status requests from the MyQ servers.
 
 ## Installation Instructions:
 
@@ -34,5 +41,8 @@ If you have not set up the GitHub integration yet or do not know about it, take 
 In the future, should you wish to update, simply repeat steps 2 and 3. The only difference is you will see the device types/SmartApp show up in the "Obsolete (updated in GitHub)" column instead.
 
 
+### Donate:
 
+If you love this app, feel free to donate.
 
+[![PayPal - The safer, easier way to give online!](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif "Donate")](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6QH4Y5KCESYPY)
