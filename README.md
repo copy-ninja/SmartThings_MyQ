@@ -4,10 +4,10 @@
 ##Overview
 This SmartApp integrates Chamberlain/LiftMaster MyQ doors into SmartThings. It creates a garage door device in your list of Things and allows you to control the door...
 
-..By pushing the device in the SmartThings mobile app
-..Automatically by your presence (coming or going) in a Routine or other SmartThings rules app
-..Via switch tiles in a SmartTiles dashboard
-..By asking Alexa or Google Home to turn the door on (open) or off (close)
+* By pushing the device in the SmartThings mobile app
+* Automatically by your presence (coming or going) in a Routine or other SmartThings rules app
+* Via switch tiles in a SmartTiles dashboard
+* By asking Alexa or Google Home to turn the door on (open) or off (close)
 
 Credit to copy-ninja, whose version I branched off to create this app to integrate without the need to poll MyQ for the door's status. If you use the optional Tilt/Contact sensor, you can still get status updates on the door. Otherwise, normal control functionality with be the same with or without a sensor. Previous versions of this app relied on polling MyQ for status updates; however, MyQ/SmartThings have restricted the ability to poll the MyQ servers, although sending open/close commands still works as normal.
 
