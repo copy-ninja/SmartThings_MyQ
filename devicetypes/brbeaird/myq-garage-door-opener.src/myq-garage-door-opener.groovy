@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 6/14/2016
+ *  Last Updated : 12/9/2016
  *
  */
 metadata {
@@ -43,17 +43,14 @@ metadata {
 		
 		multiAttributeTile(name:"door", type: "lighting", width: 6, height: 4, canChangeIcon: true) {
 			tileAttribute ("device.door", key: "PRIMARY_CONTROL") {
-				attributeState "unknown", label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e", nextState: "closing"
+				attributeState "unknown", label:'${name}', icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e", nextState: "closing"
 				attributeState "closed",  label:'${name}', action:"door control.open",   icon:"st.doors.garage.garage-closed",  backgroundColor:"#79b821", nextState: "opening"
 				attributeState "open",    label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e", nextState: "waiting"
 				attributeState "opening", label:'${name}', 								 icon:"st.doors.garage.garage-opening", backgroundColor:"#cec236", nextState: "open"
 				attributeState "closing", label:'${name}', 								 icon:"st.doors.garage.garage-closing", backgroundColor:"#cec236", nextState: "closed"
 				attributeState "waiting", label:'${name}', 								 icon:"st.doors.garage.garage-closing", backgroundColor:"#cec236", nextState: "closing"
 				attributeState "stopped", label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-closing", backgroundColor:"#1ee3ff", nextState: "closing"
-			}
-			tileAttribute ("device.lastActivity", key: "SECONDARY_CONTROL") {
-				attributeState "default", label:'Last activity: ${currentValue}', action: "refresh.refresh"
-			}
+			}			
 		}
 
 // Note that you can refresh this device simply by tapping the "lastActivity" string in the MultiTile now.
@@ -72,6 +69,12 @@ metadata {
 //		valueTile("lastActivity", "device.lastActivity", inactiveLabel: false, decoration: "flat") {
 //			state "default", label:'Last activity: ${currentValue}', action:"refresh.refresh", backgroundColor:"#ffffff"
 //		}
+        valueTile("openButton", "device.longText", width: 3, height: 2) {
+			state "val", label:'OPEN', action: "switch.on", backgroundColor:"#ffffff"
+		}        
+        valueTile("closeButton", "device.longText", width: 3, height: 2) {
+			state "val", label:'CLOSE', action: "switch.off", backgroundColor:"#ffffff"
+		}
         valueTile("doorSensor", "device.doorSensor", width: 6, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "default", label:'${currentValue}', backgroundColor:"#ffffff"
 		}
@@ -80,14 +83,19 @@ metadata {
 		}
 
 		main "door"
-		details(["door", "switch",/* "lastActivity", "refresh", */ "doorSensor", "doorMoving"])
+		details(["door", "openButton", "closeButton", "doorSensor", "doorMoving"])
 	}
 }
 
 def parse(String description) {}
 
 def on() { 
-	def doorState = device.currentState("door")?.value
+	log.debug "Turning door on!"
+    log.debug "doorstate: " + device.currentState("door")?.value
+    def doorState = device.currentState("door")?.value
+    if (doorState == null){
+    	open()
+    }    
     if (doorState != "open"){
     	push()
     }
@@ -97,6 +105,7 @@ def on() {
 //	sendEvent(name: "switch", value: "on", isStateChange: true, display: false, displayed: false)
 }
 def off() { 
+    log.debug "Turning door off!"
     def doorState = device.currentState("door")?.value
     if (doorState != "closed"){
     	push()
@@ -166,7 +175,7 @@ def updateDeviceStatus(status) {
         		log.debug "Door is already open. Leaving status alone."
         	}
         	else{
-        		sendEvent(name: "door", value: "opening", display: false, displayed: false, isStateChange: true)
+        		sendEvent(name: "door", value: "opening", descriptionText: "Sent opening command.", display: false, displayed: true, isStateChange: true)
         	}
             break
 
