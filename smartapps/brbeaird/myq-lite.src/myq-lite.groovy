@@ -1,7 +1,7 @@
 /**
  *  MyQ Lite
  *
- *  Copyright 2015 Jason Mok/Brian Beaird/Barry Burke
+ *  Copyright 2016 Jason Mok/Brian Beaird/Barry Burke
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 12/9/2016
+ *  Last Updated : 12/12/2016
  *
  */
 definition(
@@ -217,8 +217,8 @@ def initialize() {
 
         //Modify DNI string for the extra pushbuttons to make sure they don't get deleted unintentionally
         def DNI = it?.deviceNetworkId
-        DNI = DNI.replace("-OPEN", "")
-        DNI = DNI.replace("-CLOSE", "")        
+        DNI = DNI.replace(" Opener", "")
+        DNI = DNI.replace(" Closer", "")        
 
         if (!(DNI in doors)){
             log.debug "found device to delete: " + it
@@ -266,10 +266,10 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
         	log.debug "Child already exists for " + doorName + ". Sensor name is: " + sensor
             if ((!sensor) && existingType == "MyQ Garage Door Opener"){
             	log.debug "Type needs updating to non-sensor version"
-                existingDev.deviceType = "MyQ Garage Door Opener-NoSensor"
+                existingDev.deviceType = "MyQ Garage Door Opener NoSensor"
             }
             
-            if (sensor && existingType == "MyQ Garage Door Opener-NoSensor"){
+            if (sensor && existingType == "MyQ Garage Door Opener NoSensor"){
             	log.debug "Type needs updating to sensor version"
                 existingDev.deviceType = "MyQ Garage Door Opener"
             }            
@@ -280,16 +280,16 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
                 addChildDevice("brbeaird", "MyQ Garage Door Opener", door, null, ["name": doorName]) 
             }
             else{
-                addChildDevice("brbeaird", "MyQ Garage Door Opener-NoSensor", door, null, ["name": doorName]) 
+                addChildDevice("brbeaird", "MyQ Garage Door Opener NoSensor", door, null, ["name": doorName]) 
             }
         }
         
         //Create push button devices
         if (prefPushButtons){
-        	def existingOpenButtonDev = getChildDevice(door + "-OPEN")
-            def existingCloseButtonDev = getChildDevice(door + "-CLOSE")
+        	def existingOpenButtonDev = getChildDevice(door + " Opener")
+            def existingCloseButtonDev = getChildDevice(door + " Closer")
             if (!existingOpenButtonDev){
-                def openButton = addChildDevice("smartthings", "Momentary Button Tile", door + "-OPEN", null, [name: doorName + "-OPEN", label: doorName + "-OPEN"])
+                def openButton = addChildDevice("smartthings", "Momentary Button Tile", door + " Opener", null, [name: doorName + " Opener", label: doorName + " Opener"])
                 subscribe(openButton, "momentary.pushed", doorButtonOpenHandler)                
             }
             else{
@@ -297,7 +297,7 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
             }
             
             if (!existingCloseButtonDev){                
-                def closeButton = addChildDevice("smartthings", "Momentary Button Tile", door + "-CLOSE", null, [name: doorName + "-CLOSE", label: doorName + "-CLOSE"])
+                def closeButton = addChildDevice("smartthings", "Momentary Button Tile", door + " Closer", null, [name: doorName + " Closer", label: doorName + " Closer"])
                 subscribe(closeButton, "momentary.pushed", doorButtonCloseHandler)
             }
             else{
@@ -311,7 +311,7 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
         
         //Cleanup defunct push button devices if no longer wanted
         else{
-        	def pushButtonIDs = [door + "-OPEN", door + "-CLOSE"]
+        	def pushButtonIDs = [door + " Opener", door + " Closer"]
             log.debug "ID's to look for: " + pushButtonIDs
             def devsToDelete = getChildDevices().findAll { pushButtonIDs.contains(it.deviceNetworkId)}
             log.debug "button devices to delete: " + devsToDelete
@@ -459,7 +459,7 @@ def sensorHandler(evt) {
 def doorButtonOpenHandler(evt) {
     log.debug "Door open button push detected: Event name  " + evt.name + " value: " + evt.value   + " deviceID: " + evt.deviceId + " DNI: " + evt.getDevice().deviceNetworkId
     def doorDeviceDNI = evt.getDevice().deviceNetworkId
-    doorDeviceDNI = doorDeviceDNI.replace("-OPEN", "")
+    doorDeviceDNI = doorDeviceDNI.replace(" Opener", "")
     def doorDevice = getChildDevice(doorDeviceDNI)
     log.debug "Opening door."
     doorDevice.openPrep()
@@ -469,7 +469,7 @@ def doorButtonOpenHandler(evt) {
 def doorButtonCloseHandler(evt) {    
     log.debug "Door close button push detected: Event name  " + evt.name + " value: " + evt.value   + " deviceID: " + evt.deviceId + " DNI: " + evt.getDevice().deviceNetworkId
     def doorDeviceDNI = evt.getDevice().deviceNetworkId
-    doorDeviceDNI = doorDeviceDNI.replace("-CLOSE", "")
+    doorDeviceDNI = doorDeviceDNI.replace(" Closer", "")
 	def doorDevice = getChildDevice(doorDeviceDNI)
     log.debug "Closing door."
     doorDevice.closePrep()
@@ -522,7 +522,7 @@ private getDoorList() {
         //sendAlert("response data: " + response.data.Devices)
 			response.data.Devices.each { device ->
 				// 2 = garage door, 5 = gate, 7 = MyQGarage(no gateway), 17 = Garage Door Opener WGDO
-				if (device.MyQDeviceTypeName != 'VGDO' && (device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7||device.MyQDeviceTypeId == 17)) {
+				if (device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7||device.MyQDeviceTypeId == 17) {
 					log.debug "Found door: " + device.MyQDeviceId
                     def dni = [ app.id, "GarageDoorOpener", device.MyQDeviceId ].join('|')
 					def description = ''
