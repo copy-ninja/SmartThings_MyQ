@@ -48,10 +48,11 @@ This version now supports the additional use of an Acceleromter for each door, a
 2. Click on **My Device Handlers** -> **Create new Device Handler** -> **From Code**.
 3. Copy contents of <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/NoSensor/devicetypes/brbeaird/myq-garage-door-opener.src/myq-garage-door-opener-NoSensor.groovy">Door Opener (No sensor version)</a> and paste into text area. in SmartApps section. Click **Create**. Click **Publish** > **For Me**
 4. Repeat the previous step for this door type code: <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/NoSensor/devicetypes/brbeaird/myq-garage-door-opener.src/myq-garage-door-opener.groovy">Door Opener (With sensor version)</a>
-5. Now we create the SmartApp code. Click **My SmartApps** -> **New Smartapp** -> **From Code**.
-6. Copy contents of <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/NoSensor/smartapps/brbeaird/myq-lite.src/myq-lite.groovy">SmartApp</a> and paste into text area. in SmartApps section. Click **Create**. Click **Publish** > **For Me**
-7. In your SmartThings mobile app, tap **Automation** -> **SmartApps** -> **Add a SmartApp**. Scroll down and tap **My Apps**. Tap **MyQ Lite**. 
-8. Enter in your login details and pick your gateway brand. If login is successful, you'll see a list of doors available for you to pick. After you choose your doors, you can select optional sensors to be tied to those doors. 
+5. Repeat the previous step for the Momentary Tile device type code: <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/NoSensor/devicetypes/smartthings/momentary-button-tile.src/momentary-button-tile.groovy">Momentary Button Tile</a>
+6. Now we create the SmartApp code. Click **My SmartApps** -> **New Smartapp** -> **From Code**.
+7. Copy contents of <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/NoSensor/smartapps/brbeaird/myq-lite.src/myq-lite.groovy">SmartApp</a> and paste into text area. in SmartApps section. Click **Create**. Click **Publish** > **For Me**
+8. In your SmartThings mobile app, tap **Automation** -> **SmartApps** -> **Add a SmartApp**. Scroll down and tap **My Apps**. Tap **MyQ Lite**. 
+9. Enter in your login details and pick your gateway brand. If login is successful, you'll see a list of doors available for you to pick. After you choose your doors, you can select optional sensors to be tied to those doors. 
 
 ### SmartThings IDE GitHub Integration:
 
