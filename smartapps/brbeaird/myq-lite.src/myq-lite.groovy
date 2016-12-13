@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 12/12/2016
+ *  Last Updated : 12/13/2016
  *
  */
 definition(
@@ -266,10 +266,10 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
         	log.debug "Child already exists for " + doorName + ". Sensor name is: " + sensor
             if ((!sensor) && existingType == "MyQ Garage Door Opener"){
             	log.debug "Type needs updating to non-sensor version"
-                existingDev.deviceType = "MyQ Garage Door Opener NoSensor"
+                existingDev.deviceType = "MyQ Garage Door Opener-NoSensor"
             }
             
-            if (sensor && existingType == "MyQ Garage Door Opener NoSensor"){
+            if (sensor && existingType == "MyQ Garage Door Opener-NoSensor"){
             	log.debug "Type needs updating to sensor version"
                 existingDev.deviceType = "MyQ Garage Door Opener"
             }            
@@ -280,7 +280,7 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
                 addChildDevice("brbeaird", "MyQ Garage Door Opener", door, null, ["name": doorName]) 
             }
             else{
-                addChildDevice("brbeaird", "MyQ Garage Door Opener NoSensor", door, null, ["name": doorName]) 
+                addChildDevice("brbeaird", "MyQ Garage Door Opener-NoSensor", door, null, ["name": doorName]) 
             }
         }
         
