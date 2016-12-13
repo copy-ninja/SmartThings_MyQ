@@ -40,6 +40,12 @@ This app has the option of interfacing with a tilt sensor on the garage door. Wh
 ##Optional MultiSensor Support (Accelerometer Only)
 This version now supports the additional use of an Acceleromter for each door, as in a Samsung/SmartThings MultiSensor. If configured, the accelerometer will be used to more accurately track states of opening, closing, and waiting (the alarm before closing actually begins). Generally, this will return the visual status updates from the original version, but without making ANY status requests from the MyQ servers.
 
+### Usage with Alexa (Without Sensors):
+For Alexa to respond to commands to open/close the door, make sure you choose the option during setup to create the Pushbutton switches. This will create an "Opener" and "Closer" switch. Once setup is done and you see those switches in your Things, go back into Alexa and run the discovery process. Those switches should show up in the Alexa app and should respond to **"Alexa, turn ON [garage door name] Opener"** and **"Alexa, turn ON [garage door name] Closer."** This method is somewhat awkward as you're saying "turn on" for both types, but it gets the job done for now.
+
+### Usage with Alexa (With Sensors):
+If your door has sensors, Alexa will respond simply to **"Alexa, turn ON [garage door name]"** or **"Alexa, turn OFF [garage door name]"** once you've completed the setup and done the discovery process in the Alexa app. This is because the MyQ door device has a on/off switch capability that can be used and kept in sync since the sensor updates the door's status. It's not necessary to use the Pushbutton switch in this case.
+
 ## Installation Instructions:
 
 ### Manually:
