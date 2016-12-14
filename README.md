@@ -30,8 +30,6 @@ This SmartApp integrates Chamberlain/LiftMaster MyQ doors into SmartThings. It c
 
 Credit to copy-ninja, whose version I branched off to create this app to integrate without the need to poll MyQ for the door's status. If you use the optional Tilt/Contact sensor, you can still get status updates on the door. Otherwise, normal control functionality with be the same with or without a sensor. Previous versions of this app relied on polling MyQ for status updates; however, MyQ/SmartThings have restricted the ability to poll the MyQ servers, although sending open/close commands still works as normal.
 
-More details can be found on the wiki: https://github.com/brbeaird/SmartThings_MyQ/wiki
-
 SmartThings thread here: <a href="https://community.smartthings.com/t/release-myq-lite-for-liftmaster-chamberlain/49150">https://community.smartthings.com/t/beta-myq-lite-for-liftmaster-chamberlain/49150</a>
 
 ##Optional Tilt/Contact Sensor
@@ -52,11 +50,11 @@ If your door has sensors, Alexa will respond simply to **"Alexa, turn ON [garage
 1. Log in to the <a href="https://graph.api.smartthings.com/ide/">SmartThings IDE</a>. If you don't have a login yet, create one.
 2. The first step is to create device handlers for both door types.
 2. Click on **My Device Handlers** -> **Create new Device Handler** -> **From Code**.
-3. Copy contents of <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/NoSensor/devicetypes/brbeaird/myq-garage-door-opener.src/myq-garage-door-opener-NoSensor.groovy">Door Opener (No sensor version)</a> and paste into text area. in SmartApps section. Click **Create**. Click **Publish** > **For Me**
-4. Repeat the previous step for this door type code: <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/NoSensor/devicetypes/brbeaird/myq-garage-door-opener.src/myq-garage-door-opener.groovy">Door Opener (With sensor version)</a>
-5. Repeat the previous step for the Momentary Tile device type code: <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/NoSensor/devicetypes/smartthings/momentary-button-tile.src/momentary-button-tile.groovy">Momentary Button Tile</a>
+3. Copy contents of <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-garage-door-opener-nosensor.src/myq-garage-door-opener-nosensor.groovy">Door Opener (No sensor version)</a> and paste into text area. in SmartApps section. Click **Create**. Click **Publish** > **For Me**
+4. Repeat the previous step for this door type code: <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-garage-door-opener.src/myq-garage-door-opener.groovy">Door Opener (With sensor version)</a>
+5. Repeat the previous step for the Momentary Tile device type code: <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/smartthings/momentary-button-tile.src/momentary-button-tile.groovy">Momentary Button Tile</a>
 6. Now we create the SmartApp code. Click **My SmartApps** -> **New Smartapp** -> **From Code**.
-7. Copy contents of <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/NoSensor/smartapps/brbeaird/myq-lite.src/myq-lite.groovy">SmartApp</a> and paste into text area. in SmartApps section. Click **Create**. Click **Publish** > **For Me**
+7. Copy contents of <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/smartthings/momentary-button-tile.src/momentary-button-tile.groovy">SmartApp</a> and paste into text area. in SmartApps section. Click **Create**. Click **Publish** > **For Me**
 8. In your SmartThings mobile app, tap **Automation** -> **SmartApps** -> **Add a SmartApp**. Scroll down and tap **My Apps**. Tap **MyQ Lite**. 
 9. Enter in your login details and pick your gateway brand. If login is successful, you'll see a list of doors available for you to pick. After you choose your doors, you can select optional sensors to be tied to those doors. 
 
