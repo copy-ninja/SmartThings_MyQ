@@ -80,40 +80,23 @@ metadata {
 		}
 		valueTile("doorMoving", "device.doorMoving", width: 6, height: 2, inactiveLavel: false, decoration: "flat") {
 			state "default", label: '${currentValue}', backgroundColor:"#ffffff"
-		}
-
-		main "door"
-		details(["door", "openButton", "closeButton", "doorSensor", "doorMoving"])
+		}        
+        main "door"
+		details(["door", "openButton", "closeButton", "doorSensor", "doorMoving", "switch"])
 	}
 }
 
 def parse(String description) {}
 
 def on() { 
-	log.debug "Turning door on!"
-    log.debug "doorstate: " + device.currentState("door")?.value
-    def doorState = device.currentState("door")?.value
-    if (doorState == null){
-    	open()
-    }    
-    if (doorState != "open"){
-    	push()
-    }
-    else{
-    	log.debug "Door is already open."
-    }    
-//	sendEvent(name: "switch", value: "on", isStateChange: true, display: false, displayed: false)
+	log.debug "Turning door on!"    
+    open()
+    sendEvent(name: "switch", value: "on", isStateChange: true, display: true, displayed: true)	
 }
 def off() { 
     log.debug "Turning door off!"
-    def doorState = device.currentState("door")?.value
-    if (doorState != "closed"){
-    	push()
-    }
-    else{
-    	log.debug "Door is already closed."
-    }
-//	sendEvent(name: "switch", value: "off", isStateChange: true, display: false, displayed: false)
+    close()    
+	sendEvent(name: "switch", value: "off", isStateChange: true, display: true, displayed: true)
 }
 
 def push() {
