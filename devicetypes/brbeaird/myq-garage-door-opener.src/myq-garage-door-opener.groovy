@@ -63,8 +63,8 @@ metadata {
 			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
 		}
 		standardTile("switch", "device.switch") {
-			state("on", label:'${name}', action: "switch.on",  icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
-			state("off", label:'${name}', action: "switch.off", icon:"st.contact.contact.closed", backgroundColor:"#79b821")
+			state("on", label:'${name}', action: "switch.on",  backgroundColor:"#ffa81e")
+			state("off", label:'${name}', action: "switch.off", backgroundColor:"#79b821")
 		}
 //		valueTile("lastActivity", "device.lastActivity", inactiveLabel: false, decoration: "flat") {
 //			state "default", label:'Last activity: ${currentValue}', action:"refresh.refresh", backgroundColor:"#ffffff"
