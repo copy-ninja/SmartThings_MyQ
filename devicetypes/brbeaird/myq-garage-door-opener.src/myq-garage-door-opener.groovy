@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 12/29/2016
+ *  Last Updated : 1/10/2017
  *
  */
 metadata {
@@ -44,12 +44,12 @@ metadata {
 		multiAttributeTile(name:"door", type: "lighting", width: 6, height: 4, canChangeIcon: true) {
 			tileAttribute ("device.door", key: "PRIMARY_CONTROL") {
 				attributeState "unknown", label:'${name}', icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e", nextState: "closing"
-				attributeState "closed",  label:'${name}', action:"door control.open",   icon:"st.doors.garage.garage-closed",  backgroundColor:"#79b821", nextState: "opening"
-				attributeState "open",    label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e", nextState: "waiting"
-				attributeState "opening", label:'${name}', 								 icon:"st.doors.garage.garage-opening", backgroundColor:"#cec236", nextState: "open"
-				attributeState "closing", label:'${name}', 								 icon:"st.doors.garage.garage-closing", backgroundColor:"#cec236", nextState: "closed"
-				attributeState "waiting", label:'${name}', 								 icon:"st.doors.garage.garage-closing", backgroundColor:"#cec236", nextState: "closing"
-				attributeState "stopped", label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-closing", backgroundColor:"#1ee3ff", nextState: "closing"
+				attributeState "closed",  label:'${name}', action:"door control.open",   icon:"st.doors.garage.garage-closed",  backgroundColor:"#79b821"
+				attributeState "open",    label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e"
+				attributeState "opening", label:'${name}', 								 icon:"st.doors.garage.garage-opening", backgroundColor:"#cec236"
+				attributeState "closing", label:'${name}', 								 icon:"st.doors.garage.garage-closing", backgroundColor:"#cec236"
+				attributeState "waiting", label:'${name}', 								 icon:"st.doors.garage.garage-closing", backgroundColor:"#cec236"
+				attributeState "stopped", label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-closing", backgroundColor:"#1ee3ff"
 			}			
 		}
 
@@ -110,14 +110,18 @@ def push() {
 }
 
 def open()  { 
-	parent.sendCommand(this, "desireddoorstate", 1) 
+	log.debug "Garage door open command called."
+    parent.notify("Garage door open command called.")
+    parent.sendCommand(this, "desireddoorstate", 1) 
 	updateDeviceStatus("opening")
-    runIn(20, refresh, [overwrite: true])	//Force a sync with tilt sensor after 20 seconds
+    //runIn(20, refresh, [overwrite: true])	//Force a sync with tilt sensor after 20 seconds
 }
 def close() { 
+	log.debug "Garage door close command called."
+    parent.notify("Garage door close command called.")
 	parent.sendCommand(this, "desireddoorstate", 0) 
 //	updateDeviceStatus("closing")			// Now handled in the parent (in case we have an Acceleration sensor, we can handle "waiting" state)
-    runIn(20, refresh, [overwrite: true]) //Force a sync with tilt sensor after 20 seconds
+    //runIn(20, refresh, [overwrite: true]) //Force a sync with tilt sensor after 20 seconds
 }
 
 def refresh() {	    
