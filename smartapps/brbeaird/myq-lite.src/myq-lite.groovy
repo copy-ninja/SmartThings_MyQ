@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 12/13/2016
+ *  Last Updated : 1/10/2016
  *
  */
 definition(
@@ -657,19 +657,23 @@ def sendCommand(child, attributeName, attributeValue) {
         	def doorDNI = child.device.deviceNetworkId
         	switch (doorDNI) {
         		case firstDoor:
-                	if (door1Sensor){if (door1Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("opening")}
+                	if (door1Sensor){if (door1Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("closing")}
                 	break
             	case doors[1]:
-            		if (door2Sensor){if (door2Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("opening")}
+            		if (door2Sensor){if (door2Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("closing")}
                 	break
             	case doors[2]:
-            		if (door3Sensor){if (door3Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("opening")}
+            		if (door3Sensor){if (door3Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("closing")}
                 	break
             	case doors[3]:
-            		if (door4Sensor){if (door4Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("opening")}
+            		if (door4Sensor){if (door4Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("closing")}
         			break
             }
         }      
 		return true
 	} 
+}
+
+def notify(message){
+	sendNotificationEvent(message)
 }
