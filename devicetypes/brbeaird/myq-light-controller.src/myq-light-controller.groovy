@@ -2,6 +2,7 @@
  *  MyQ Light Controller
  *
  *  Copyright 2017 Jason Mok/Brian Beaird
+ *  Special thanks to @dcabtacoma for sending me a light controller so I could test the code.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
