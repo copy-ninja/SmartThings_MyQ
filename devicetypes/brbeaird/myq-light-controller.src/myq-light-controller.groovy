@@ -1,0 +1,128 @@
+/**
+ *  MyQ Light Controller
+ *
+ *  Copyright 2015 Jason Mok
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
+ *  Last Updated : 7/15/2015
+ *
+ */
+metadata {
+	definition (name: "MyQ Light Controller", namespace: "brbeaird", author: "Jason Mok/Brian Beaird") {
+		capability "Actuator"
+		capability "Sensor"-
+		capability "Switch"
+        capability "Polling"
+        capability "Refresh"
+
+		command "updateDeviceStatus", ["string"]
+	}
+
+	simulator {	}
+
+	tiles {
+		standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true) {
+			state("off", label: 'Off', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff", nextState: "on")
+			state("on", label: 'On', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#79b821", nextState: "off")
+		}		
+		main "switch"
+		details(["switch"])
+	}
+}
+
+def on() {
+	log.debug "Light turned on"    
+    parent.sendCommand(this, "desiredlightstate", 1)
+    updateDeviceStatus(1)
+	
+}
+def off() {
+	log.debug "Light turned off"
+    parent.sendCommand(this, "desiredlightstate", 0)
+    updateDeviceStatus(0)
+}
+
+def updateDeviceStatus(status) {
+	if (status == 0) -
+    {  
+    	log.debug "Updating status to off"
+        sendEvent(name: "switch", value: "off", display: true, displayed: true, isStateChange: true, descriptionText: device.displayName + " was off")        
+    }   
+	if (status == 1) {         
+    	log.debug "Updating status to on"
+        sendEvent(name: "switch", value: "on", displayed: true, display: true, isStateChange: true, descriptionText: device.displayName + " was on")  
+    }
+       
+}
+/**
+ *  MyQ Light Controller
+ *
+ *  Copyright 2015 Jason Mok
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License. You may obtain a copy of the License at:
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
+ *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
+ *  for the specific language governing permissions and limitations under the License.
+ *
+ *  Last Updated : 7/15/2015
+ *
+ */
+metadata {
+	definition (name: "MyQ Light Controller", namespace: "brbeaird", author: "Jason Mok/Brian Beaird") {
+		capability "Actuator"
+		capability "Sensor"
+		capability "Switch"
+        capability "Polling"
+        capability "Refresh"
+
+		command "updateDeviceStatus", ["string"]
+	}
+
+	simulator {	}
+
+	tiles {
+		standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true) {
+			state("off", label: 'Off', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff", nextState: "on")
+			state("on", label: 'On', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#79b821", nextState: "off")
+		}		
+		main "switch"
+		details(["switch"])
+	}
+}
+
+def on() {
+	log.debug "Light turned on"    
+    parent.sendCommand(this, "desiredlightstate", 1)
+    updateDeviceStatus(1)
+	
+}
+def off() {
+	log.debug "Light turned off"
+    parent.sendCommand(this, "desiredlightstate", 0)
+    updateDeviceStatus(0)
+}
+
+def updateDeviceStatus(status) {
+	if (status == 0) 
+    {  
+    	log.debug "Updating status to off"
+        sendEvent(name: "switch", value: "off", display: true, displayed: true, isStateChange: true, descriptionText: device.displayName + " was off")        
+    }   
+	if (status == 1) {         
+    	log.debug "Updating status to on"
+        sendEvent(name: "switch", value: "on", displayed: true, display: true, isStateChange: true, descriptionText: device.displayName + " was on")  
+    }
+       
+}

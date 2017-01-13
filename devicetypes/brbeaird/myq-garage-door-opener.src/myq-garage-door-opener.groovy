@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 1/10/2017
+ *  Last Updated : 1/12/2017
  *
  */
 metadata {
@@ -114,14 +114,14 @@ def open()  {
     parent.notify("Garage door open command called.")
     parent.sendCommand(this, "desireddoorstate", 1) 
 	updateDeviceStatus("opening")
-    //runIn(20, refresh, [overwrite: true])	//Force a sync with tilt sensor after 20 seconds
+    runIn(20, refresh, [overwrite: true])	//Force a sync with tilt sensor after 20 seconds
 }
 def close() { 
 	log.debug "Garage door close command called."
     parent.notify("Garage door close command called.")
 	parent.sendCommand(this, "desireddoorstate", 0) 
 //	updateDeviceStatus("closing")			// Now handled in the parent (in case we have an Acceleration sensor, we can handle "waiting" state)
-    //runIn(20, refresh, [overwrite: true]) //Force a sync with tilt sensor after 20 seconds
+    runIn(30, refresh, [overwrite: true]) //Force a sync with tilt sensor after 30 seconds
 }
 
 def refresh() {	    
