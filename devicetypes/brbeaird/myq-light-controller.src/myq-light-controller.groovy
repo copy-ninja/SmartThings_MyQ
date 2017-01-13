@@ -20,9 +20,7 @@ metadata {
 	definition (name: "MyQ Light Controller", namespace: "brbeaird", author: "Jason Mok/Brian Beaird") {
 		capability "Actuator"
 		capability "Sensor"
-		capability "Switch"
-        capability "Polling"
-        capability "Refresh"
+		capability "Switch"      
 
 		command "updateDeviceStatus", ["string"]
 	}
@@ -30,10 +28,12 @@ metadata {
 	simulator {	}
 
 	tiles {
-		standardTile("switch", "device.switch", width: 2, height: 2, canChangeIcon: true) {
-			state("off", label: 'Off', action: "switch.on", icon: "st.switches.switch.off", backgroundColor: "#ffffff", nextState: "on")
-			state("on", label: 'On', action: "switch.off", icon: "st.switches.switch.on", backgroundColor: "#79b821", nextState: "off")
-		}		
+		multiAttributeTile(name:"switch", type: "lighting", width: 6, height: 4, canChangeIcon: true) {
+			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
+				attributeState "off", label: '${name}', action: "switch.on", icon: "st.Lighting.light13", backgroundColor: "#ffffff", nextState: "on"
+				attributeState "on", label: '${name}', action: "switch.off", icon: "st.Lighting.light13", backgroundColor: "#79b821", nextState: "off"
+			}			
+		}              
 		main "switch"
 		details(["switch"])
 	}
