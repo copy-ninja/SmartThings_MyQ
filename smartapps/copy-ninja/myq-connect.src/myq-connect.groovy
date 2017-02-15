@@ -22,9 +22,9 @@ definition(
 	author: "Jason Mok",
 	description: "Connect MyQ to control your devices",
 	category: "SmartThings Labs",
-	iconUrl:   "http://smartthings.copyninja.net/icons/MyQ@1x.png",
-	iconX2Url: "http://smartthings.copyninja.net/icons/MyQ@2x.png",
-	iconX3Url: "http://smartthings.copyninja.net/icons/MyQ@3x.png"
+	iconUrl:   "https://s3.amazonaws.com/gu-smartapp-icons/myq.png",
+	iconX2Url: "https://s3.amazonaws.com/gu-smartapp-icons/myq@2x.png",
+	iconX3Url: "https://s3.amazonaws.com/gu-smartapp-icons/myq@3x.png"
 )
 
 preferences {
