@@ -12,8 +12,10 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 7/15/2015
- *
+ *  Last Updated : 4/4/2016
+ *  
+ *  20160404 - Modified by Gene Ussery - Perform refresh before running on or off functions. Added logic to push to only run open if the garage is closed 
+ *										  and run closed if the garage is open or stopped.
  */
 metadata {
 	definition (name: "MyQ Garage Door Opener", namespace: "copy-ninja", author: "Jason Mok") {
@@ -66,35 +68,44 @@ metadata {
 def parse(String description) {}
 
 def on() { 
-	push() 
+	log.debug("Running On")
+    refresh()
+    push("open") 
 	sendEvent(name: "button", value: "on", isStateChange: true, display: false, displayed: false)
 }
 def off() { 
+	log.debug("Running Off")
+    refresh()
+	push("closed") 
 	sendEvent(name: "button", value: "off", isStateChange: true, display: false, displayed: false)
 }
 
-def push() { 
+def push(String desiredstate) { 
+	log.debug("Running Push")
 	def doorState = device.currentState("door")?.value
-	if (doorState == "open" || doorState == "stopped") {
+	if ((doorState == "open" || doorState == "stopped") && desiredstate == "closed") {
 		close()
-	} else if (doorState == "closed") {
+	} else if (doorState == "closed" && desiredstate == "open") {
 		open()
 	} 
 	sendEvent(name: "momentary", value: "pushed", display: false, displayed: false)
 }
 
 def open()  { 
+	log.debug("Running Open")
 	parent.sendCommand(this, "desireddoorstate", 1) 
 	updateDeviceStatus(4)
 	updateDeviceLastActivity(parent.getDeviceLastActivity(this))
 }
 def close() { 
+	log.debug("Running Close")
 	parent.sendCommand(this, "desireddoorstate", 0) 
 	updateDeviceStatus(5)
 	updateDeviceLastActivity(parent.getDeviceLastActivity(this))
 }
 
 def refresh() {
+	log.debug("Running Refresh")
 	parent.refresh()
 	updateDeviceLastActivity(parent.getDeviceLastActivity(this))
 }
@@ -103,6 +114,7 @@ def poll() { refresh() }
 
 // update status
 def updateDeviceStatus(status) {
+	log.debug("Running UpdateStatus")
 	def currentState = device.currentState("door")?.value
 	if (status == "1" || status == "9") { 
 		sendEvent(name: "door", value: "open", display: true, descriptionText: device.displayName + " is open") 
@@ -125,6 +137,7 @@ def updateDeviceStatus(status) {
 }
 
 def updateDeviceLastActivity(long lastActivity) {
+	log.debug("Running UpdateLastActivity")
 	def lastActivityValue = ""
 	def diffTotal = now() - lastActivity       
 	def diffDays  = (diffTotal / 86400000) as long

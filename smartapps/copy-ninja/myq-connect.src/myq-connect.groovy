@@ -12,8 +12,9 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 03/08/2016
+ *  Last Updated : 02/15/2017
  *
+ *  20170215 - Gene Ussery - Changed to work with API changes from Chamberlain
  */
 definition(
 	name: "MyQ (Connect)",
@@ -21,9 +22,9 @@ definition(
 	author: "Jason Mok",
 	description: "Connect MyQ to control your devices",
 	category: "SmartThings Labs",
-	iconUrl:   "http://smartthings.copyninja.net/icons/MyQ@1x.png",
-	iconX2Url: "http://smartthings.copyninja.net/icons/MyQ@2x.png",
-	iconX3Url: "http://smartthings.copyninja.net/icons/MyQ@3x.png"
+	iconUrl:   "https://s3.amazonaws.com/gu-smartapp-icons/myq.png",
+	iconX2Url: "https://s3.amazonaws.com/gu-smartapp-icons/myq@2x.png",
+	iconX3Url: "https://s3.amazonaws.com/gu-smartapp-icons/myq@3x.png"
 )
 
 preferences {
@@ -161,7 +162,10 @@ private forceLogin() {
 private login() { return (!(state.session.expiration > now())) ? doLogin() : true }
 
 private doLogin() { 
-	apiGet("/api/user/validate", [username: settings.username, password: settings.password] ) { response ->
+//	apiGet("/api/v4/user/validate", [username: settings.username, password: settings.password] ) { response ->
+
+		apiPost("/api/v4/user/validate", [username: settings.username, password: settings.password] ) { response ->
+        log.debug "got login response data: ${response.data}"
 		if (response.status == 200) {
 			if (response.data.SecurityToken != null) {
 				state.session.brandID = response.data.BrandId
@@ -282,6 +286,18 @@ private apiPut(apiPath, apiBody = [], callback = {}) {
 	}
 }
 
+// HTTP POST call
+private apiPost(apiPath, apiBody = [], callback = {}) {	
+	if (state.session.securityToken) { apiBody = apiBody + [SecurityToken: state.session.securityToken ] }
+       
+	try {
+		httpPost([ uri: getApiURL(), path: apiPath, contentType: "application/json; charset=utf-8", body: apiBody, 
+        	headers: [MyQApplicationId: getApiAppID()], ]) { response -> callback(response) }
+	}	catch (SocketException e)	{
+		//sendAlert("API Error: $e")
+        log.debug "API Error: $e"
+	}
+}
 // Updates data for devices
 private updateDeviceData() {    
 	// automatically checks if the token has expired, if so login again
