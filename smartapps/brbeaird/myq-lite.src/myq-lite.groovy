@@ -1,7 +1,7 @@
 /**
  *  MyQ Lite
  *
- *  Copyright 2016 Jason Mok/Brian Beaird/Barry Burke
+ *  Copyright 2017 Jason Mok/Brian Beaird/Barry Burke
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 2/13/2017
+ *  Last Updated : 2/15/2017
  *
  */
 definition(
@@ -21,9 +21,9 @@ definition(
 	author: "Jason Mok/Brian Beaird/Barry Burke",
 	description: "Integrate MyQ with Smartthings",
 	category: "SmartThings Labs",
-	iconUrl:   "http://smartthings.copyninja.net/icons/MyQ@1x.png",
-	iconX2Url: "http://smartthings.copyninja.net/icons/MyQ@2x.png",
-	iconX3Url: "http://smartthings.copyninja.net/icons/MyQ@3x.png"
+	iconUrl:   "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
+	iconX2Url: "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq@2x.png",
+	iconX3Url: "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq@3x.png"
 )
 
 preferences {
