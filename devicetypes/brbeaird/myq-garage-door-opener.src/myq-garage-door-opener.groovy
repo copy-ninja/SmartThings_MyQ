@@ -41,9 +41,9 @@ metadata {
 
 	tiles {
 		
-		multiAttributeTile(name:"door", type: "lighting", width: 6, height: 4, canChangeIcon: true) {
+		multiAttributeTile(name:"door", type: "lighting", width: 6, height: 4, canChangeIcon: false) {
 			tileAttribute ("device.door", key: "PRIMARY_CONTROL") {
-				attributeState "unknown", label:'${name}', icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e", nextState: "closing"
+				attributeState "unknown", label:'${name}', icon:"st.doors.garage.garage-closed",    backgroundColor:"#ffa81e", nextState: "closing"
 				attributeState "closed",  label:'${name}', action:"door control.open",   icon:"st.doors.garage.garage-closed",  backgroundColor:"#79b821"
 				attributeState "open",    label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e"
 				attributeState "opening", label:'${name}', 								 icon:"st.doors.garage.garage-opening", backgroundColor:"#cec236"
