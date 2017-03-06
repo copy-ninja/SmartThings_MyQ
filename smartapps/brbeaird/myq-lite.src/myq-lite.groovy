@@ -33,11 +33,13 @@ preferences {
     page(name: "prefSensor2", title: "MyQ")
     page(name: "prefSensor3", title: "MyQ")
     page(name: "prefSensor4", title: "MyQ")
+    page(name: "summary", title: "MyQ")
 }
 
 /* Preferences */
 def prefLogIn() {
-	def showUninstall = username != null && password != null 
+	state.installMsg = ""
+    def showUninstall = username != null && password != null 
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:showUninstall, install: false) {
 		section("Login Credentials"){
 			input("username", "email", title: "Username", description: "MyQ Username (email address)")
@@ -95,8 +97,7 @@ def prefSensor1() {
 	log.debug "Doors chosen: " + doors
     
     //Set defaults
-    def nextPage = ""
-    def showInstall = true
+    def nextPage = "summary"    
     def titleText = ""
     
     //Determine if we have multiple doors and need to send to another page
@@ -111,11 +112,10 @@ def prefSensor1() {
     else{
     	log.debug "Multiple doors detected."
         nextPage = "prefSensor2"
-        titleText = "OPTIONAL: Select Sensors for Door 1 (" + state.data[doors[0]].name + ")"
-        showInstall = false;
+        titleText = "OPTIONAL: Select Sensors for Door 1 (" + state.data[doors[0]].name + ")"        
     }    
     
-    return dynamicPage(name: "prefSensor1",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:showInstall, uninstall:true) {        
+    return dynamicPage(name: "prefSensor1",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:false, uninstall:true) {        
         section(titleText){			
 			paragraph "Optional: If you have sensors on this door, select them below. A sensor allows the device type to know whether the door is open or closed, which helps the device function " + 
             	"as a switch you can turn on (to open) and off (to close)."                
@@ -131,16 +131,14 @@ def prefSensor1() {
 }
 
 def prefSensor2() {	   
-    def nextPage = ""
-    def showInstall = true
+    def nextPage = "summary"    
     def titleText = "Sensors for Door 2 (" + state.data[doors[1]].name + ")"
      
     if (doors.size() > 2){
-    	nextPage = "prefSensor3"
-        showInstall = false;
+    	nextPage = "prefSensor3"        
     }
     
-    return dynamicPage(name: "prefSensor2",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:showInstall, uninstall:true) {
+    return dynamicPage(name: "prefSensor2",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:false, uninstall:true) {
         section(titleText){			
 			input(name: "door2Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: false, multiple: false)
 			input(name: "door2Acceleration", title: "Acceleration Sensor", type: "capability.accelerationSensor", required: false, multiple: false)
@@ -153,16 +151,14 @@ def prefSensor2() {
 }
 
 def prefSensor3() {
-    def nextPage = ""
-    def showInstall = true
+    def nextPage = "summary"    
     def titleText = "Sensors for Door 3 (" + state.data[doors[2]].name + ")"
      
     if (doors.size() > 3){
-    	nextPage = "prefSensor4"
-        showInstall = false;
+    	nextPage = "prefSensor4"        
     }
     
-    return dynamicPage(name: "prefSensor3",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:showInstall, uninstall:true) {
+    return dynamicPage(name: "prefSensor3",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:false, uninstall:true) {
         section(titleText){			
 			input(name: "door3Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: false, multiple: false)
 			input(name: "door3Acceleration", title: "Acceleration Sensor", type: "capability.accelerationSensor", required: false, multiple: false)
@@ -176,7 +172,7 @@ def prefSensor3() {
 
 def prefSensor4() {	   
 	def titleText = "Contact Sensor for Door 4 (" + state.data[doors[3]].name + ")"
-    return dynamicPage(name: "prefSensor4",  title: "Optional Sensors and Push Buttons", install:true, uninstall:true) {
+    return dynamicPage(name: "prefSensor4",  title: "Optional Sensors and Push Buttons", nextPage:"summary", install:false, uninstall:true) {
         section(titleText){			
 			input(name: "door4Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: "false", multiple: "false")
 			input(name: "door4Acceleration", title: "Acceleration Sensor", type: "capability.accelerationSensor", required: false, multiple: false)
@@ -184,6 +180,16 @@ def prefSensor4() {
         section("Create separate on/off push buttons?"){			
 			paragraph "Choose the option below to have extra on and off push button devices created. This is recommened if you have no sensors but still want a way to open/close the garage from SmartTiles."           
             input "prefDoor4PushButtons", "bool", required: false, title: "Create on/off push buttons?"
+		}
+    }
+}
+
+def summary() {	   
+	state.installMsg = ""
+    initialize()    
+    return dynamicPage(name: "summary",  title: "Summary", install:true, uninstall:true) {            
+        section("Installation Details:"){
+			paragraph state.installMsg          
 		}
     }
 }
@@ -196,7 +202,7 @@ def installed() {
 def updated() { 
 	log.debug "Updated..."
     unsubscribe()
-	initialize()
+	//initialize()
 }
 
 def uninstalled() {}	
@@ -231,10 +237,20 @@ def initialize() {
     	log.debug "Checking for existing light: " + it
     	if (!getChildDevice(it)) {
         	log.debug "Creating child light device: " + it
-        	addChildDevice("brbeaird", "MyQ Light Controller", it, null, ["name": lightsList[it]])
+        	
+            try{            
+            	addChildDevice("brbeaird", "MyQ Light Controller", it, null, ["name": lightsList[it]])
+                state.installMsg = state.installMsg + lightsList[it] + ": created light device. \r\n\r\n"
+            }
+            catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
+            {
+                log.debug "Error! " + e                        
+                state.installMsg = state.installMsg + lightsList[it] + ": problem creating light device. Check your IDE to make sure the brbeaird : MyQ Light Controller device handler is installed and published. \r\n\r\n"
+            }
         }
         else{
         	log.debug "Light device already exists: " + it
+            state.installMsg = state.installMsg + lightsList[it] + ": light device already exists. \r\n\r\n"
         }
         
     }
@@ -284,48 +300,88 @@ def initialize() {
 }
 
 def createChilDevices(door, sensor, doorName, prefPushButtons){
-	if (door){
+	log.debug "In CreateChild"
+    if (door){
         //Has door's child device already been created?
         def existingDev = getChildDevice(door)
         def existingType = existingDev?.typeName
         
         if (existingDev){        
         	log.debug "Child already exists for " + doorName + ". Sensor name is: " + sensor
+            state.installMsg = state.installMsg + doorName + ": door device already exists. \r\n\r\n"
             if ((!sensor) && existingType == "MyQ Garage Door Opener"){
             	log.debug "Type needs updating to non-sensor version"
-                existingDev.deviceType = "MyQ Garage Door Opener-NoSensor"
+                existingDev.deviceType = "MyQ Garage Door Opener-NoSensor2"
+                state.installMsg = state.installMsg + doorName + ": changed door device to No-sensor version." + "\r\n\r\n"
             }
             
             if (sensor && existingType == "MyQ Garage Door Opener-NoSensor"){
             	log.debug "Type needs updating to sensor version"
                 existingDev.deviceType = "MyQ Garage Door Opener"
+                state.installMsg = state.installMsg + doorName + ": changed door device to sensor version." + "\r\n\r\n"
             }            
         }
         else{
             log.debug "Creating child door device " + door
-            if (sensor){
-                addChildDevice("brbeaird", "MyQ Garage Door Opener", door, null, ["name": doorName]) 
-            }
-            else{
-                addChildDevice("brbeaird", "MyQ Garage Door Opener-NoSensor", door, null, ["name": doorName]) 
-            }
+            
+                if (sensor){
+                    try{
+                        log.debug "Creating door with sensor"
+                        addChildDevice("brbeaird", "MyQ Garage Door Opener", door, null, ["name": doorName]) 
+                        state.installMsg = state.installMsg + doorName + ": created door device (sensor version) \r\n\r\n"
+                    }
+                    catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
+                    {
+                        log.debug "Error! " + e                        
+                        state.installMsg = state.installMsg + doorName + ": problem creating door device (sensor type). Check your IDE to make sure the brbeaird : MyQ Garage Door Opener device handler is installed and published. \r\n\r\n"
+                        
+                    }
+                }
+                else{
+                    try{
+                        log.debug "Creating door with no sensor"
+                        addChildDevice("brbeaird", "MyQ Garage Door Opener-NoSensor", door, null, ["name": doorName]) 
+                        state.installMsg = state.installMsg + doorName + ": created door device (no-sensor version) \r\n\r\n"
+                    }
+                    catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
+                    {
+                        log.debug "Error! " + e                        
+                        state.installMsg = state.installMsg + doorName + ": problem creating door device (no-sensor type). Check your IDE to make sure the brbeaird : MyQ Garage Door Opener-NoSensor device handler is installed and published. \r\n\r\n"
+                    }
+                }
+            
         }
         
         //Create push button devices
         if (prefPushButtons){
         	def existingOpenButtonDev = getChildDevice(door + " Opener")
             def existingCloseButtonDev = getChildDevice(door + " Closer")
-            if (!existingOpenButtonDev){
-                def openButton = addChildDevice("smartthings", "Momentary Button Tile", door + " Opener", null, [name: doorName + " Opener", label: doorName + " Opener"])
-                subscribe(openButton, "momentary.pushed", doorButtonOpenHandler)                
+            if (!existingOpenButtonDev){                
+                try{
+                	def openButton = addChildDevice("smartthings", "Momentary Button Tile", door + " Opener", null, [name: doorName + " Opener", label: doorName + " Opener"])
+                	state.installMsg = state.installMsg + doorName + ": created push button device. \r\n\r\n"
+                	subscribe(openButton, "momentary.pushed", doorButtonOpenHandler)                
+                }
+                catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
+                {
+                    log.debug "Error! " + e                                            
+                    state.installMsg = state.installMsg + doorName + ": problem creating push button device. Check your IDE to make sure the smartthings : Momentary Button Tile device handler is installed and published. \r\n\r\n"
+                }
             }
             else{
-            	subscribe(existingOpenButtonDev, "momentary.pushed", doorButtonOpenHandler)                
+            	subscribe(existingOpenButtonDev, "momentary.pushed", doorButtonOpenHandler)
+                state.installMsg = state.installMsg + doorName + ": push button device already exists. \r\n\r\n"
             }
             
             if (!existingCloseButtonDev){                
-                def closeButton = addChildDevice("smartthings", "Momentary Button Tile", door + " Closer", null, [name: doorName + " Closer", label: doorName + " Closer"])
-                subscribe(closeButton, "momentary.pushed", doorButtonCloseHandler)
+                try{
+                    def closeButton = addChildDevice("smartthings", "Momentary Button Tile", door + " Closer", null, [name: doorName + " Closer", label: doorName + " Closer"])
+                    subscribe(closeButton, "momentary.pushed", doorButtonCloseHandler)                                        
+                }
+                catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
+                {
+                    log.debug "Error! " + e                        
+                }
             }
             else{
                 subscribe(existingCloseButtonDev, "momentary.pushed", doorButtonCloseHandler)                
@@ -343,7 +399,8 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
                 try{
                 	deleteChildDevice(it.deviceNetworkId)
                 } catch (e){
-                	sendPush("Warning: unable to delete virtual on/off push button - you'll need to manually remove it.")
+                	//sendPush("Warning: unable to delete virtual on/off push button - you'll need to manually remove it.")
+                    state.installMsg = state.installMsg + "Warning: unable to delete virtual on/off push button - you'll need to manually remove it. \r\n\r\n"
                     log.debug "Error trying to delete button " + it + " - " + e
                     log.debug "Button  is likely in use in a Routine, or SmartApp (make sure and check SmarTiles!)."
                 }
