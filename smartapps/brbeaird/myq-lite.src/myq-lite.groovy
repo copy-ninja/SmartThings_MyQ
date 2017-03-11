@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 2/15/2017
+ *  Last Updated : 3/10/2017
  *
  */
 definition(
@@ -200,15 +200,15 @@ def installed() {
 }
 
 def updated() { 
-	log.debug "Updated..."
-    unsubscribe()
+	log.debug "Updated..."    
 	//initialize()
 }
 
 def uninstalled() {}	
 
 def initialize() {    
-	log.debug "Initializing..."
+	unsubscribe()
+    log.debug "Initializing..."
     login()
     state.sensorMap = [:]
     
@@ -370,6 +370,7 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
             }
             else{
             	subscribe(existingOpenButtonDev, "momentary.pushed", doorButtonOpenHandler)
+                log.debug "subscribed to button: " + existingOpenButtonDev
                 state.installMsg = state.installMsg + doorName + ": push button device already exists. \r\n\r\n"
             }
             
