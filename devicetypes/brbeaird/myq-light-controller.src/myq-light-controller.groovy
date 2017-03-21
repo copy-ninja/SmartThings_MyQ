@@ -13,7 +13,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 1/12/2017
+ *  Last Updated : 3/21/2017
  *
  */
 metadata {
@@ -62,4 +62,8 @@ def updateDeviceStatus(status) {
         sendEvent(name: "switch", value: "on", displayed: true, display: true, isStateChange: true, descriptionText: device.displayName + " was on")  
     }
        
+}
+
+def showVersion(){
+	return "1.0.0"
 }

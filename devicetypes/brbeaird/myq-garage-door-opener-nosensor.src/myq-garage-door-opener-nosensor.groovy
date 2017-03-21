@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 1/12/2017
+ *  Last Updated : 3/21/2017
  *
  */
 metadata {
@@ -78,4 +78,8 @@ def resetToUnknown(){
 
 def log(msg){
 	log.debug msg
+}
+
+def showVersion(){
+	return "1.0.0"
 }

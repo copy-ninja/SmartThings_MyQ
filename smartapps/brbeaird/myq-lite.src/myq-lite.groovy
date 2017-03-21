@@ -12,12 +12,11 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 3/10/2017
- *  SmartApp version: 2.0.0*
- *  Door device version: 2.0.0*
- *  Door-no-sensor device version: 1.0.0*
- *  Light device version: 1.0.0*
+ *  Last Updated : 3/21/2017
+ *
  */
+include 'asynchttp_v1'
+
 definition(
 	name: "MyQ Lite",
 	namespace: "brbeaird",
@@ -39,9 +38,12 @@ preferences {
     page(name: "summary", title: "MyQ")
 }
 
+
 /* Preferences */
 def prefLogIn() {
-	state.installMsg = ""
+	doAsyncCallout()
+    
+    state.installMsg = ""
     def showUninstall = username != null && password != null 
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:showUninstall, install: false) {
 		section("Login Credentials"){
@@ -189,10 +191,12 @@ def prefSensor4() {
 
 def summary() {	   
 	state.installMsg = ""
-    initialize()    
+    initialize()
+    versionCheck()
     return dynamicPage(name: "summary",  title: "Summary", install:true, uninstall:true) {            
         section("Installation Details:"){
-			paragraph state.installMsg          
+			paragraph state.installMsg
+            paragraph state.versionWarning
 		}
     }
 }
@@ -373,14 +377,17 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
             }
             else{
             	subscribe(existingOpenButtonDev, "momentary.pushed", doorButtonOpenHandler)
+                state.installMsg = state.installMsg + doorName + ": push button device already exists. Subscription recreated. \r\n\r\n"
                 log.debug "subscribed to button: " + existingOpenButtonDev
-                state.installMsg = state.installMsg + doorName + ": push button device already exists. \r\n\r\n"
+                
+                
+                
             }
             
             if (!existingCloseButtonDev){                
                 try{
                     def closeButton = addChildDevice("smartthings", "Momentary Button Tile", door + " Closer", null, [name: doorName + " Closer", label: doorName + " Closer"])
-                    subscribe(closeButton, "momentary.pushed", doorButtonCloseHandler)                                        
+                    subscribe(closeButton, "momentary.pushed", doorButtonCloseHandler)
                 }
                 catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
                 {
@@ -841,6 +848,98 @@ def sendCommand(child, attributeName, attributeValue) {
 		return true
 	} 
 }
+
+
+
+def doAsyncCallout(){	
+    def params = [
+        uri:  'https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/smartapps/brbeaird/myq-lite.src/myq-lite.groovy',
+        contentType: 'text/plain; charset=utf-8'
+    ]
+    asynchttp_v1.get('responseHandlerMethod', params)
+}
+
+def responseHandlerMethod(response, data) {
+    def resp = response.getData()
+    
+    def smartAppVersionBegin = resp.indexOf('SmartApp version') + 18
+    def smartAppVersionEnd = resp.indexOf('*', smartAppVersionBegin)
+    state.latestSmartAppVersion = resp.substring(smartAppVersionBegin, smartAppVersionEnd)
+    
+    def doorVersionBegin = resp.indexOf('Door device version') + 21
+    def doorVersionEnd = resp.indexOf('*', doorVersionBegin)
+    state.latestDoorVersion = resp.substring(doorVersionBegin, doorVersionEnd)
+    
+    def doorVersionNoSensorBegin = resp.indexOf('Door-no-sensor device version') + 31
+    def doorVersionNoSensorEnd = resp.indexOf('*', doorVersionNoSensorBegin)
+    state.latestDoorNoSensorVersion = resp.substring(doorVersionNoSensorBegin, doorVersionNoSensorEnd)
+    
+    def lightVersionBegin = resp.indexOf('Light device version') + 22
+    def lightVersionEnd = resp.indexOf('*', lightVersionBegin)
+    state.latestLightVersion = resp.substring(lightVersionBegin, lightVersionEnd)
+    
+    log.debug "smartAppVersion: " + state.latestSmartAppVersion
+    log.debug "doorVersion: " + state.latestDoorVersion
+    log.debug "doorNoSensorVersion: " + state.latestDoorNoSensorVersion
+    log.debug "lightVersion: " + state.latestLightVersion
+}
+
+def versionCheck(){
+	state.versionWarning = ""
+    state.thisSmartAppVersion = "2.0.0"
+    state.thisDoorVersion = ""
+	state.thisDoorNoSensorVersion = ""
+    state.thisLightVersion = ""
+    state.versionWarning = ""
+    
+    def usesDoorDev = false
+    def usesDoorNoSensorDev = false
+    def usesLightControllerDev = false
+    
+    getChildDevices().each { childDevice ->
+    	
+        try {			
+            def devType = childDevice.getTypeName()            
+            
+            if (devType != "Momentary Button Tile"){               	                
+                if (devType == "MyQ Garage Door Opener"){
+                	usesDoorDev = true
+                    state.thisDoorVersion = childDevice.showVersion()                    
+                }
+                if (devType == "MyQ Garage Door Opener-NoSensor"){
+                	usesDoorNoSensorDev = true
+                    state.thisDoorNoSensorVersion = childDevice.showVersion()                    
+                }
+                if (devType == "MyQ Light Controller"){                
+                	usesLightControllerDev = true
+                    state.thisLightVersion = childDevice.showVersion()                    
+                }
+            }
+            
+		} catch (MissingPropertyException e)	{
+			log.debug "API Error: $e"
+		}
+    }
+    
+    log.debug "This door (no sensor) version: " + state.thisDoorNoSensorVersion
+    log.debug "This door version: " + state.thisDoorVersion
+    log.debug "This light version: " + state.thisLightVersion    
+    
+    if (state.thisSmartAppVersion != state.latestSmartAppVersion) {
+    	state.versionWarning = state.versionWarning + "Your SmartApp version (" + state.thisSmartAppVersion + ") is not the latest version (" + state.latestSmartAppVersion + ")\n\n"
+	}
+	if (usesDoorDev && state.thisDoorVersion != state.latestDoorVersion) {
+    	state.versionWarning = state.versionWarning + "Your MyQ Door device version (" + state.thisDoorVersion + ") is not the latest version (" + state.latestDoorVersion + ")\n\n"
+    }
+	if (usesDoorNoSensorDev && state.thisDoorNoSensorVersion != state.latestDoorNoSensorVersion) {
+    	state.versionWarning = state.versionWarning + "Your MyQ Door (No-sensor) device version (" + state.thisDoorNoSensorVersion + ") is not the latest version (" + state.latestDoorNoSensorVersion + ")\n\n"
+    }
+    if (usesLightControllerDev && state.thisLightVersion != state.latestLightVersion) {
+    	state.versionWarning = state.versionWarning + "Your MyQ Light Controller device version (" + state.thisLightVersion + ") is not the latest version (" + state.latestLightVersion + ")\n\n"
+    }
+    log.debug state.versionWarning
+}
+
 
 def notify(message){
 	sendNotificationEvent(message)
