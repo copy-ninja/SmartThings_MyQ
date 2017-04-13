@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 3/21/2017
+ *  Last Updated : 4/13/2017
  *
  */
 metadata {
@@ -31,6 +31,8 @@ metadata {
 		attribute "lastActivity", "string"
         attribute "doorSensor", "string"
         attribute "doorMoving", "string"
+        attribute "OpenButton", "string"
+        attribute "CloseButton", "string"
         
 		command "updateDeviceStatus", ["string"]
 		command "updateDeviceLastActivity", ["number"]
@@ -69,11 +71,13 @@ metadata {
 //		valueTile("lastActivity", "device.lastActivity", inactiveLabel: false, decoration: "flat") {
 //			state "default", label:'Last activity: ${currentValue}', action:"refresh.refresh", backgroundColor:"#ffffff"
 //		}
-        valueTile("openButton", "device.longText", width: 3, height: 2) {
-			state "val", label:'OPEN', action: "switch.on", backgroundColor:"#ffffff"
-		}        
-        valueTile("closeButton", "device.longText", width: 3, height: 2) {
-			state "val", label:'CLOSE', action: "switch.off", backgroundColor:"#ffffff"
+        standardTile("openBtn", "device.OpenButton", width: 3, height: 3) {
+            state "normal", label: 'Open', icon: "st.doors.garage.garage-open", backgroundColor: "#00a0dc", action: "open", nextState: "opening"
+            state "opening", label: 'Opening', icon: "st.doors.garage.garage-opening", backgroundColor: "#cec236", action: "open"
+		}
+        standardTile("closeBtn", "device.CloseButton", width: 3, height: 3) {            
+            state "normal", label: 'Close', icon: "st.doors.garage.garage-closed", backgroundColor: "#00a0dc", action: "close", nextState: "closing"
+            state "closing", label: 'Closing', icon: "st.doors.garage.garage-closing", backgroundColor: "#cec236", action: "close"
 		}
         valueTile("doorSensor", "device.doorSensor", width: 6, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "default", label:'${currentValue}', backgroundColor:"#ffffff"
@@ -82,7 +86,7 @@ metadata {
 			state "default", label: '${currentValue}', backgroundColor:"#ffffff"
 		}        
         main "door"
-		details(["door", "openButton", "closeButton", "doorSensor", "doorMoving", "switch"])
+		details(["door", "openBtn", "closeBtn", "doorSensor", "doorMoving", "switch"])
 	}
 }
 
@@ -126,6 +130,8 @@ def close() {
 
 def refresh() {	    
     parent.refresh(this)
+    sendEvent(name: "OpenButton", value: "normal", displayed: false, isStateChange: true)
+    sendEvent(name: "CloseButton", value: "normal", displayed: false, isStateChange: true)
 }
 
 def poll() { refresh() }
@@ -209,5 +215,5 @@ def log(msg){
 }
 
 def showVersion(){
-	return "2.0.0"
+	return "2.1.0"
 }

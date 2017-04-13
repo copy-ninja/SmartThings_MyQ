@@ -14,7 +14,7 @@
  *
  *  Last Updated : 3/21/2017
  *  SmartApp version: 2.0.0*
- *  Door device version: 2.0.0*
+ *  Door device version: 2.1.0*
  *  Door-no-sensor device version: 1.1.0*
  *  Light device version: 1.0.0*
  */
