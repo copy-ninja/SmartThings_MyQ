@@ -679,6 +679,9 @@ private getDoorList() {
                         state.doorList[dni] = description
                         state.data[dni] = [ status: doorState, lastAction: updatedTime, name: description, type: device.MyQDeviceTypeId ]
                     }
+                    else{
+                    	log.debug "Door " + device.MyQDeviceId + " has blank desc field. This is unusual..."
+                    }
 				}
                 
                 //Lights!
