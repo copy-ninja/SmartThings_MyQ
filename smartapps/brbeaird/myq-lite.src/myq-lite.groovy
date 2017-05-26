@@ -859,30 +859,22 @@ def sendCommand(child, attributeName, attributeValue) {
 
 def doAsyncCallout(){	
     def params = [
-        uri:  'https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/smartapps/brbeaird/myq-lite.src/myq-lite.groovy',
-        contentType: 'text/plain; charset=utf-8'
+        uri:  'http://www.fantasyaftermath.com/getMyQVersion',
+        contentType: 'application/json'
     ]
     asynchttp_v1.get('responseHandlerMethod', params)
 }
 
 def responseHandlerMethod(response, data) {
-    def resp = response.getData()
-    
-    def smartAppVersionBegin = resp.indexOf('SmartApp version') + 18
-    def smartAppVersionEnd = resp.indexOf('*', smartAppVersionBegin)
-    state.latestSmartAppVersion = resp.substring(smartAppVersionBegin, smartAppVersionEnd)
-    
-    def doorVersionBegin = resp.indexOf('Door device version') + 21
-    def doorVersionEnd = resp.indexOf('*', doorVersionBegin)
-    state.latestDoorVersion = resp.substring(doorVersionBegin, doorVersionEnd)
-    
-    def doorVersionNoSensorBegin = resp.indexOf('Door-no-sensor device version') + 31
-    def doorVersionNoSensorEnd = resp.indexOf('*', doorVersionNoSensorBegin)
-    state.latestDoorNoSensorVersion = resp.substring(doorVersionNoSensorBegin, doorVersionNoSensorEnd)
-    
-    def lightVersionBegin = resp.indexOf('Light device version') + 22
-    def lightVersionEnd = resp.indexOf('*', lightVersionBegin)
-    state.latestLightVersion = resp.substring(lightVersionBegin, lightVersionEnd)
+    if (response.hasError()) {
+        log.error "response has error: $response.errorMessage"
+    } else {
+        def results = response.json
+        state.latestSmartAppVersion = results.SmartApp;
+        state.latestDoorVersion = results.DoorDevice;
+        state.latestDoorNoSensorVersion = results.DoorDeviceNoSensor;
+        state.latestLightVersion = results.LightDevice;
+    }
     
     log.debug "smartAppVersion: " + state.latestSmartAppVersion
     log.debug "doorVersion: " + state.latestDoorVersion
