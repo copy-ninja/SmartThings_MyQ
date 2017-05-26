@@ -12,8 +12,8 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 3/21/2017
- *  SmartApp version: 2.0.0*
+ *  Last Updated : 5/26/2017
+ *  SmartApp version: 2.0.1*
  *  Door device version: 2.1.0*
  *  Door-no-sensor device version: 1.1.0*
  *  Light device version: 1.0.0*
@@ -44,7 +44,8 @@ preferences {
 
 /* Preferences */
 def prefLogIn() {
-	doAsyncCallout()
+	state.thisSmartAppVersion = "2.0.1"
+    getVersionInfo(0);
     
     state.installMsg = ""
     def showUninstall = username != null && password != null 
@@ -207,6 +208,7 @@ def summary() {
 /* Initialization */
 def installed() { 
 	//initialize() 
+    getVersionInfo(state.thisSmartAppVersion);    
 }
 
 def updated() { 
@@ -249,7 +251,7 @@ def initialize() {
         	log.debug "Creating child light device: " + it
         	
             try{            
-            	addChildDevice("brbeaird", "MyQ Light Controller", it, null, ["name": lightsList[it]])
+            	addChildDevice("brbeaird", "MyQ Light Controller", it, getHubID(), ["name": lightsList[it]])
                 state.installMsg = state.installMsg + lightsList[it] + ": created light device. \r\n\r\n"
             }
             catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
@@ -337,7 +339,7 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
                 if (sensor){
                     try{
                         log.debug "Creating door with sensor"
-                        addChildDevice("brbeaird", "MyQ Garage Door Opener", door, null, ["name": doorName]) 
+                        addChildDevice("brbeaird", "MyQ Garage Door Opener", door, getHubID(), ["name": doorName]) 
                         state.installMsg = state.installMsg + doorName + ": created door device (sensor version) \r\n\r\n"
                     }
                     catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
@@ -350,7 +352,7 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
                 else{
                     try{
                         log.debug "Creating door with no sensor"
-                        addChildDevice("brbeaird", "MyQ Garage Door Opener-NoSensor", door, null, ["name": doorName]) 
+                        addChildDevice("brbeaird", "MyQ Garage Door Opener-NoSensor", door, getHubID(), ["name": doorName]) 
                         state.installMsg = state.installMsg + doorName + ": created door device (no-sensor version) \r\n\r\n"
                     }
                     catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
@@ -368,7 +370,7 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
             def existingCloseButtonDev = getChildDevice(door + " Closer")
             if (!existingOpenButtonDev){                
                 try{
-                	def openButton = addChildDevice("smartthings", "Momentary Button Tile", door + " Opener", null, [name: doorName + " Opener", label: doorName + " Opener"])
+                	def openButton = addChildDevice("smartthings", "Momentary Button Tile", door + " Opener", getHubID(), [name: doorName + " Opener", label: doorName + " Opener"])
                 	state.installMsg = state.installMsg + doorName + ": created push button device. \r\n\r\n"
                 	subscribe(openButton, "momentary.pushed", doorButtonOpenHandler)                
                 }
@@ -389,7 +391,7 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
             
             if (!existingCloseButtonDev){                
                 try{
-                    def closeButton = addChildDevice("smartthings", "Momentary Button Tile", door + " Closer", null, [name: doorName + " Closer", label: doorName + " Closer"])
+                    def closeButton = addChildDevice("smartthings", "Momentary Button Tile", door + " Closer", getHubID(), [name: doorName + " Closer", label: doorName + " Closer"])
                     subscribe(closeButton, "momentary.pushed", doorButtonCloseHandler)
                 }
                 catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
@@ -745,6 +747,15 @@ private getDeviceList() {
 	return deviceList
 }
 
+def getHubID(){
+    def hubID    
+    def hubs = location.hubs.findAll{ it.type == physicalgraph.device.HubType.PHYSICAL } 
+    //log.debug "hub count: ${hubs.size()}"
+    //log.debug "hubID: ${hubID}"
+    return hubs[0].id 
+}
+
+
 /* api connection */
 // get URL 
 private getApiURL() {
@@ -857,9 +868,9 @@ def sendCommand(child, attributeName, attributeValue) {
 
 
 
-def doAsyncCallout(){	
+def getVersionInfo(version){	
     def params = [
-        uri:  'http://www.fantasyaftermath.com/getMyQVersion',
+        uri:  'http://www.fantasyaftermath.com/getMyQVersion/' + version,
         contentType: 'application/json'
     ]
     asynchttp_v1.get('responseHandlerMethod', params)
@@ -883,8 +894,7 @@ def responseHandlerMethod(response, data) {
 }
 
 def versionCheck(){
-	state.versionWarning = ""
-    state.thisSmartAppVersion = "2.0.0"
+	state.versionWarning = ""    
     state.thisDoorVersion = ""
 	state.thisDoorNoSensorVersion = ""
     state.thisLightVersion = ""
