@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 5/26/2017
+ *  Last Updated : 5/28/2017
  *  SmartApp version: 2.0.1*
  *  Door device version: 2.1.0*
  *  Door-no-sensor device version: 1.1.0*
@@ -44,9 +44,8 @@ preferences {
 
 /* Preferences */
 def prefLogIn() {
-	state.thisSmartAppVersion = "2.0.1"
-    getVersionInfo(0);
-    
+	state.previousVersion = state.thisSmartAppVersion
+    state.thisSmartAppVersion = "2.0.1"
     state.installMsg = ""
     def showUninstall = username != null && password != null 
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:showUninstall, install: false) {
@@ -61,7 +60,8 @@ def prefLogIn() {
 }
 
 def prefListDevices() {
-	getSelectedDevices("lights")
+	getVersionInfo(0, 0);
+    getSelectedDevices("lights")
     if (forceLogin()) {
 		def doorList = getDoorList()		
 		if ((state.doorList) || (state.lightList)){
@@ -206,14 +206,14 @@ def summary() {
 }
 
 /* Initialization */
-def installed() { 
-	//initialize() 
-    getVersionInfo(state.thisSmartAppVersion);    
+def installed() { 	
 }
 
 def updated() { 
-	log.debug "Updated..."    
-	//initialize()
+	log.debug "Updated..."
+    if (state.previousVersion != state.thisSmartAppVersion){    	
+    	getVersionInfo(state.previousVersion, state.thisSmartAppVersion);
+    }    
 }
 
 def uninstalled() {}	
@@ -868,9 +868,9 @@ def sendCommand(child, attributeName, attributeValue) {
 
 
 
-def getVersionInfo(version){	
+def getVersionInfo(oldVersion, newVersion){	
     def params = [
-        uri:  'http://www.fantasyaftermath.com/getMyQVersion/' + version,
+        uri:  'http://www.fantasyaftermath.com/getMyQVersion/' + oldVersion + '/' + newVersion,
         contentType: 'application/json'
     ]
     asynchttp_v1.get('responseHandlerMethod', params)
@@ -887,7 +887,9 @@ def responseHandlerMethod(response, data) {
         state.latestLightVersion = results.LightDevice;
     }
     
-    log.debug "smartAppVersion: " + state.latestSmartAppVersion
+    log.debug "previousVersion: " + state.previousVersion
+    log.debug "installedVersion: " + state.thisSmartAppVersion
+    log.debug "latestVersion: " + state.latestSmartAppVersion
     log.debug "doorVersion: " + state.latestDoorVersion
     log.debug "doorNoSensorVersion: " + state.latestDoorNoSensorVersion
     log.debug "lightVersion: " + state.latestLightVersion
@@ -929,9 +931,9 @@ def versionCheck(){
 		}
     }
     
-    log.debug "This door (no sensor) version: " + state.thisDoorNoSensorVersion
-    log.debug "This door version: " + state.thisDoorVersion
-    log.debug "This light version: " + state.thisLightVersion    
+    //log.debug "This door (no sensor) version: " + state.thisDoorNoSensorVersion
+    //log.debug "This door version: " + state.thisDoorVersion
+    //log.debug "This light version: " + state.thisLightVersion    
     
     if (state.thisSmartAppVersion != state.latestSmartAppVersion) {
     	state.versionWarning = state.versionWarning + "Your SmartApp version (" + state.thisSmartAppVersion + ") is not the latest version (" + state.latestSmartAppVersion + ")\n\n"
