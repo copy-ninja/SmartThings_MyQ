@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 5/28/2017
+ *  Last Updated : 5/29/2017
  *  SmartApp version: 2.0.1*
  *  Door device version: 2.1.0*
  *  Door-no-sensor device version: 1.1.0*
@@ -45,6 +45,9 @@ preferences {
 /* Preferences */
 def prefLogIn() {
 	state.previousVersion = state.thisSmartAppVersion
+    if (state.previousVersion == null){
+    	state.previousVersion = 0;
+    }
     state.thisSmartAppVersion = "2.0.1"
     state.installMsg = ""
     def showUninstall = username != null && password != null 
