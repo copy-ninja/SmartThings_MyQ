@@ -219,7 +219,9 @@ def updated() {
     }    
 }
 
-def uninstalled() {}	
+def uninstalled() {
+	getVersionInfo(state.previousVersion, 0);
+}	
 
 def initialize() {    
 	unsubscribe()
@@ -956,4 +958,4 @@ def versionCheck(){
 
 def notify(message){
 	sendNotificationEvent(message)
-}
+}s
