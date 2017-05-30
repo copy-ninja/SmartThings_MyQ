@@ -958,4 +958,4 @@ def versionCheck(){
 
 def notify(message){
 	sendNotificationEvent(message)
-}s
+}
