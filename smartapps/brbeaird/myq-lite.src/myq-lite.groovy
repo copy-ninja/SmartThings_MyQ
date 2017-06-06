@@ -14,9 +14,9 @@
  *
  *  Last Updated : 5/29/2017
  *  SmartApp version: 2.0.1*
- *  Door device version: 2.1.0*
- *  Door-no-sensor device version: 1.1.0*
- *  Light device version: 1.0.0*
+ *  Door device version: 2.1.1*
+ *  Door-no-sensor device version: 1.1.1*
+ *  Light device version: 1.0.1*
  */
 include 'asynchttp_v1'
 

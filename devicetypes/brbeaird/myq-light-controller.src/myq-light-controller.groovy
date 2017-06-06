@@ -13,7 +13,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 3/21/2017
+ *  Last Updated : 6/6/2017
  *
  */
 metadata {
@@ -31,7 +31,7 @@ metadata {
 		multiAttributeTile(name:"switch", type: "lighting", width: 6, height: 4, canChangeIcon: true) {
 			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
 				attributeState "off", label: '${name}', action: "switch.on", icon: "st.Lighting.light13", backgroundColor: "#ffffff", nextState: "on"
-				attributeState "on", label: '${name}', action: "switch.off", icon: "st.Lighting.light13", backgroundColor: "#79b821", nextState: "off"
+				attributeState "on", label: '${name}', action: "switch.off", icon: "st.Lighting.light13", backgroundColor: "#00a0dc", nextState: "off"
 			}			
 		}              
 		main "switch"
@@ -65,5 +65,5 @@ def updateDeviceStatus(status) {
 }
 
 def showVersion(){
-	return "1.0.0"
+	return "1.0.1"
 }

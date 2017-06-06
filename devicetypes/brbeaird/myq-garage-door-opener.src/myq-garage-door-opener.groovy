@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 4/13/2017
+ *  Last Updated : 6/6/2017
  *
  */
 metadata {
@@ -46,8 +46,8 @@ metadata {
 		multiAttributeTile(name:"door", type: "lighting", width: 6, height: 4, canChangeIcon: false) {
 			tileAttribute ("device.door", key: "PRIMARY_CONTROL") {
 				attributeState "unknown", label:'${name}', icon:"st.doors.garage.garage-closed",    backgroundColor:"#ffa81e", nextState: "closing"
-				attributeState "closed",  label:'${name}', action:"door control.open",   icon:"st.doors.garage.garage-closed",  backgroundColor:"#79b821"
-				attributeState "open",    label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-open",    backgroundColor:"#ffa81e"
+				attributeState "closed",  label:'${name}', action:"door control.open",   icon:"st.doors.garage.garage-closed",  backgroundColor:"#00a0dc"
+				attributeState "open",    label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-open",    backgroundColor:"#e86d13"
 				attributeState "opening", label:'${name}', 								 icon:"st.doors.garage.garage-opening", backgroundColor:"#cec236"
 				attributeState "closing", label:'${name}', 								 icon:"st.doors.garage.garage-closing", backgroundColor:"#cec236"
 				attributeState "waiting", label:'${name}', 								 icon:"st.doors.garage.garage-closing", backgroundColor:"#cec236"
@@ -61,8 +61,8 @@ metadata {
 //			state("default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh")
 //		}
 		standardTile("contact", "device.contact") {
-			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#ffa81e")
-			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#79b821")
+			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#e86d13")
+			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#00a0dc")
 		}
 		standardTile("switch", "device.switch") {
 			state("on", label:'${name}', action: "switch.on",  backgroundColor:"#ffa81e")
@@ -72,7 +72,7 @@ metadata {
 //			state "default", label:'Last activity: ${currentValue}', action:"refresh.refresh", backgroundColor:"#ffffff"
 //		}
         standardTile("openBtn", "device.OpenButton", width: 3, height: 3) {
-            state "normal", label: 'Open', icon: "st.doors.garage.garage-open", backgroundColor: "#00a0dc", action: "open", nextState: "opening"
+            state "normal", label: 'Open', icon: "st.doors.garage.garage-open", backgroundColor: "#e86d13", action: "open", nextState: "opening"
             state "opening", label: 'Opening', icon: "st.doors.garage.garage-opening", backgroundColor: "#cec236", action: "open"
 		}
         standardTile("closeBtn", "device.CloseButton", width: 3, height: 3) {            
@@ -116,8 +116,9 @@ def push() {
 def open()  { 
 	log.debug "Garage door open command called."
     parent.notify("Garage door open command called.")
+    updateDeviceStatus("opening")
     parent.sendCommand(this, "desireddoorstate", 1) 
-	updateDeviceStatus("opening")
+	
     runIn(20, refresh, [overwrite: true])	//Force a sync with tilt sensor after 20 seconds
 }
 def close() { 
@@ -215,5 +216,5 @@ def log(msg){
 }
 
 def showVersion(){
-	return "2.1.0"
+	return "2.1.1"
 }
