@@ -57,7 +57,7 @@ def prefLogIn() {
 			input("password", "password", title: "Password", description: "MyQ password")
 		}
 		section("Gateway Brand"){
-			input(name: "brand", title: "Gateway Brand", type: "enum",  metadata:[values:["Liftmaster","Chamberlain","Chamberlain (UK)", "Craftsman"]] )
+			input(name: "brand", title: "Gateway Brand", type: "enum",  metadata:[values:["Liftmaster","Chamberlain","Craftsman"]] )
 		}
 	}
 }
@@ -766,11 +766,7 @@ def getHubID(){
 private getApiURL() {
 	if (settings.brand == "Craftsman") {
 		return "https://craftexternal.myqdevice.com"
-	}
-    else if (settings.brand == "Chamberlain (UK)"){    	
-        return "https://www.mychamberlain.eu/api"
-    }
-    else {
+	} else {
 		return "https://myqexternal.myqdevice.com"
 	}
 }
