@@ -12,8 +12,8 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 5/29/2017
- *  SmartApp version: 2.0.1*
+ *  Last Updated : 10/28/2017
+ *  SmartApp version: 2.0.2*
  *  Door device version: 2.1.1*
  *  Door-no-sensor device version: 1.1.1*
  *  Light device version: 1.0.1*
@@ -48,7 +48,7 @@ def prefLogIn() {
     if (state.previousVersion == null){
     	state.previousVersion = 0;
     }
-    state.thisSmartAppVersion = "2.0.1"
+    state.thisSmartAppVersion = "2.0.2"
     state.installMsg = ""
     def showUninstall = username != null && password != null 
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:showUninstall, install: false) {
@@ -630,8 +630,8 @@ private getDoorList() {
     def deviceList = [:]
 	apiGet("/api/v4/userdevicedetails/get", []) { response ->
 		if (response.status == 200) {
-        //log.debug "response data: " + response.data.Devices
-        //sendAlert("response data: " + response.data.Devices)
+            //log.debug "response data: " + response.data
+            //sendAlert("response data: " + response.data.Devices)
 			response.data.Devices.each { device ->
 				// 2 = garage door, 5 = gate, 7 = MyQGarage(no gateway), 17 = Garage Door Opener WGDO
 				if (device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7||device.MyQDeviceTypeId == 17) {
@@ -782,11 +782,18 @@ private getApiAppID() {
 // HTTP GET call
 private apiGet(apiPath, apiQuery = [], callback = {}) {	
 	// set up query
+    def myHeaders = ""
+    
+    
 	apiQuery = [ appId: getApiAppID() ] + apiQuery
-	if (state.session.securityToken) { apiQuery = apiQuery + [SecurityToken: state.session.securityToken ] }
+	if (state.session.securityToken) { 
+    	apiQuery = apiQuery + [SecurityToken: state.session.securityToken ] 
+        myHeaders = [ "SecurityToken": state.session.securityToken,                        
+                         "MyQApplicationId": getApiAppID() ]
+        }
        
 	try {
-		httpGet([ uri: getApiURL(), path: apiPath, query: apiQuery ]) { response -> callback(response) }
+		httpGet([ uri: getApiURL(), path: apiPath, headers: myHeaders, query: apiQuery ]) { response -> callback(response) }
 	}	catch (SocketException e)	{
 		//sendAlert("API Error: $e")
         log.debug "API Error: $e"
