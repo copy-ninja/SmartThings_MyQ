@@ -806,12 +806,18 @@ private apiPut(apiPath, apiBody = [], callback = {}) {
 	apiBody = [ ApplicationId: getApiAppID() ] + apiBody
 	if (state.session.securityToken) { apiBody = apiBody + [SecurityToken: state.session.securityToken ] }
     
-	// set up query
+	def myHeaders = ""  
+    
+    // set up query
 	def apiQuery = [ appId: getApiAppID() ]
-	if (state.session.securityToken) { apiQuery = apiQuery + [SecurityToken: state.session.securityToken ] }
+	if (state.session.securityToken) { 
+    	apiQuery = apiQuery + [SecurityToken: state.session.securityToken ]
+        myHeaders = [ "SecurityToken": state.session.securityToken,                        
+                         "MyQApplicationId": getApiAppID() ]
+    }
     
 	try {
-		httpPut([ uri: getApiURL(), path: apiPath, contentType: "application/json; charset=utf-8", body: apiBody, query: apiQuery ]) { response -> callback(response) }
+		httpPut([ uri: getApiURL(), path: apiPath, headers: myHeaders, contentType: "application/json; charset=utf-8", body: apiBody, query: apiQuery ]) { response -> callback(response) }
 	} catch (SocketException e)	{
 		log.debug "API Error: $e"
 	}
