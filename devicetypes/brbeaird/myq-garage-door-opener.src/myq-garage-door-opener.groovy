@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 6/6/2017
+ *  Last Updated : 11/28/2017
  *
  */
 metadata {
@@ -216,5 +216,5 @@ def log(msg){
 }
 
 def showVersion(){
-	return "2.1.1"
+	return "2.1.2"
 }

@@ -13,8 +13,8 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  *  Last Updated : 10/28/2017
- *  SmartApp version: 2.0.2*
- *  Door device version: 2.1.1*
+ *  SmartApp version: 2.0.3*
+ *  Door device version: 2.1.2*
  *  Door-no-sensor device version: 1.1.1*
  *  Light device version: 1.0.1*
  */
@@ -68,8 +68,9 @@ def prefListDevices() {
     if (forceLogin()) {
 		def doorList = getDoorList()		
 		if ((state.doorList) || (state.lightList)){
-        	if ((state.doorList || state.lightList)) {
-                return dynamicPage(name: "prefListDevices",  title: "Devices", nextPage:"prefSensor1", install:false, uninstall:true) {
+        	def nextPage = "prefSensor1"
+            if (!state.doorList){nextPage = "summary"}  //Skip to summary if there are no doors to handle            
+                return dynamicPage(name: "prefListDevices",  title: "Devices", nextPage:nextPage, install:false, uninstall:true) {
                     if (state.doorList) {
                         section("Select which garage door/gate to use"){
                             input(name: "doors", type: "enum", required:false, multiple:true, metadata:[values:state.doorList])
@@ -81,9 +82,6 @@ def prefListDevices() {
                         }
                     } 
                 }
-            } 
-        
-        
         
         }else {
 			def devList = getDeviceList()
@@ -235,18 +233,20 @@ def initialize() {
     
 	// Create selected devices
 	def doorsList = getDoorList()
-	def lightsList = state.lightList    
+	def lightsList = state.lightList
     
-    def firstDoor = doors[0]        
-    //Handle single door (sometimes it's just a dumb string thanks to the simulator)
-    if (doors instanceof String)
-    firstDoor = doors   
-    
-	//Create door devices
-    createChilDevices(firstDoor, door1Sensor, doorsList[firstDoor], prefDoor1PushButtons)
-    if (doors[1]) createChilDevices(doors[1], door2Sensor, doorsList[doors[1]], prefDoor2PushButtons)
-    if (doors[2]) createChilDevices(doors[2], door3Sensor, doorsList[doors[2]], prefDoor3PushButtons)
-    if (doors[3]) createChilDevices(doors[3], door4Sensor, doorsList[doors[3]], prefDoor4PushButtons)    
+    if (doors != null){
+        def firstDoor = doors[0]        
+        //Handle single door (sometimes it's just a dumb string thanks to the simulator)
+        if (doors instanceof String)
+        firstDoor = doors   
+
+        //Create door devices
+        createChilDevices(firstDoor, door1Sensor, doorsList[firstDoor], prefDoor1PushButtons)
+        if (doors[1]) createChilDevices(doors[1], door2Sensor, doorsList[doors[1]], prefDoor2PushButtons)
+        if (doors[2]) createChilDevices(doors[2], door3Sensor, doorsList[doors[2]], prefDoor3PushButtons)
+        if (doors[3]) createChilDevices(doors[3], door4Sensor, doorsList[doors[3]], prefDoor4PushButtons)    
+    }
     
     //Create light devices
     def selectedLights = getSelectedDevices("lights")    
