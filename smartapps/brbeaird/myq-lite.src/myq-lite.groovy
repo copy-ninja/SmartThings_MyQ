@@ -68,7 +68,7 @@ def prefListDevices() {
     if (forceLogin()) {
 		def doorList = getDoorList()		
 		if ((state.doorList) || (state.lightList)){
-        	if ((state.doorList)) {
+        	if ((state.doorList || state.lightList)) {
                 return dynamicPage(name: "prefListDevices",  title: "Devices", nextPage:"prefSensor1", install:false, uninstall:true) {
                     if (state.doorList) {
                         section("Select which garage door/gate to use"){
