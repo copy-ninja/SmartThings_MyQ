@@ -52,7 +52,10 @@ metadata {
 				attributeState "closing", label:'${name}', 								 icon:"st.doors.garage.garage-closing", backgroundColor:"#cec236"
 				attributeState "waiting", label:'${name}', 								 icon:"st.doors.garage.garage-closing", backgroundColor:"#cec236"
 				attributeState "stopped", label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-closing", backgroundColor:"#1ee3ff"
-			}			
+			}
+            tileAttribute("device.lastActivity", key: "SECONDARY_CONTROL") {
+        		attributeState("lastActivity", label:'Last Activity: ${currentValue}', defaultState: true)
+    		}
 		}
 
 // Note that you can refresh this device simply by tapping the "lastActivity" string in the MultiTile now.
@@ -67,10 +70,7 @@ metadata {
 		standardTile("switch", "device.switch") {
 			state("on", label:'${name}', action: "switch.on",  backgroundColor:"#ffa81e")
 			state("off", label:'${name}', action: "switch.off", backgroundColor:"#79b821")
-		}
-//		valueTile("lastActivity", "device.lastActivity", inactiveLabel: false, decoration: "flat") {
-//			state "default", label:'Last activity: ${currentValue}', action:"refresh.refresh", backgroundColor:"#ffffff"
-//		}
+		}		
         standardTile("openBtn", "device.OpenButton", width: 3, height: 3) {
             state "normal", label: 'Open', icon: "st.doors.garage.garage-open", backgroundColor: "#e86d13", action: "open", nextState: "opening"
             state "opening", label: 'Opening', icon: "st.doors.garage.garage-opening", backgroundColor: "#cec236", action: "open"
