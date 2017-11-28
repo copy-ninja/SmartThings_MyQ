@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 10/28/2017
+ *  Last Updated : 11/28/2017
  *  SmartApp version: 2.0.3*
  *  Door device version: 2.1.2*
  *  Door-no-sensor device version: 1.1.1*
@@ -48,7 +48,7 @@ def prefLogIn() {
     if (state.previousVersion == null){
     	state.previousVersion = 0;
     }
-    state.thisSmartAppVersion = "2.0.2"
+    state.thisSmartAppVersion = "2.0.3"
     state.installMsg = ""
     def showUninstall = username != null && password != null 
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:showUninstall, install: false) {
