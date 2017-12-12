@@ -104,7 +104,7 @@ If you love this app, feel free to donate.
 
 | Platform        | Wallet/Link | QR Code
 | ------------- |-------------|------|
-| Bitcoin      | 1CUwQwqFrae3uCQhK3kaj84UXQ6UZcBd2S | <img src="https://i.imgur.com/VdZGjuLt.png" />
+| Bitcoin      | 1gLEpa5VUpYx77p4nfqHkWrpZK4opFrgV | <img src="https://i.imgur.com/ubrZjaz.png" />
 | Paypal      | [![PayPal - The safer, easier way to give online!](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif "Donate")](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6QH4Y5KCESYPY) |
 
 
