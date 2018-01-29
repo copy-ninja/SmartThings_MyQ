@@ -633,8 +633,8 @@ private getDoorList() {
             //log.debug "response data: " + response.data
             //sendAlert("response data: " + response.data.Devices)
 			response.data.Devices.each { device ->
-				// 2 = garage door, 5 = gate, 7 = MyQGarage(no gateway), 17 = Garage Door Opener WGDO
-				if (device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7||device.MyQDeviceTypeId == 17) {
+				// 2 = garage door, 5 = gate, 7 = MyQGarage(no gateway), 9 = commercial door, 17 = Garage Door Opener WGDO
+				if (device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7||device.MyQDeviceTypeId == 17||device.MyQDeviceTypeId == 9) {
 					log.debug "Found door: " + device.MyQDeviceId
                     def dni = [ app.id, "GarageDoorOpener", device.MyQDeviceId ].join('|')
 					def description = ''
