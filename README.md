@@ -4,9 +4,9 @@
 ### Overview
 This SmartApp integrates Chamberlain/LiftMaster MyQ doors and light controllers into SmartThings. It creates a garage door device and/or a light device in your list of Things and allows you to control the device...
 
-* By pushing the device in the SmartThings mobile app
+* By tapping the device in the SmartThings mobile app
 * Automatically by your presence (coming or going) in a Routine or other SmartThings rules app
-* Via switch tiles in a ActionTiles dashboard
+* Via tiles in an ActionTiles dashboard
 * By asking Alexa or Google Home to turn the device on (open) or off (close)
 
 
