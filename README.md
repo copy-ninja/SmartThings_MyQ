@@ -6,15 +6,15 @@ This SmartApp integrates Chamberlain/LiftMaster MyQ doors and light controllers 
 
 * By pushing the device in the SmartThings mobile app
 * Automatically by your presence (coming or going) in a Routine or other SmartThings rules app
-* Via switch tiles in a SmartTiles dashboard
+* Via switch tiles in a ActionTiles dashboard
 * By asking Alexa or Google Home to turn the device on (open) or off (close)
 
 
-### Device and SmartTiles
+### Device and ActionTiles
 ![Door device](http://i.imgur.com/zBXS6nQm.png "Door device")  ![Routine](http://i.imgur.com/fmDa1t6m.png "Routine") 
 
 
-![With SmartTiles](http://i.imgur.com/WhbN2H9m.png "With SmartTiles")    
+![With ActionTiles](http://i.imgur.com/WhbN2H9m.png "With ActionTiles")    
 
 
 ### Setup
@@ -29,30 +29,41 @@ This SmartApp integrates Chamberlain/LiftMaster MyQ doors and light controllers 
 
 
 
-Credit to copy-ninja, whose version I branched off to create this app to integrate without the need to poll MyQ for the device status. It is strongly recommend you use a Tilt/Contact sensor on the door to keep an accurate status in SmartThings. That said, you can maintain most functionality without one (see no-sensor special notes below). For light controllers, there's no way for SmartThings to know the status, but as long as you only control the light from SmartThings, the status should stay in sync. 
+This SmartApp works best when you have a Tilt/Contact sensor on the door to keep an accurate status in SmartThings. **Unfortunately, the MyQ included tilt sensor will not work as SmartThings cannot communicate with it**. That said, you can maintain most functionality without a sensor at all (see no-sensor special notes below). 
+
+This SmartApp can control MyQ lamp modules (not the actual lights in the garage door openers) For the lamp controllers, there's no way for SmartThings to know the status, but as long as you only control the light from SmartThings, the status should stay in sync. 
 
 Previous versions of this app relied on polling MyQ for status updates; however, MyQ/SmartThings have restricted the ability to poll the MyQ servers, although sending open/close/on/off commands via API still works as normal.
 
 SmartThings thread here: <a href="https://community.smartthings.com/t/release-myq-lite-for-liftmaster-chamberlain/49150">https://community.smartthings.com/t/beta-myq-lite-for-liftmaster-chamberlain/49150</a>
 
+Credit to copy-ninja, whose version I branched off to create this app to integrate without the need to poll MyQ for the device status. 
+
 ## Optional Tilt/Contact Sensor
-This app has the (strongly recommended) option of interfacing with a tilt sensor on the garage door. When present, a sensor will allow the door status to be known and displayed on the device. This also allows for the "switch" capability on the device, which is necessary for routines, SmartTiles dashboard, and Alexa use. <a href="https://www.amazon.com/gp/product/B00HGVJRX2/ref=as_li_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=B00HGVJRX2&linkCode=as2&tag=brbeaird0e-20&linkId=05e7b850708aa7cda815de18103d4805">Here's an example of one you can purchase from Amazon.</a>
+This app has the (strongly recommended) option of interfacing with a tilt sensor on the garage door. When present, a sensor will allow the door status to be known and displayed on the device. This also allows for the "switch" capability on the device, which is necessary for routines, ActionTiles dashboard, and Alexa use. <a href="https://www.amazon.com/gp/product/B00HGVJRX2/ref=as_li_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=B00HGVJRX2&linkCode=as2&tag=brbeaird0e-20&linkId=05e7b850708aa7cda815de18103d4805">Here's an example of one you can purchase from Amazon.</a>
 
 ## Optional MultiSensor Support (Accelerometer Only)
 This version now supports the additional use of an Acceleromter for each door, as in a Samsung/SmartThings MultiSensor. If configured, the accelerometer will be used to more accurately track states of opening, closing, and waiting (the alarm before closing actually begins). Generally, this will return the visual status updates from the original version, still without making any status requests from the MyQ servers.
 
-### Special notes when using the no-sensor door version
+### Special notes when using routines with the no-sensor door version
 We have discovered that the no-sensor version of the garage door does not work well with SmartThings routines. This is because routines only take action if the device's status is in the correct position. For example, the no-sensor version of the door has no way to accurately track whether the door is open or closed, so it defaults to "unknown." In this state, a routine will never close the door because it believes the door to always be in a "closed" state.
 
 You have two options to work around this limitation:
 1.) Use the mometary push-button devices that will generate if you choose that option during setup. Then, when setting up a routine, have the routine "turn on" the corresponding push button to either open or close the door.
 2.) Use the CoRE SmartApp and select the option to disable status optimization. This tells CoRE to always send the desired command regardless of whether SmartThings thinks the door is already opened/closed.
 
-### Garage Door Usage with Alexa (Without Sensors):
-For Alexa to respond to commands to open/close the door, make sure you choose the option during setup to create the Pushbutton switches. This will create an "Opener" and "Closer" switch. Once setup is done and you see those switches in your Things, go back into Alexa and run the discovery process. Those switches should show up in the Alexa app and should respond to **"Alexa, turn ON [garage door name] Opener"** and **"Alexa, turn ON [garage door name] Closer."** This method is somewhat awkward as you're saying "turn on" for both types, but it gets the job done for now.
 
-### Garage Door Usage with Alexa (With Sensors):
-If your door has sensors, Alexa will respond simply to **"Alexa, turn ON [garage door name]"** or **"Alexa, turn OFF [garage door name]"** once you've completed the setup and done the discovery process in the Alexa app. This is because the MyQ door device has a on/off switch capability that can be used and kept in sync since the sensor updates the door's status. It's not necessary to use the Pushbutton switch in this case.
+### Garage Door Usage with Alexa/Google Home (Without a door sensor):
+For Alexa to respond to commands to open/close the door, make sure you choose the option during setup to create the Pushbutton switches. This will create an "Opener" and "Closer" switch. Once setup is done and you see those switches in your Things, go back into Alexa and run the discovery process. Those switches should show up in the Alexa app and should respond to **"Alexa, turn ON [garage door name] Opener"** and **"Alexa, turn ON [garage door name] Closer."** 
+
+If you want a less-awkward way to open the door, you can set up an Alexa routine or a Google Home shortcut that translates something like "Alexa, open the garage" to the full "Alexa, turn on..." phrase from above.
+
+### Garage Door Usage with Alexa/Google Home (With a door sensor):
+If your door has a sensor, Alexa will respond simply to **"Alexa, turn ON [garage door name]"** or **"Alexa, turn OFF [garage door name]"** once you've completed the setup and done the discovery process in the Alexa app. This is because the MyQ door device has a on/off switch capability that can be used and kept in sync since the sensor updates the door's status. It's not necessary to use the Pushbutton switch in this case.
+
+If you want a less-awkward way to open the door, you can set up an Alexa routine or a Google Home shortcut that translates something like "Alexa, open the garage" to the full "Alexa, turn on..." phrase from above.
+
+### Garage Door Usage with Alexa/Google Home (With a door sensor):
 
 ### Special notes when using Light Controllers:
 Since we have no way to keep an exact on/off status on the light, it is strongly recommended that you ONLY control the light via SmartThings (not through the MyQ app or manually at the physical device itself). As long as SmartThings is the only thing making changes, it will essentially always have the correct status. If for some reason the status does get out of sync, you may just need to turn it off and back on in SmartThings to sync it back up.
