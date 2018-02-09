@@ -13,19 +13,18 @@
     "releaseType": "production",
     "keywords": ["myq", "garage", "garage door", "door", "chamberlain", "liftmaster", "car"],
     "notes": "Nothing to show here (yet)",
-
     "smartApps": {
         "parent": {
             "name": "MyQ Lite",
             "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/MyQBlue.png",
             "published": true,
             "oAuth": true,
-            "appSettings": {},
             "version": "2.0.3",
+            "appSettings": {},
             "appUrl": "smartapps/brbeaird/myq-lite.src/myq-lite.groovy"
         },
-        "children": [
-        ]
+        "children": [{
+        }]
     },
     "deviceHandlers": [{
                 "name": "MyQ Garage Door Opener",
