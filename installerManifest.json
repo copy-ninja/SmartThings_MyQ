@@ -16,7 +16,7 @@
     "smartApps": {
         "parent": {
             "name": "MyQ Lite",
-            "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/MyQBlue.png",
+            "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
             "published": true,
             "oAuth": true,
             "version": "2.0.3",
@@ -27,7 +27,7 @@
     },
     "deviceHandlers": [{
             "name": "MyQ Garage Door Opener",
-            "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/MyQBlue.png",
+            "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
             "published": true,
             "oAuth": false,
             "appUrl": "devicetypes/brbeaird/myq-garage-door-opener.src/myq-garage-door-opener.groovy",
@@ -37,7 +37,7 @@
     },
     {
 	        "name": "MyQ Garage Door Opener-NoSensor",
-	        "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/MyQBlue.png",
+	        "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
 	        "published": true,
 	        "oAuth": false,
 	        "appUrl": "devicetypes/brbeaird/myq-garage-door-opener-nosensor.src/myq-garage-door-opener-nosensor.groovy",
@@ -47,7 +47,7 @@
 	    },
 	    {
 	        "name": "MyQ Light Controller",
-	        "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/MyQBlue.png",
+	        "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
 	        "published": true,
 	        "oAuth": false,
 	        "appUrl": "devicetypes/brbeaird/myq-light-controller.src/myq-light-controller.groovy",
@@ -57,7 +57,7 @@
 	    },
 	    {
 	        "name": "Momentary Button Tile",
-	        "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/MyQBlue.png",
+	        "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
 	        "published": true,
 	        "oAuth": false,
 	        "appUrl": "devicetypes/smartthings/momentary-button-tile.src/momentary-button-tile.groovy",
