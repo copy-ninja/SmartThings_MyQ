@@ -55,7 +55,7 @@
                 "appUrl": "devicetypes/brbeaird/myq-light-controller.src/myq-light-controller.groovy",
                 "appSettings": {},
                 "version": "1.0.1",
-                "optional": false
+                "optional": true
             },
             {
                 "name": "Momentary Button Tile",
