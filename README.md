@@ -1,5 +1,5 @@
 
-# MyQ Lite (Previously SmartThings MyQ)
+# SmartThings MyQ Lite SmartApp
 
 ### Overview
 This SmartApp integrates Chamberlain/LiftMaster MyQ doors and light controllers into SmartThings. It creates a garage door device and/or a light device in your list of Things and allows you to control the device...
@@ -33,7 +33,7 @@ This SmartApp works best when you have a Tilt/Contact sensor on the door to keep
 
 This SmartApp can control MyQ lamp modules (not the actual lights in the garage door openers) For the lamp controllers, there's no way for SmartThings to know the status, but as long as you only control the light from SmartThings, the status should stay in sync. 
 
-Previous versions of this app relied on polling MyQ for status updates; however, MyQ/SmartThings have restricted the ability to poll the MyQ servers, although sending open/close/on/off commands via API still works as normal.
+Previous versions of this app (known as simply SmartThings_MyQ) relied on polling MyQ for status updates; however, MyQ/SmartThings have restricted the ability to poll the MyQ servers, although sending open/close/on/off commands via API still works as normal.
 
 SmartThings thread here: <a href="https://community.smartthings.com/t/release-myq-lite-for-liftmaster-chamberlain/49150">https://community.smartthings.com/t/beta-myq-lite-for-liftmaster-chamberlain/49150</a>
 
