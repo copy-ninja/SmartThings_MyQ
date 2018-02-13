@@ -1,5 +1,5 @@
 
-# SmartThings MyQ
+# MyQ Lite (Previously SmartThings MyQ)
 
 ### Overview
 This SmartApp integrates Chamberlain/LiftMaster MyQ doors and light controllers into SmartThings. It creates a garage door device and/or a light device in your list of Things and allows you to control the device...
