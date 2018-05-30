@@ -754,10 +754,15 @@ private getDeviceList() {
 
 def getHubID(){
     def hubID    
-    def hubs = location.hubs.findAll{ it.type == physicalgraph.device.HubType.PHYSICAL } 
+    def hubs = location.hubs.findAll{ it.type == physicalgraph.device.HubType.PHYSICAL }
+    if (hubs == null || hubs.size() == 0){
+        return null;
+    }
+    else{
+        return hubs[0].id 
+    }
     //log.debug "hub count: ${hubs.size()}"
-    //log.debug "hubID: ${hubID}"
-    return hubs[0].id 
+    //log.debug "hubID: ${hubID}"    
 }
 
 
