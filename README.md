@@ -14,7 +14,7 @@ This SmartApp integrates Chamberlain/LiftMaster MyQ doors and light controllers 
 ![Door device](http://i.imgur.com/zBXS6nQm.png "Door device")  ![Routine](http://i.imgur.com/fmDa1t6m.png "Routine") 
 
 
-![With ActionTiles](http://i.imgur.com/WhbN2H9m.png "With ActionTiles")    
+![With ActionTiles](https://i.imgur.com/8BSYtMI.png "With ActionTiles")    
 
 
 ### Setup
