@@ -1,6 +1,10 @@
 
 # SmartThings MyQ Lite SmartApp
 
+### Current Notes
+* This SmartApp is currently only supported in the **SmartThings Classic mobile app**; the new app does not yet support custom apps like this
+* If you get an error saying "No supported devices found," the most likely cause is you're running an older version of the SmartApp. Double check to see you're using the latest code. If you're still having trouble, there's a small chance your IDE info is not sync'd properly across all SmartThings cloud shards. One way to tell this is by checking the Hubs link and noticing your hub missing. Another  way to check that is to reset all cookies and log in again (or try from a different computer) to see if it logs you into a different shard at that point, which will let you verify if things are out of sync. If there's a problem with that, SmartThings support can help.
+
 ### Overview
 This SmartApp integrates Chamberlain/LiftMaster MyQ doors and light controllers into SmartThings. It creates a garage door device and/or a light device in your list of Things and allows you to control the device...
 
