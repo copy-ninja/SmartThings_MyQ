@@ -19,6 +19,7 @@ metadata {
 	definition (name: "MyQ Garage Door Opener-NoSensor", namespace: "brbeaird", author: "Brian Beaird") {
 		capability "Garage Door Control"
 		capability "Door Control"
+		capability "Actuator"
         
         attribute "OpenButton", "string"
         attribute "CloseButton", "string"
