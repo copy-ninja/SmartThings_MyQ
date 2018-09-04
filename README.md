@@ -89,7 +89,7 @@ There are 5 code files available for the installations of this app - 1 SmartApp 
 
 
 ### Manually:
-1. Log in to the <a href="https://graph.api.smartthings.com/ide/">SmartThings IDE</a>. If you don't have a login yet, create one.
+1. Log in to the <a href="https://account.smartthings.com">SmartThings IDE</a>. If you don't have a login yet, create one.
 2. The first step is to create device handlers for both door types.
 3. Click on **My Device Handlers** -> **Create new Device Handler** -> **From Code**.
 4. Copy contents of <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-garage-door-opener.src/myq-garage-door-opener.groovy">Door Opener (original sensor version) </a> and paste into text area. in SmartApps section. Click **Create**. Click **Publish** > **For Me** (you can ignore this step if you don't have a door sensor)
