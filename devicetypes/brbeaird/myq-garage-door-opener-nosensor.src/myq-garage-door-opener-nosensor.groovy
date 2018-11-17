@@ -1,7 +1,7 @@
 /**
  *  MyQ Garage Door Opener NoSensor
  *
- *  Copyright 2017 Brian Beaird
+ *  Copyright 2018 Brian Beaird
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -12,14 +12,13 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 6/6/2017
+ *  Last Updated : 11/17/2018
  *
  */
 metadata {
-	definition (name: "MyQ Garage Door Opener-NoSensor", namespace: "brbeaird", author: "Brian Beaird") {
+	definition (name: "MyQ Garage Door Opener-NoSensor", namespace: "brbeaird", author: "Brian Beaird", vid: "generic-contact-4", ocfdevicetype: "oic.d.garagedoor", mnmn: "SmartThings") {
 		capability "Garage Door Control"
-		capability "Door Control"
-		capability "Actuator"
+        capability "Health Check"
         
         attribute "OpenButton", "string"
         attribute "CloseButton", "string"
@@ -93,5 +92,18 @@ def log(msg){
 }
 
 def showVersion(){
-	return "1.1.1"
+	return "1.1.2"
+}
+
+def installed(){
+	sendEvent(name: "checkInterval", value: 4 * 60 * 60 + 2 * 60, displayed: false, data: [protocol: "cloud", scheme:"untracked"])
+}
+
+def updated(){
+	sendEvent(name: "checkInterval", value: 4 * 60 * 60 + 2 * 60, displayed: false, data: [protocol: "cloud", scheme:"untracked"])
+}
+
+def ping() {
+    logDebug "ping()"	
+    return []
 }

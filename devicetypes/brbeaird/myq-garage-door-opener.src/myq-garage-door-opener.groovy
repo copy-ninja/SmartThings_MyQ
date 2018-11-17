@@ -1,7 +1,7 @@
 /**
  *  MyQ Garage Door Opener
  *
- *  Copyright 2017 Jason Mok/Brian Beaird/Barry Burke
+ *  Copyright 2018 Jason Mok/Brian Beaird/Barry Burke
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -12,13 +12,12 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 11/28/2017
+ *  Last Updated : 11/17/2018
  *
  */
 metadata {
-	definition (name: "MyQ Garage Door Opener", namespace: "brbeaird", author: "Jason Mok/Brian Beaird/Barry Burke") {
+	definition (name: "MyQ Garage Door Opener", namespace: "brbeaird", author: "Jason Mok/Brian Beaird/Barry Burke", vid: "generic-contact-4", ocfdevicetype: "oic.d.garagedoor", mnmn: "SmartThings") {
 		capability "Garage Door Control"
-		capability "Door Control"
 		capability "Contact Sensor"
 		capability "Refresh"
 		capability "Polling"				// SmartThings will occaisionally poll us (despite their assertions to the contrary). We don't really need this anymore.
@@ -27,6 +26,7 @@ metadata {
 		capability "Switch"
 		capability "Momentary"
 		capability "Sensor"
+        capability "Health Check"
 		
 		attribute "lastActivity", "string"
         attribute "doorSensor", "string"
@@ -216,5 +216,22 @@ def log(msg){
 }
 
 def showVersion(){
-	return "2.1.2"
+	return "2.1.3"
+}
+
+def installed() {
+	sendEvent(name: "checkInterval", value: 4 * 60 * 60 + 2 * 60, displayed: false, data: [protocol: "cloud", scheme:"untracked"])
+}
+
+def updated() {
+	sendEvent(name: "checkInterval", value: 4 * 60 * 60 + 2 * 60, displayed: false, data: [protocol: "cloud", scheme:"untracked"])
+}
+
+def configure() {
+	sendEvent(name: "checkInterval", value: 4 * 60 * 60 + 2 * 60, displayed: false, data: [protocol: "cloud", scheme:"untracked"])
+}
+
+def ping() {
+    logDebug "ping()"	
+    return []
 }
