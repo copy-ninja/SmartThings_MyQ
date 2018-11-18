@@ -184,12 +184,32 @@ def prefSensor3() {
     }
 }
 
+def prefSensor4() {
+    def nextPage = "summary"    
+    def titleText = "Sensors for Door 4 (" + state.data[doors[3]].name + ")"
+     
+    if (doors.size() > 4){
+    	nextPage = "prefSensor5"        
+    }
+    
+    return dynamicPage(name: "prefSensor4",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:false, uninstall:true) {
+        section(titleText){			
+			input(name: "door4Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: false, multiple: false)
+			input(name: "door4Acceleration", title: "Acceleration Sensor", type: "capability.accelerationSensor", required: false, multiple: false)
+		}
+        section("Create separate on/off push buttons?"){			
+			paragraph "Choose the option below to have extra on and off push button devices created. This is recommened if you have no sensors but still want a way to open/close the garage from SmartTiles."           
+            input "prefDoor4PushButtons", "bool", required: false, title: "Create on/off push buttons?"
+		}
+    }
+}
+
 def prefSensor5() {
     def nextPage = "summary"    
     def titleText = "Sensors for Door 5 (" + state.data[doors[4]].name + ")"
      
     if (doors.size() > 5){
-    	nextPage = "prefSensor5"        
+    	nextPage = "prefSensor6"        
     }
     
     return dynamicPage(name: "prefSensor5",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:false, uninstall:true) {
@@ -209,7 +229,7 @@ def prefSensor6() {
     def titleText = "Sensors for Door 6 (" + state.data[doors[5]].name + ")"
      
     if (doors.size() > 6){
-    	nextPage = "prefSensor6"        
+    	nextPage = "prefSensor7"        
     }
     
     return dynamicPage(name: "prefSensor6",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:false, uninstall:true) {
@@ -229,7 +249,7 @@ def prefSensor7() {
     def titleText = "Sensors for Door 7 (" + state.data[doors[6]].name + ")"
      
     if (doors.size() > 7){
-    	nextPage = "prefSensor7"        
+    	nextPage = "prefSensor8"        
     }
     
     return dynamicPage(name: "prefSensor7",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:false, uninstall:true) {
