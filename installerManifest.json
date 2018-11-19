@@ -32,7 +32,7 @@
             "oAuth": false,
             "appUrl": "devicetypes/brbeaird/myq-garage-door-opener.src/myq-garage-door-opener.groovy",
             "appSettings": {},
-            "version": "2.1.3",
+            "version": "2.1.4",
             "optional": false
     },
     {
@@ -42,7 +42,7 @@
 	        "oAuth": false,
 	        "appUrl": "devicetypes/brbeaird/myq-garage-door-opener-nosensor.src/myq-garage-door-opener-nosensor.groovy",
 	        "appSettings": {},
-	        "version": "1.1.2",
+	        "version": "1.1.3",
 	        "optional": false
 	    },
 	    {

@@ -18,6 +18,7 @@
 metadata {
 	definition (name: "MyQ Garage Door Opener", namespace: "brbeaird", author: "Jason Mok/Brian Beaird/Barry Burke", vid: "generic-contact-4", ocfdevicetype: "oic.d.garagedoor", mnmn: "SmartThings") {
 		capability "Garage Door Control"
+		capability "Door Control"
 		capability "Contact Sensor"
 		capability "Refresh"
 		capability "Polling"				// SmartThings will occaisionally poll us (despite their assertions to the contrary). We don't really need this anymore.
@@ -216,7 +217,7 @@ def log(msg){
 }
 
 def showVersion(){
-	return "2.1.3"
+	return "2.1.4"
 }
 
 def installed() {

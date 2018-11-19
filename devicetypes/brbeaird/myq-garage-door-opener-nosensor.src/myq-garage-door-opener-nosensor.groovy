@@ -18,6 +18,8 @@
 metadata {
 	definition (name: "MyQ Garage Door Opener-NoSensor", namespace: "brbeaird", author: "Brian Beaird", vid: "generic-contact-4", ocfdevicetype: "oic.d.garagedoor", mnmn: "SmartThings") {
 		capability "Garage Door Control"
+		capability "Door Control"
+		capability "Actuator"
         capability "Health Check"
         
         attribute "OpenButton", "string"
@@ -92,7 +94,7 @@ def log(msg){
 }
 
 def showVersion(){
-	return "1.1.2"
+	return "1.1.3"
 }
 
 def installed(){
