@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 11/17/2018
+ *  Last Updated : 11/20/2018
  *
  */
 metadata {
@@ -94,7 +94,7 @@ def log(msg){
 }
 
 def showVersion(){
-	return "1.1.3"
+	return "1.1.4"
 }
 
 def installed(){
@@ -107,5 +107,5 @@ def updated(){
 
 def ping() {
     logDebug "ping()"	
-    return []
+    return refresh()
 }
