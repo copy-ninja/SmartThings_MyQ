@@ -49,10 +49,10 @@ def prefLogIn() {
     if (state.previousVersion == null){
     	state.previousVersion = 0;
     }
-    state.thisSmartAppVersion = "2.0.4"
+    state.thisSmartAppVersion = "2.0.5"
     state.installMsg = ""
     def showUninstall = username != null && password != null 
-	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:showUninstall, install: false) {
+	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:showUninstall, install: false, submitOnChange: true) {
 		section("Login Credentials"){
 			input("username", "email", title: "Username", description: "MyQ Username (email address)")
 			input("password", "password", title: "Password", description: "MyQ password")
@@ -105,7 +105,18 @@ def prefListDevices() {
 
 
 def prefSensor1() {
-	log.debug "Doors chosen: " + doors
+    log.debug "Doors chosen: " + doors
+    
+    //Sometimes ST has an issue where stale options are not properly dropped from settings. Let's get a true count of valid doors selected
+    state.validatedDoors = []
+    if (doors.size() > 1){        
+        doors.each {
+            if (state.data[it] != null){                
+                state.validatedDoors.add(it)                
+            }
+        }
+        log.debug "Valid doors chosen: " + state.validatedDoors
+    }
     
     //Set defaults
     def nextPage = "summary"    
@@ -118,12 +129,13 @@ def prefSensor1() {
     }
     else if (doors.size() == 1){
     	log.debug "Single door detected (array)."
-        titleText = "Select Sensors for Door 1 (" + state.data[doors[0]].name + ")"
+        titleText = "Select Sensors for Door 1 (" + state.data[state.validatedDoors[0]].name + ")"
     }
     else{
     	log.debug "Multiple doors detected."
+        log.debug state.validatedDoors[0]
         nextPage = "prefSensor2"
-        titleText = "OPTIONAL: Select Sensors for Door 1 (" + state.data[doors[0]].name + ")"
+        titleText = "OPTIONAL: Select Sensors for Door 1 (" + state.data[state.validatedDoors[0]].name + ")"
     }    
     
     return dynamicPage(name: "prefSensor1",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:false, uninstall:true) {
@@ -143,9 +155,9 @@ def prefSensor1() {
 
 def prefSensor2() {	   
     def nextPage = "summary"    
-    def titleText = "Sensors for Door 2 (" + state.data[doors[1]].name + ")"
+    def titleText = "Sensors for Door 2 (" + state.data[state.validatedDoors[1]].name + ")"
      
-    if (doors.size() > 2){
+    if (state.validatedDoors.size() > 2){
     	nextPage = "prefSensor3"
     }
     
@@ -166,9 +178,9 @@ def prefSensor2() {
 
 def prefSensor3() {
     def nextPage = "summary"    
-    def titleText = "Sensors for Door 3 (" + state.data[doors[2]].name + ")"
+    def titleText = "Sensors for Door 3 (" + state.data[state.validatedDoors[2]].name + ")"
      
-    if (doors.size() > 3){
+    if (state.validatedDoors.size() > 3){
     	nextPage = "prefSensor4"
     }
     
@@ -189,9 +201,9 @@ def prefSensor3() {
 
 def prefSensor4() {
     def nextPage = "summary"    
-    def titleText = "Sensors for Door 4 (" + state.data[doors[3]].name + ")"
+    def titleText = "Sensors for Door 4 (" + state.data[state.validatedDoors[3]].name + ")"
      
-    if (doors.size() > 4){
+    if (state.validatedDoors.size() > 4){
     	nextPage = "prefSensor5"
     }
     
@@ -212,9 +224,9 @@ def prefSensor4() {
 
 def prefSensor5() {
     def nextPage = "summary"    
-    def titleText = "Sensors for Door 5 (" + state.data[doors[4]].name + ")"
+    def titleText = "Sensors for Door 5 (" + state.data[state.validatedDoors[4]].name + ")"
      
-    if (doors.size() > 5){
+    if (state.validatedDoors.size() > 5){
     	nextPage = "prefSensor6"
     }
     
@@ -235,9 +247,9 @@ def prefSensor5() {
 
 def prefSensor6() {
     def nextPage = "summary"    
-    def titleText = "Sensors for Door 6 (" + state.data[doors[5]].name + ")"
+    def titleText = "Sensors for Door 6 (" + state.data[state.validatedDoors[5]].name + ")"
      
-    if (doors.size() > 6){
+    if (state.validatedDoors.size() > 6){
     	nextPage = "prefSensor7"
     }
     
@@ -258,9 +270,9 @@ def prefSensor6() {
 
 def prefSensor7() {
     def nextPage = "summary"    
-    def titleText = "Sensors for Door 7 (" + state.data[doors[6]].name + ")"
+    def titleText = "Sensors for Door 7 (" + state.data[state.validatedDoors[6]].name + ")"
      
-    if (doors.size() > 7){
+    if (state.validatedDoors.size() > 7){
     	nextPage = "prefSensor8"
     }
     
@@ -280,7 +292,7 @@ def prefSensor7() {
 }
 
 def prefSensor8() {	   
-	def titleText = "Contact Sensor for Door 8 (" + state.data[doors[7]].name + ")"
+	def titleText = "Contact Sensor for Door 8 (" + state.data[state.validatedDoors[7]].name + ")"
     return dynamicPage(name: "prefSensor8",  title: "Optional Sensors and Push Buttons", nextPage:"summary", install:false, uninstall:true) {
         section(titleText){
             paragraph "Optional: If you have sensors on this door, select them below. A sensor allows the device type to know whether the door is open or closed, which helps the device function " + 
@@ -348,20 +360,20 @@ def initialize() {
 	def lightsList = state.lightList
     
     if (doors != null){
-        def firstDoor = doors[0]        
+        def firstDoor = state.validatedDoors[0]        
         //Handle single door (sometimes it's just a dumb string thanks to the simulator)
         if (doors instanceof String)
         firstDoor = doors   
 
         //Create door devices
         createChilDevices(firstDoor, door1Sensor, doorsList[firstDoor], prefDoor1PushButtons)
-        if (doors[1]) createChilDevices(doors[1], door2Sensor, doorsList[doors[1]], prefDoor2PushButtons)
-        if (doors[2]) createChilDevices(doors[2], door3Sensor, doorsList[doors[2]], prefDoor3PushButtons)
-        if (doors[3]) createChilDevices(doors[3], door4Sensor, doorsList[doors[3]], prefDoor4PushButtons)
-        if (doors[4]) createChilDevices(doors[4], door5Sensor, doorsList[doors[4]], prefDoor5PushButtons)
-        if (doors[5]) createChilDevices(doors[5], door6Sensor, doorsList[doors[5]], prefDoor6PushButtons)
-        if (doors[6]) createChilDevices(doors[6], door7Sensor, doorsList[doors[6]], prefDoor7PushButtons)
-        if (doors[7]) createChilDevices(doors[7], door8Sensor, doorsList[doors[7]], prefDoor8PushButtons)
+        if (state.validatedDoors[1]) createChilDevices(state.validatedDoors[1], door2Sensor, doorsList[state.validatedDoors[1]], prefDoor2PushButtons)
+        if (state.validatedDoors[2]) createChilDevices(state.validatedDoors[2], door3Sensor, doorsList[state.validatedDoors[2]], prefDoor3PushButtons)
+        if (state.validatedDoors[3]) createChilDevices(state.validatedDoors[3], door4Sensor, doorsList[state.validatedDoors[3]], prefDoor4PushButtons)
+        if (state.validatedDoors[4]) createChilDevices(state.validatedDoors[4], door5Sensor, doorsList[state.validatedDoors[4]], prefDoor5PushButtons)
+        if (state.validatedDoors[5]) createChilDevices(state.validatedDoors[5], door6Sensor, doorsList[state.validatedDoors[5]], prefDoor6PushButtons)
+        if (state.validatedDoors[6]) createChilDevices(state.validatedDoors[6], door7Sensor, doorsList[state.validatedDoors[6]], prefDoor7PushButtons)
+        if (state.validatedDoors[7]) createChilDevices(state.validatedDoors[7], door8Sensor, doorsList[state.validatedDoors[7]], prefDoor8PushButtons)
     }
     
     //Create light devices
@@ -565,7 +577,7 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
 
 
 def syncDoorsWithSensors(child){	
-    def firstDoor = doors[0]
+    def firstDoor = state.validatedDoors[0]
         
     //Handle single door (sometimes it's just a dumb string thanks to the simulator)
     if (doors instanceof String)
@@ -578,32 +590,32 @@ def syncDoorsWithSensors(child){
         	case firstDoor:
             	updateDoorStatus(firstDoor, door1Sensor, door1Acceleration, door1ThreeAxis, child)
                 break
-            case doors[1]:
-            	updateDoorStatus(doors[1], door2Sensor, door2Acceleration, door2ThreeAxis, child)
+            case state.validatedDoors[1]:
+            	updateDoorStatus(state.validatedDoors[1], door2Sensor, door2Acceleration, door2ThreeAxis, child)
                 break
-            case doors[2]:
-            	updateDoorStatus(doors[2], door3Sensor, door3Acceleration, door3ThreeAxis, child)
+            case state.validatedDoors[2]:
+            	updateDoorStatus(state.validatedDoors[2], door3Sensor, door3Acceleration, door3ThreeAxis, child)
                 break
-            case doors[3]:
-            	updateDoorStatus(doors[3], door4Sensor, door4Acceleration, door4ThreeAxis, child)
-            case doors[4]:
-            	updateDoorStatus(doors[4], door5Sensor, door5Acceleration, door5ThreeAxis, child)
-            case doors[5]:
-            	updateDoorStatus(doors[5], door6Sensor, door6Acceleration, door6hreeAxis, child)
-            case doors[6]:
-            	updateDoorStatus(doors[6], door7Sensor, door7Acceleration, door7ThreeAxis, child)
-            case doors[7]:
-            	updateDoorStatus(doors[7], door8Sensor, door8Acceleration, door8ThreeAxis, child)
+            case state.validatedDoors[3]:
+            	updateDoorStatus(state.validatedDoors[3], door4Sensor, door4Acceleration, door4ThreeAxis, child)
+            case state.validatedDoors[4]:
+            	updateDoorStatus(state.validatedDoors[4], door5Sensor, door5Acceleration, door5ThreeAxis, child)
+            case state.validatedDoors[5]:
+            	updateDoorStatus(state.validatedDoors[5], door6Sensor, door6Acceleration, door6hreeAxis, child)
+            case state.validatedDoors[6]:
+            	updateDoorStatus(state.validatedDoors[6], door7Sensor, door7Acceleration, door7ThreeAxis, child)
+            case state.validatedDoors[7]:
+            	updateDoorStatus(state.validatedDoors[7], door8Sensor, door8Acceleration, door8ThreeAxis, child)
      	}
     } else {    					// refresh ALL the doors
 		if (firstDoor) updateDoorStatus(firstDoor, door1Sensor, door1Acceleration, door1ThreeAxis, null)
-		if (doors[1]) updateDoorStatus(doors[1], door2Sensor, door2Acceleration, door2ThreeAxis, null)
-		if (doors[2]) updateDoorStatus(doors[2], door3Sensor, door3Acceleration, door3ThreeAxis, null)
-		if (doors[3]) updateDoorStatus(doors[3], door4Sensor, door4Acceleration, door4ThreeAxis, null)
-        if (doors[4]) updateDoorStatus(doors[4], door5Sensor, door5Acceleration, door5ThreeAxis, null)
-        if (doors[5]) updateDoorStatus(doors[5], door6Sensor, door6Acceleration, door6ThreeAxis, null)
-        if (doors[6]) updateDoorStatus(doors[6], door7Sensor, door7Acceleration, door7ThreeAxis, null)
-        if (doors[7]) updateDoorStatus(doors[7], door8Sensor, door8Acceleration, door8ThreeAxis, null)
+		if (state.validatedDoors[1]) updateDoorStatus(state.validatedDoors[1], door2Sensor, door2Acceleration, door2ThreeAxis, null)
+		if (state.validatedDoors[2]) updateDoorStatus(state.validatedDoors[2], door3Sensor, door3Acceleration, door3ThreeAxis, null)
+		if (state.validatedDoors[3]) updateDoorStatus(state.validatedDoors[3], door4Sensor, door4Acceleration, door4ThreeAxis, null)
+        if (state.validatedDoors[4]) updateDoorStatus(state.validatedDoors[4], door5Sensor, door5Acceleration, door5ThreeAxis, null)
+        if (state.validatedDoors[5]) updateDoorStatus(state.validatedDoors[5], door6Sensor, door6Acceleration, door6ThreeAxis, null)
+        if (state.validatedDoors[6]) updateDoorStatus(state.validatedDoors[6], door7Sensor, door7Acceleration, door7ThreeAxis, null)
+        if (state.validatedDoors[7]) updateDoorStatus(state.validatedDoors[7], door8Sensor, door8Acceleration, door8ThreeAxis, null)
     }
 }
 
@@ -688,37 +700,37 @@ def sensorHandler(evt) {
     switch (evt.deviceId) {
     	case door1Sensor.id:
         case door1Acceleration?.id:
-            def firstDoor = doors[0]
+            def firstDoor = state.validatedDoors[0]
 			if (doors instanceof String) firstDoor = doors
         	updateDoorStatus(firstDoor, door1Sensor, door1Acceleration, door1ThreeAxis, null)
             break
     	case door2Sensor?.id:
         case door2Acceleration?.id:
-        	updateDoorStatus(doors[1], door2Sensor, door2Acceleration, door2ThreeAxis, null)
+        	updateDoorStatus(state.validatedDoors[1], door2Sensor, door2Acceleration, door2ThreeAxis, null)
             break    	
         case door3Sensor?.id:
         case door3Acceleration?.id:
-        	updateDoorStatus(doors[2], door3Sensor, door3Acceleration, door3ThreeAxis, null)
+        	updateDoorStatus(state.validatedDoors[2], door3Sensor, door3Acceleration, door3ThreeAxis, null)
             break
     	case door4Sensor?.id:
         case door4Acceleration?.id:
-        	updateDoorStatus(doors[3], door4Sensor, door4Acceleration, door4ThreeAxis, null)
+        	updateDoorStatus(state.validatedDoors[3], door4Sensor, door4Acceleration, door4ThreeAxis, null)
             break
         case door5Sensor?.id:
         case door5Acceleration?.id:
-        	updateDoorStatus(doors[4], door5Sensor, door5Acceleration, door5ThreeAxis, null)
+        	updateDoorStatus(state.validatedDoors[4], door5Sensor, door5Acceleration, door5ThreeAxis, null)
             break
         case door6Sensor?.id:
         case door6Acceleration?.id:
-        	updateDoorStatus(doors[5], door6Sensor, door6Acceleration, door6ThreeAxis, null)
+        	updateDoorStatus(state.validatedDoors[5], door6Sensor, door6Acceleration, door6ThreeAxis, null)
             break
         case door7Sensor?.id:
         case door7Acceleration?.id:
-        	updateDoorStatus(doors[6], door7Sensor, door7Acceleration, door7ThreeAxis, null)
+        	updateDoorStatus(state.validatedDoors[6], door7Sensor, door7Acceleration, door7ThreeAxis, null)
             break
         case door8Sensor?.id:
         case door8Acceleration?.id:
-        	updateDoorStatus(doors[7], door8Sensor, door8Acceleration, door8ThreeAxis, null)
+        	updateDoorStatus(state.validatedDoors[7], door8Sensor, door8Acceleration, door8ThreeAxis, null)
             break
         default:
 			syncDoorsWithSensors()
@@ -1027,32 +1039,32 @@ def sendCommand(child, attributeName, attributeValue) {
 		apiPut("/api/v4/deviceattribute/putdeviceattribute", [ MyQDeviceId: getChildDeviceID(child), AttributeName: attributeName, AttributeValue: attributeValue ]) 
         
         if ((attributeName == "desireddoorstate") && (attributeValue == 0)) {		// if we are closing, check if we have an Acceleration sensor, if so, "waiting" until it moves
-            def firstDoor = doors[0]
+            def firstDoor = state.validatedDoors[0]
     		if (doors instanceof String) firstDoor = doors
         	def doorDNI = child.device.deviceNetworkId
         	switch (doorDNI) {
         		case firstDoor:
                 	if (door1Sensor){if (door1Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("closing")}
                 	break
-            	case doors[1]:
+            	case state.validatedDoors[1]:
             		if (door2Sensor){if (door2Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("closing")}
                 	break
-            	case doors[2]:
+            	case state.validatedDoors[2]:
             		if (door3Sensor){if (door3Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("closing")}
                 	break
-            	case doors[3]:
+            	case state.validatedDoors[3]:
             		if (door4Sensor){if (door4Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("closing")}
         			break
-                case doors[4]:
+                case state.validatedDoors[4]:
             		if (door5Sensor){if (door5Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("closing")}
         			break
-                case doors[5]:
+                case state.validatedDoors[5]:
             		if (door6Sensor){if (door6Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("closing")}
         			break
-                case doors[6]:
+                case state.validatedDoors[6]:
             		if (door7Sensor){if (door7Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("closing")}
         			break
-                case doors[7]:
+                case state.validatedDoors[7]:
             		if (door8Sensor){if (door8Acceleration) child.updateDeviceStatus("waiting") else child.updateDeviceStatus("closing")}
         			break
             }
