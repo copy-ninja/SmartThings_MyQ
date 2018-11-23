@@ -12,11 +12,8 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 11/17/2018
- *  SmartApp version: 2.0.4*
- *  Door device version: 2.1.3*
- *  Door-no-sensor device version: 1.1.2*
- *  Light device version: 1.0.1*
+ *  Last Updated : 11/23/2018
+ *  SmartApp version: 2.0.4* 
  */
 include 'asynchttp_v1'
 
@@ -32,7 +29,7 @@ definition(
 )
 
 preferences {
-	page(name: "prefLogIn", title: "MyQ")    
+	page(name: "prefLogIn", title: "MyQ")
 	page(name: "prefListDevices", title: "MyQ")
     page(name: "prefSensor1", title: "MyQ")
     page(name: "prefSensor2", title: "MyQ")
@@ -73,7 +70,7 @@ def prefListDevices() {
 		def doorList = getDoorList()		
 		if ((state.doorList) || (state.lightList)){
         	def nextPage = "prefSensor1"
-            if (!state.doorList){nextPage = "summary"}  //Skip to summary if there are no doors to handle            
+            if (!state.doorList){nextPage = "summary"}  //Skip to summary if there are no doors to handle
                 return dynamicPage(name: "prefListDevices",  title: "Devices", nextPage:nextPage, install:false, uninstall:true) {
                     if (state.doorList) {
                         section("Select which garage door/gate to use"){
@@ -126,19 +123,19 @@ def prefSensor1() {
     else{
     	log.debug "Multiple doors detected."
         nextPage = "prefSensor2"
-        titleText = "OPTIONAL: Select Sensors for Door 1 (" + state.data[doors[0]].name + ")"        
+        titleText = "OPTIONAL: Select Sensors for Door 1 (" + state.data[doors[0]].name + ")"
     }    
     
-    return dynamicPage(name: "prefSensor1",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:false, uninstall:true) {        
+    return dynamicPage(name: "prefSensor1",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:false, uninstall:true) {
         section(titleText){			
 			paragraph "Optional: If you have sensors on this door, select them below. A sensor allows the device type to know whether the door is open or closed, which helps the device function " + 
-            	"as a switch you can turn on (to open) and off (to close)."                
+            	"as a switch you can turn on (to open) and off (to close). Note: if you choose an acceleration sensor, you must also choose a contact sensor."
             input(name: "door1Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: false, multiple: false)
 			input(name: "door1Acceleration", title: "Acceleration Sensor", type: "capability.accelerationSensor", required: false, multiple: false)
 		}        
         section("Create separate on/off push buttons?"){			
 			paragraph "Choose the option below to have separate additional On and Off push button devices created. This is recommened if you have no sensors but still want a way to open/close the " +
-            "garage from SmartTiles and other interfaces like Google Home that can't function with the built-in open/close capability. See wiki for more details."           
+            "garage from SmartTiles and other interfaces like Google Home that can't function with the built-in open/close capability. See wiki for more details."
             input "prefDoor1PushButtons", "bool", required: false, title: "Create on/off push buttons?"
 		}
     }
@@ -149,16 +146,19 @@ def prefSensor2() {
     def titleText = "Sensors for Door 2 (" + state.data[doors[1]].name + ")"
      
     if (doors.size() > 2){
-    	nextPage = "prefSensor3"        
+    	nextPage = "prefSensor3"
     }
     
     return dynamicPage(name: "prefSensor2",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:false, uninstall:true) {
-        section(titleText){			
+        section(titleText){		
+            paragraph "Optional: If you have sensors on this door, select them below. A sensor allows the device type to know whether the door is open or closed, which helps the device function " + 
+            	"as a switch you can turn on (to open) and off (to close). Note: if you choose an acceleration sensor, you must also choose a contact sensor."
 			input(name: "door2Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: false, multiple: false)
 			input(name: "door2Acceleration", title: "Acceleration Sensor", type: "capability.accelerationSensor", required: false, multiple: false)
 		}
         section("Create separate on/off push buttons?"){
-			paragraph "Choose the option below to have extra on and off push button devices created. This is recommened if you have no sensors but still want a way to open/close the garage from SmartTiles."           
+			paragraph "Choose the option below to have separate additional On and Off push button devices created. This is recommened if you have no sensors but still want a way to open/close the " +
+            "garage from SmartTiles and other interfaces like Google Home that can't function with the built-in open/close capability. See wiki for more details."
             input "prefDoor2PushButtons", "bool", required: false, title: "Create on/off push buttons?"
 		}
     }
@@ -169,16 +169,19 @@ def prefSensor3() {
     def titleText = "Sensors for Door 3 (" + state.data[doors[2]].name + ")"
      
     if (doors.size() > 3){
-    	nextPage = "prefSensor4"        
+    	nextPage = "prefSensor4"
     }
     
     return dynamicPage(name: "prefSensor3",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:false, uninstall:true) {
-        section(titleText){			
+        section(titleText){
+            paragraph "Optional: If you have sensors on this door, select them below. A sensor allows the device type to know whether the door is open or closed, which helps the device function " + 
+            	"as a switch you can turn on (to open) and off (to close). Note: if you choose an acceleration sensor, you must also choose a contact sensor."
 			input(name: "door3Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: false, multiple: false)
 			input(name: "door3Acceleration", title: "Acceleration Sensor", type: "capability.accelerationSensor", required: false, multiple: false)
 		}
         section("Create separate on/off push buttons?"){			
-			paragraph "Choose the option below to have extra on and off push button devices created. This is recommened if you have no sensors but still want a way to open/close the garage from SmartTiles."           
+			paragraph "Choose the option below to have separate additional On and Off push button devices created. This is recommened if you have no sensors but still want a way to open/close the " +
+            "garage from SmartTiles and other interfaces like Google Home that can't function with the built-in open/close capability. See wiki for more details."
             input "prefDoor3PushButtons", "bool", required: false, title: "Create on/off push buttons?"
 		}
     }
@@ -189,16 +192,19 @@ def prefSensor4() {
     def titleText = "Sensors for Door 4 (" + state.data[doors[3]].name + ")"
      
     if (doors.size() > 4){
-    	nextPage = "prefSensor5"        
+    	nextPage = "prefSensor5"
     }
     
     return dynamicPage(name: "prefSensor4",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:false, uninstall:true) {
         section(titleText){			
+            paragraph "Optional: If you have sensors on this door, select them below. A sensor allows the device type to know whether the door is open or closed, which helps the device function " + 
+            	"as a switch you can turn on (to open) and off (to close). Note: if you choose an acceleration sensor, you must also choose a contact sensor."
 			input(name: "door4Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: false, multiple: false)
 			input(name: "door4Acceleration", title: "Acceleration Sensor", type: "capability.accelerationSensor", required: false, multiple: false)
 		}
         section("Create separate on/off push buttons?"){			
-			paragraph "Choose the option below to have extra on and off push button devices created. This is recommened if you have no sensors but still want a way to open/close the garage from SmartTiles."           
+			paragraph "Choose the option below to have separate additional On and Off push button devices created. This is recommened if you have no sensors but still want a way to open/close the " +
+            "garage from SmartTiles and other interfaces like Google Home that can't function with the built-in open/close capability. See wiki for more details."
             input "prefDoor4PushButtons", "bool", required: false, title: "Create on/off push buttons?"
 		}
     }
@@ -209,16 +215,19 @@ def prefSensor5() {
     def titleText = "Sensors for Door 5 (" + state.data[doors[4]].name + ")"
      
     if (doors.size() > 5){
-    	nextPage = "prefSensor6"        
+    	nextPage = "prefSensor6"
     }
     
     return dynamicPage(name: "prefSensor5",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:false, uninstall:true) {
         section(titleText){			
+            paragraph "Optional: If you have sensors on this door, select them below. A sensor allows the device type to know whether the door is open or closed, which helps the device function " + 
+            	"as a switch you can turn on (to open) and off (to close). Note: if you choose an acceleration sensor, you must also choose a contact sensor."
 			input(name: "door5Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: false, multiple: false)
 			input(name: "door5Acceleration", title: "Acceleration Sensor", type: "capability.accelerationSensor", required: false, multiple: false)
 		}
         section("Create separate on/off push buttons?"){			
-			paragraph "Choose the option below to have extra on and off push button devices created. This is recommened if you have no sensors but still want a way to open/close the garage from SmartTiles."           
+			paragraph "Choose the option below to have separate additional On and Off push button devices created. This is recommened if you have no sensors but still want a way to open/close the " +
+            "garage from SmartTiles and other interfaces like Google Home that can't function with the built-in open/close capability. See wiki for more details."
             input "prefDoor5PushButtons", "bool", required: false, title: "Create on/off push buttons?"
 		}
     }
@@ -229,16 +238,19 @@ def prefSensor6() {
     def titleText = "Sensors for Door 6 (" + state.data[doors[5]].name + ")"
      
     if (doors.size() > 6){
-    	nextPage = "prefSensor7"        
+    	nextPage = "prefSensor7"
     }
     
     return dynamicPage(name: "prefSensor6",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:false, uninstall:true) {
-        section(titleText){			
+        section(titleText){
+            paragraph "Optional: If you have sensors on this door, select them below. A sensor allows the device type to know whether the door is open or closed, which helps the device function " + 
+            	"as a switch you can turn on (to open) and off (to close). Note: if you choose an acceleration sensor, you must also choose a contact sensor."
 			input(name: "door6Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: false, multiple: false)
 			input(name: "door6Acceleration", title: "Acceleration Sensor", type: "capability.accelerationSensor", required: false, multiple: false)
 		}
         section("Create separate on/off push buttons?"){			
-			paragraph "Choose the option below to have extra on and off push button devices created. This is recommened if you have no sensors but still want a way to open/close the garage from SmartTiles."           
+			paragraph "Choose the option below to have separate additional On and Off push button devices created. This is recommened if you have no sensors but still want a way to open/close the " +
+            "garage from SmartTiles and other interfaces like Google Home that can't function with the built-in open/close capability. See wiki for more details."
             input "prefDoor6PushButtons", "bool", required: false, title: "Create on/off push buttons?"
 		}
     }
@@ -249,16 +261,19 @@ def prefSensor7() {
     def titleText = "Sensors for Door 7 (" + state.data[doors[6]].name + ")"
      
     if (doors.size() > 7){
-    	nextPage = "prefSensor8"        
+    	nextPage = "prefSensor8"
     }
     
     return dynamicPage(name: "prefSensor7",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:false, uninstall:true) {
-        section(titleText){			
+        section(titleText){
+            paragraph "Optional: If you have sensors on this door, select them below. A sensor allows the device type to know whether the door is open or closed, which helps the device function " + 
+            	"as a switch you can turn on (to open) and off (to close). Note: if you choose an acceleration sensor, you must also choose a contact sensor."
 			input(name: "door7Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: false, multiple: false)
 			input(name: "door7Acceleration", title: "Acceleration Sensor", type: "capability.accelerationSensor", required: false, multiple: false)
 		}
         section("Create separate on/off push buttons?"){			
-			paragraph "Choose the option below to have extra on and off push button devices created. This is recommened if you have no sensors but still want a way to open/close the garage from SmartTiles."           
+			paragraph "Choose the option below to have separate additional On and Off push button devices created. This is recommened if you have no sensors but still want a way to open/close the " +
+            "garage from SmartTiles and other interfaces like Google Home that can't function with the built-in open/close capability. See wiki for more details."
             input "prefDoor7PushButtons", "bool", required: false, title: "Create on/off push buttons?"
 		}
     }
@@ -267,12 +282,15 @@ def prefSensor7() {
 def prefSensor8() {	   
 	def titleText = "Contact Sensor for Door 8 (" + state.data[doors[7]].name + ")"
     return dynamicPage(name: "prefSensor8",  title: "Optional Sensors and Push Buttons", nextPage:"summary", install:false, uninstall:true) {
-        section(titleText){			
+        section(titleText){
+            paragraph "Optional: If you have sensors on this door, select them below. A sensor allows the device type to know whether the door is open or closed, which helps the device function " + 
+            	"as a switch you can turn on (to open) and off (to close). Note: if you choose an acceleration sensor, you must also choose a contact sensor."
 			input(name: "door8Sensor", title: "Contact Sensor", type: "capability.contactSensor", required: "false", multiple: "false")
 			input(name: "door8Acceleration", title: "Acceleration Sensor", type: "capability.accelerationSensor", required: false, multiple: false)
 		}
         section("Create separate on/off push buttons?"){			
-			paragraph "Choose the option below to have extra on and off push button devices created. This is recommened if you have no sensors but still want a way to open/close the garage from SmartTiles."           
+			paragraph "Choose the option below to have separate additional On and Off push button devices created. This is recommened if you have no sensors but still want a way to open/close the " +
+            "garage from SmartTiles and other interfaces like Google Home that can't function with the built-in open/close capability. See wiki for more details."
             input "prefDoor4PushButtons", "bool", required: false, title: "Create on/off push buttons?"
 		}
     }
@@ -282,7 +300,7 @@ def summary() {
 	state.installMsg = ""
     initialize()
     versionCheck()
-    return dynamicPage(name: "summary",  title: "Summary", install:true, uninstall:true) {            
+    return dynamicPage(name: "summary",  title: "Summary", install:true, uninstall:true) {
         section("Installation Details:"){
 			paragraph state.installMsg
             paragraph state.versionWarning
@@ -359,7 +377,7 @@ def initialize() {
             }
             catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
             {
-                log.debug "Error! " + e                        
+                log.debug "Error! " + e
                 state.installMsg = state.installMsg + lightsList[it] + ": problem creating light device. Check your IDE to make sure the brbeaird : MyQ Light Controller device handler is installed and published. \r\n\r\n"
             }
         }
@@ -376,7 +394,7 @@ def initialize() {
         //Modify DNI string for the extra pushbuttons to make sure they don't get deleted unintentionally
         def DNI = it?.deviceNetworkId
         DNI = DNI.replace(" Opener", "")
-        DNI = DNI.replace(" Closer", "")        
+        DNI = DNI.replace(" Closer", "")
 
         if (!(DNI in selectedDevices)){
             log.debug "found device to delete: " + it
@@ -395,8 +413,8 @@ def initialize() {
         subscribe(door1Sensor, "contact", sensorHandler)
     if (door2Sensor)    	
         subscribe(door2Sensor, "contact", sensorHandler)
-    if (door3Sensor)        
-        subscribe(door3Sensor, "contact", sensorHandler)        
+    if (door3Sensor)
+        subscribe(door3Sensor, "contact", sensorHandler)
     if (door4Sensor)    	
         subscribe(door4Sensor, "contact", sensorHandler)
     if (door5Sensor)    	
@@ -412,8 +430,8 @@ def initialize() {
         subscribe(door1Acceleration, "acceleration", sensorHandler)    
     if (door2Acceleration)    	
         subscribe(door2Acceleration, "acceleration", sensorHandler)
-    if (door3Acceleration)        
-        subscribe(door3Acceleration, "acceleration", sensorHandler)        
+    if (door3Acceleration)
+        subscribe(door3Acceleration, "acceleration", sensorHandler)
     if (door4Acceleration)    	
         subscribe(door4Acceleration, "acceleration", sensorHandler)
     if (door5Acceleration)    	
@@ -437,7 +455,7 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
         def existingDev = getChildDevice(door)
         def existingType = existingDev?.typeName
         
-        if (existingDev){        
+        if (existingDev){
         	log.debug "Child already exists for " + doorName + ". Sensor name is: " + sensor
             state.installMsg = state.installMsg + doorName + ": door device already exists. \r\n\r\n"
             if ((!sensor) && existingType == "MyQ Garage Door Opener"){
@@ -450,7 +468,7 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
             	log.debug "Type needs updating to sensor version"
                 existingDev.deviceType = "MyQ Garage Door Opener"
                 state.installMsg = state.installMsg + doorName + ": changed door device to sensor version." + "\r\n\r\n"
-            }            
+            }
         }
         else{
             log.debug "Creating child door device " + door
@@ -463,7 +481,7 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
                     }
                     catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
                     {
-                        log.debug "Error! " + e                        
+                        log.debug "Error! " + e
                         state.installMsg = state.installMsg + doorName + ": problem creating door device (sensor type). Check your IDE to make sure the brbeaird : MyQ Garage Door Opener device handler is installed and published. \r\n\r\n"
                         
                     }
@@ -476,7 +494,7 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
                     }
                     catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
                     {
-                        log.debug "Error! " + e                        
+                        log.debug "Error! " + e
                         state.installMsg = state.installMsg + doorName + ": problem creating door device (no-sensor type). Check your IDE to make sure the brbeaird : MyQ Garage Door Opener-NoSensor device handler is installed and published. \r\n\r\n"
                     }
                 }
@@ -487,15 +505,15 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
         if (prefPushButtons){
         	def existingOpenButtonDev = getChildDevice(door + " Opener")
             def existingCloseButtonDev = getChildDevice(door + " Closer")
-            if (!existingOpenButtonDev){                
+            if (!existingOpenButtonDev){
                 try{
                 	def openButton = addChildDevice("smartthings", "Momentary Button Tile", door + " Opener", getHubID(), [name: doorName + " Opener", label: doorName + " Opener"])
                 	state.installMsg = state.installMsg + doorName + ": created push button device. \r\n\r\n"
-                	subscribe(openButton, "momentary.pushed", doorButtonOpenHandler)                
+                	subscribe(openButton, "momentary.pushed", doorButtonOpenHandler)
                 }
                 catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
                 {
-                    log.debug "Error! " + e                                            
+                    log.debug "Error! " + e
                     state.installMsg = state.installMsg + doorName + ": problem creating push button device. Check your IDE to make sure the smartthings : Momentary Button Tile device handler is installed and published. \r\n\r\n"
                 }
             }
@@ -508,18 +526,18 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
                 
             }
             
-            if (!existingCloseButtonDev){                
+            if (!existingCloseButtonDev){
                 try{
                     def closeButton = addChildDevice("smartthings", "Momentary Button Tile", door + " Closer", getHubID(), [name: doorName + " Closer", label: doorName + " Closer"])
                     subscribe(closeButton, "momentary.pushed", doorButtonCloseHandler)
                 }
                 catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
                 {
-                    log.debug "Error! " + e                        
+                    log.debug "Error! " + e
                 }
             }
             else{
-                subscribe(existingCloseButtonDev, "momentary.pushed", doorButtonCloseHandler)                
+                subscribe(existingCloseButtonDev, "momentary.pushed", doorButtonCloseHandler)
             }
         }
         
@@ -577,7 +595,7 @@ def syncDoorsWithSensors(child){
             case doors[7]:
             	updateDoorStatus(doors[7], door8Sensor, door8Acceleration, door8ThreeAxis, child)
      	}
-    } else {           					// refresh ALL the doors
+    } else {    					// refresh ALL the doors
 		if (firstDoor) updateDoorStatus(firstDoor, door1Sensor, door1Acceleration, door1ThreeAxis, null)
 		if (doors[1]) updateDoorStatus(doors[1], door2Sensor, door2Acceleration, door2ThreeAxis, null)
 		if (doors[2]) updateDoorStatus(doors[2], door3Sensor, door3Acceleration, door3ThreeAxis, null)
@@ -681,7 +699,7 @@ def sensorHandler(evt) {
         case door3Sensor?.id:
         case door3Acceleration?.id:
         	updateDoorStatus(doors[2], door3Sensor, door3Acceleration, door3ThreeAxis, null)
-            break        
+            break
     	case door4Sensor?.id:
         case door4Acceleration?.id:
         	updateDoorStatus(doors[3], door4Sensor, door4Acceleration, door4ThreeAxis, null)
@@ -784,7 +802,7 @@ private getDoorList() {
                     def updatedTime = ''
                     device.Attributes.each { 
 						
-                        if (it.AttributeDisplayName=="desc")	//deviceList[dni] = it.Value                        	
+                        if (it.AttributeDisplayName=="desc")	//deviceList[dni] = it.Value
                         {
                         	description = it.Value
                         }
@@ -814,7 +832,7 @@ private getDoorList() {
                                     description = ""
                                 }
                             }
-                        }                        
+                        }
                         if (doorToRemove){
                         	log.debug "Removing older duplicate."
                             state.data.remove(door)
@@ -842,7 +860,7 @@ private getDoorList() {
                     def updatedTime = ''
                     device.Attributes.each { 
 						
-                        if (it.AttributeDisplayName=="desc")	//deviceList[dni] = it.Value                        	
+                        if (it.AttributeDisplayName=="desc")	//deviceList[dni] = it.Value
                         {
                         	description = it.Value
                         }
@@ -935,7 +953,7 @@ private apiGet(apiPath, apiQuery = [], callback = {}) {
 	apiQuery = [ appId: getApiAppID() ] + apiQuery
 	if (state.session.securityToken) { 
     	apiQuery = apiQuery + [SecurityToken: state.session.securityToken ] 
-        myHeaders = [ "SecurityToken": state.session.securityToken,                        
+        myHeaders = [ "SecurityToken": state.session.securityToken,
                          "MyQApplicationId": getApiAppID() ]
         }
        
@@ -959,7 +977,7 @@ private apiPut(apiPath, apiBody = [], callback = {}) {
 	def apiQuery = [ appId: getApiAppID() ]
 	if (state.session.securityToken) { 
     	apiQuery = apiQuery + [SecurityToken: state.session.securityToken ]
-        myHeaders = [ "SecurityToken": state.session.securityToken,                        
+        myHeaders = [ "SecurityToken": state.session.securityToken,
                          "MyQApplicationId": getApiAppID() ]
     }
     
@@ -1086,20 +1104,20 @@ def versionCheck(){
     getChildDevices().each { childDevice ->
     	
         try {			
-            def devType = childDevice.getTypeName()            
+            def devType = childDevice.getTypeName()
             
-            if (devType != "Momentary Button Tile"){               	                
+            if (devType != "Momentary Button Tile"){
                 if (devType == "MyQ Garage Door Opener"){
                 	usesDoorDev = true
-                    state.thisDoorVersion = childDevice.showVersion()                    
+                    state.thisDoorVersion = childDevice.showVersion()
                 }
                 if (devType == "MyQ Garage Door Opener-NoSensor"){
                 	usesDoorNoSensorDev = true
-                    state.thisDoorNoSensorVersion = childDevice.showVersion()                    
+                    state.thisDoorNoSensorVersion = childDevice.showVersion()
                 }
-                if (devType == "MyQ Light Controller"){                
+                if (devType == "MyQ Light Controller"){
                 	usesLightControllerDev = true
-                    state.thisLightVersion = childDevice.showVersion()                    
+                    state.thisLightVersion = childDevice.showVersion()
                 }
             }
             
@@ -1130,9 +1148,4 @@ def versionCheck(){
 
 def notify(message){
 	sendNotificationEvent(message)
-}
-
-def ping() {
-    logDebug "ping()"	
-    return []
 }

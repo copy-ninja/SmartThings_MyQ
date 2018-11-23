@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 11/20/2018
+ *  Last Updated : 11/23/2018
  *
  */
 metadata {
@@ -20,7 +20,7 @@ metadata {
 		capability "Garage Door Control"
 		capability "Door Control"
 		capability "Actuator"
-        capability "Health Check"
+        //capability "Health Check" Will be needed eventually for new app compatability but is not documented well enough yet
         
         attribute "OpenButton", "string"
         attribute "CloseButton", "string"
@@ -94,9 +94,10 @@ def log(msg){
 }
 
 def showVersion(){
-	return "1.1.4"
+	return "1.1.5"
 }
 
+/*Experimental settings in preparation for new ST app.
 def installed(){
 	sendEvent(name: "checkInterval", value: 4 * 60 * 60 + 2 * 60, displayed: false, data: [protocol: "cloud", scheme:"untracked"])
 }
@@ -109,3 +110,4 @@ def ping() {
     logDebug "ping()"	
     return refresh()
 }
+*/
