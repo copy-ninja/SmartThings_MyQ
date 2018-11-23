@@ -13,7 +13,7 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  *  Last Updated : 11/23/2018
- *  SmartApp version: 2.0.4* 
+ *  SmartApp version: 2.0.6* 
  */
 include 'asynchttp_v1'
 
@@ -109,7 +109,7 @@ def prefSensor1() {
     
     //Sometimes ST has an issue where stale options are not properly dropped from settings. Let's get a true count of valid doors selected
     state.validatedDoors = []
-    if (doors.size() > 1){        
+    if (doors.size() > 1){
         doors.each {
             if (state.data[it] != null){                
                 state.validatedDoors.add(it)                
@@ -129,7 +129,7 @@ def prefSensor1() {
     }
     else if (doors.size() == 1){
     	log.debug "Single door detected (array)."
-        titleText = "Select Sensors for Door 1 (" + state.data[state.validatedDoors[0]].name + ")"
+        titleText = "Select Sensors for Door 1 (" + state.data[doors[0]].name + ")"
     }
     else{
     	log.debug "Multiple doors detected."
