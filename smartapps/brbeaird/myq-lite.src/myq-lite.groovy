@@ -112,11 +112,15 @@ def prefSensor1() {
     if (doors instanceof List && doors.size() > 1){
         doors.each {
             if (state.data[it] != null){                
-                state.validatedDoors.add(it)                
+                state.validatedDoors.add(it)
             }
-        }
-        log.debug "Valid doors chosen: " + state.validatedDoors
+        }        
     }
+    else{
+    	state.validatedDoors = doors	//Handle single door
+    }
+    
+    log.debug "Valid doors chosen: " + state.validatedDoors
     
     //Set defaults
     def nextPage = "summary"    
