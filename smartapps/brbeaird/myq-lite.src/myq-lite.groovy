@@ -13,7 +13,7 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  *  Last Updated : 11/23/2018
- *  SmartApp version: 2.0.6* 
+ *  SmartApp version: 2.0.7* 
  */
 include 'asynchttp_v1'
 
@@ -49,7 +49,7 @@ def prefLogIn() {
     if (state.previousVersion == null){
     	state.previousVersion = 0;
     }
-    state.thisSmartAppVersion = "2.0.5"
+    state.thisSmartAppVersion = "2.0.7"
     state.installMsg = ""
     def showUninstall = username != null && password != null 
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:showUninstall, install: false, submitOnChange: true) {
@@ -109,7 +109,7 @@ def prefSensor1() {
     
     //Sometimes ST has an issue where stale options are not properly dropped from settings. Let's get a true count of valid doors selected
     state.validatedDoors = []
-    if (doors.size() > 1){
+    if (doors instanceof List && doors.size() > 1){
         doors.each {
             if (state.data[it] != null){                
                 state.validatedDoors.add(it)                
