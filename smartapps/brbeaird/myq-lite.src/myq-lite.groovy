@@ -13,7 +13,7 @@
  *  for the specific language governing permissions and limitations under the License.
  *
  *  Last Updated : 11/23/2018
- *  SmartApp version: 2.0.7* 
+ *  SmartApp version: 2.0.8* 
  */
 include 'asynchttp_v1'
 
@@ -49,7 +49,7 @@ def prefLogIn() {
     if (state.previousVersion == null){
     	state.previousVersion = 0;
     }
-    state.thisSmartAppVersion = "2.0.7"
+    state.thisSmartAppVersion = "2.0.8"
     state.installMsg = ""
     def showUninstall = username != null && password != null 
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:showUninstall, install: false, submitOnChange: true) {
