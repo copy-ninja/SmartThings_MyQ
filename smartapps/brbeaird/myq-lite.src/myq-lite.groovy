@@ -12,8 +12,8 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 11/23/2018
- *  SmartApp version: 2.0.8* 
+ *  Last Updated : 12/06/2018
+ *  SmartApp version: 2.0.9* 
  */
 include 'asynchttp_v1'
 
@@ -49,7 +49,7 @@ def prefLogIn() {
     if (state.previousVersion == null){
     	state.previousVersion = 0;
     }
-    state.thisSmartAppVersion = "2.0.8"
+    state.thisSmartAppVersion = "2.0.9"
     state.installMsg = ""
     def showUninstall = username != null && password != null 
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:showUninstall, install: false, submitOnChange: true) {
@@ -461,7 +461,12 @@ def initialize() {
         
     //Set initial values
     if (door1Sensor)
-    	syncDoorsWithSensors()   
+    	syncDoorsWithSensors()
+        
+    //Force a refresh sync with sensors on mode change and each day at sunrise and sunset (in cases where the devices become out of sync)
+    subscribe(location, "mode", refreshAll)    
+    subscribe(location, "sunset", refreshAll)
+    subscribe(location, "sunrise", refreshAll)
 }
 
 def createChilDevices(door, sensor, doorName, prefPushButtons){
@@ -688,6 +693,12 @@ def refresh(child){
     def doorName = state.data[door].name
     child.log("refresh called from " + doorName + ' (' + door + ')')
     syncDoorsWithSensors(child)
+}
+
+def refreshAll(){
+	getChildDevices().each{
+    	syncDoorsWithSensors(it)
+    }
 }
 
 def sensorHandler(evt) {    

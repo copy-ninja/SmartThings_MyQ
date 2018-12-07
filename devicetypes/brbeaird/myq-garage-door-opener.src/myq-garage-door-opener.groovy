@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 11/23/2018
+ *  Last Updated : 12/06/2018
  *
  */
 metadata {
@@ -59,11 +59,9 @@ metadata {
     		}
 		}
 
-// Note that you can refresh this device simply by tapping the "lastActivity" string in the MultiTile now.
-//
-//		standardTile("refresh", "device.door", inactiveLabel: false, decoration: "flat") {
-//			state("default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh")
-//		}
+		standardTile("refresh", "device.door", width: 3, height: 2, decoration: "flat") {
+			state("default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh")
+		}
 		standardTile("contact", "device.contact") {
 			state("open", label:'${name}', icon:"st.contact.contact.open", backgroundColor:"#e86d13")
 			state("closed", label:'${name}', icon:"st.contact.contact.closed", backgroundColor:"#00a0dc")
@@ -80,14 +78,14 @@ metadata {
             state "normal", label: 'Close', icon: "st.doors.garage.garage-closed", backgroundColor: "#00a0dc", action: "close", nextState: "closing"
             state "closing", label: 'Closing', icon: "st.doors.garage.garage-closing", backgroundColor: "#cec236", action: "close"
 		}
-        valueTile("doorSensor", "device.doorSensor", width: 6, height: 2, inactiveLabel: false, decoration: "flat") {
+        valueTile("doorSensor", "device.doorSensor", width: 3, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "default", label:'${currentValue}', backgroundColor:"#ffffff"
 		}
 		valueTile("doorMoving", "device.doorMoving", width: 6, height: 2, inactiveLavel: false, decoration: "flat") {
 			state "default", label: '${currentValue}', backgroundColor:"#ffffff"
 		}        
         main "door"
-		details(["door", "openBtn", "closeBtn", "doorSensor", "doorMoving", "switch"])
+		details(["door", "openBtn", "closeBtn", "doorSensor", "refresh"])
 	}
 }
 
@@ -217,7 +215,7 @@ def log(msg){
 }
 
 def showVersion(){
-	return "2.1.6"
+	return "2.1.7"
 }
 
 /*Experimental settings in preparation for new ST app.
