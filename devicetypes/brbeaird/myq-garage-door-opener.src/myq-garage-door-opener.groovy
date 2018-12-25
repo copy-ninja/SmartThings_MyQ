@@ -27,6 +27,7 @@ metadata {
 		capability "Switch"
 		capability "Momentary"
 		capability "Sensor"
+        capability "Lock"
         //capability "Health Check" Will be needed eventually for new app compatability but is not documented well enough yet
 		
 		attribute "lastActivity", "string"
@@ -38,6 +39,8 @@ metadata {
 		command "updateDeviceStatus", ["string"]
 		command "updateDeviceLastActivity", ["number"]
         command "updateDeviceMoving", ["string"]
+        command "lock"
+        command "unlock"
 	}
 
 	simulator {	}
@@ -92,11 +95,19 @@ metadata {
 def parse(String description) {}
 
 def on() { 
-	log.debug "Turning door on!"    
+	if (parent.prefDisableSwitch){
+    	log.error "WARNING: Switch capability has been disabled by SmartApp preferences."        
+    	return 0
+    }
+    log.debug "Turning door on!"
     open()
     sendEvent(name: "switch", value: "on", isStateChange: true, display: true, displayed: true)	
 }
 def off() { 
+	if (parent.prefDisableSwitch){
+    	log.error "WARNING: Switch capability has been disabled by SmartApp preferences."        
+    	return 0
+    }
     log.debug "Turning door off!"
     close()    
 	sendEvent(name: "switch", value: "off", isStateChange: true, display: true, displayed: true)
@@ -136,14 +147,34 @@ def refresh() {
 
 def poll() { refresh() }
 
+def lock(){
+	log.debug "locked"
+    close()
+    sendEvent(name: "lock", value: "locked", display: false, displayed: false, isStateChange: true)
+}
+
+def unlock(){
+	log.debug "unlocked"
+    open()
+    sendEvent(name: "lock", value: "unlocked", display: false, displayed: false, isStateChange: true)
+}
+
 // update status
 def updateDeviceStatus(status) {	
     
     def currentState = device.currentState("door")?.value
-    log.debug "Request received to update door status to : " + status
+    def lockState
+    if (device.currentState("lock")?.value == "locked"){lockState = "closed"}
+    if (device.currentState("lock")?.value == "unlocked"){lockState = "open"}
+    
+    def switchState
+    if (device.currentState("switch")?.value == "on"){switchState = "open"}
+    if (device.currentState("switch")?.value == "off"){switchState = "closed"}    
+    
+    log.debug "Request received to update door status to : " + status    
     
     //Don't do anything if nothing changed
-    if (currentState == status){
+    if (currentState == status && lockState != status && switchState != status){
     	log.debug "No change; door is already set to " + status
         status = ""
     }
@@ -154,6 +185,7 @@ def updateDeviceStatus(status) {
 			sendEvent(name: "door", value: "open", display: true, isStateChange: true, descriptionText: device.displayName + " is open") 
 			sendEvent(name: "contact", value: "open", display: false, displayed: false, isStateChange: true)	// make sure we update the hidden states as well
         	sendEvent(name: "switch", value: "on", display: false, displayed: false, isStateChange: true)		// on == open
+            sendEvent(name: "lock", value: "unlocked", display: false, displayed: false, isStateChange: true)		// unlocked == open
             break
             
         case "closed":
@@ -161,6 +193,7 @@ def updateDeviceStatus(status) {
         	sendEvent(name: "door", value: "closed", display: true, isStateChange: true, descriptionText: device.displayName + " is closed")
 			sendEvent(name: "contact", value: "closed", display: false, displayed: false, isStateChange: true)	// update hidden states
         	sendEvent(name: "switch", value: "off", display: false, displayed: false, isStateChange: true)		// off == closed
+            sendEvent(name: "lock", value: "locked", display: false, displayed: false, isStateChange: true)		// locked == closed
             break
             
 		case "opening":
@@ -215,7 +248,7 @@ def log(msg){
 }
 
 def showVersion(){
-	return "2.1.7"
+	return "2.2.0"
 }
 
 /*Experimental settings in preparation for new ST app.

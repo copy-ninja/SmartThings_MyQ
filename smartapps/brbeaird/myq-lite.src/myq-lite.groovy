@@ -49,7 +49,7 @@ def prefLogIn() {
     if (state.previousVersion == null){
     	state.previousVersion = 0;
     }
-    state.thisSmartAppVersion = "2.0.9"
+    state.thisSmartAppVersion = "2.1.0"
     state.installMsg = ""
     def showUninstall = username != null && password != null 
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:showUninstall, install: false, submitOnChange: true) {
@@ -60,6 +60,10 @@ def prefLogIn() {
 		section("Gateway Brand"){
 			input(name: "brand", title: "Gateway Brand", type: "enum",  metadata:[values:["Liftmaster","Chamberlain","Craftsman"]] )
 		}
+        section("Extra Security") {
+        	paragraph "Enable the below option if you would like to force the door to only open via an unlock command (useful if you want to lock down voice control)"
+        	input "prefDisableSwitch", "bool", required: false, title: "Disable switch capability?"            
+    	}
 	}
 }
 
@@ -332,7 +336,8 @@ def updated() {
 	log.debug "Updated..."
     if (state.previousVersion != state.thisSmartAppVersion){    	
     	getVersionInfo(state.previousVersion, state.thisSmartAppVersion);
-    }    
+    } 
+    refreshAll()
 }
 
 def uninstall(){
@@ -699,6 +704,10 @@ def refreshAll(){
 	getChildDevices().each{
     	syncDoorsWithSensors(it)
     }
+}
+
+def refreshAll(evt){
+	refreshAll()
 }
 
 def sensorHandler(evt) {    
