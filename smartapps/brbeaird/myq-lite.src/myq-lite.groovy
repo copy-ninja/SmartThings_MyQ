@@ -12,8 +12,8 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 12/06/2018
- *  SmartApp version: 2.0.9* 
+ *  Last Updated : 12/28/2018
+ *  SmartApp version: 2.1.1
  */
 include 'asynchttp_v1'
 
@@ -49,7 +49,7 @@ def prefLogIn() {
     if (state.previousVersion == null){
     	state.previousVersion = 0;
     }
-    state.thisSmartAppVersion = "2.1.0"
+    state.thisSmartAppVersion = "2.1.1"
     state.installMsg = ""
     def showUninstall = username != null && password != null 
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:showUninstall, install: false, submitOnChange: true) {
@@ -485,15 +485,29 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
         	log.debug "Child already exists for " + doorName + ". Sensor name is: " + sensor
             state.installMsg = state.installMsg + doorName + ": door device already exists. \r\n\r\n"
             if ((!sensor) && existingType == "MyQ Garage Door Opener"){
-            	log.debug "Type needs updating to non-sensor version"
-                existingDev.deviceType = "MyQ Garage Door Opener-NoSensor2"
-                state.installMsg = state.installMsg + doorName + ": changed door device to No-sensor version." + "\r\n\r\n"
+            	try{
+                    log.debug "Type needs updating to non-sensor version"
+                    existingDev.deviceType = "MyQ Garage Door Opener-NoSensor"
+                    state.installMsg = state.installMsg + doorName + ": changed door device to No-sensor version." + "\r\n\r\n"
+                }
+                catch(physicalgraph.exception.NotFoundException e)
+                {
+                    log.debug "Error! " + e
+                    state.installMsg = state.installMsg + doorName + ": problem changing door to no-sensor type. Check your IDE to make sure the brbeaird : MyQ Garage Door Opener-NoSensor device handler is installed and published. \r\n\r\n"
+                }
             }
             
             if (sensor && existingType == "MyQ Garage Door Opener-NoSensor"){
-            	log.debug "Type needs updating to sensor version"
-                existingDev.deviceType = "MyQ Garage Door Opener"
-                state.installMsg = state.installMsg + doorName + ": changed door device to sensor version." + "\r\n\r\n"
+            	try{
+                    log.debug "Type needs updating to sensor version"
+                    existingDev.deviceType = "MyQ Garage Door Opener"
+                    state.installMsg = state.installMsg + doorName + ": changed door device to sensor version." + "\r\n\r\n"
+                }
+                catch(physicalgraph.exception.NotFoundException e)
+                {
+                    log.debug "Error! " + e
+                    state.installMsg = state.installMsg + doorName + ": problem changing door to sensor type. Check your IDE to make sure the brbeaird : MyQ Garage Door Opener device handler is installed and published. \r\n\r\n"                        
+                }
             }
         }
         else{
@@ -508,7 +522,7 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
                     catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
                     {
                         log.debug "Error! " + e
-                        state.installMsg = state.installMsg + doorName + ": problem creating door device (sensor type). Check your IDE to make sure the brbeaird : MyQ Garage Door Opener device handler is installed and published. \r\n\r\n"
+                        state.installMsg = state.installMsg + doorName + ": problem creating door device (sensor type). Check your IDE to make sure the brbeaird : MyQ Garage Door Opener device handler is installed and published. \r\n\r\n"                        
                         
                     }
                 }
@@ -634,7 +648,10 @@ def syncDoorsWithSensors(child){
 }
 
 def updateDoorStatus(doorDNI, sensor, acceleration, threeAxis, child){
-	
+
+	if (sensor == null)
+    	return 0
+    
     //Get door to update and set the new value
     def doorToUpdate = getChildDevice(doorDNI)
     def doorName = state.data[doorDNI].name
@@ -957,8 +974,8 @@ def getHubID(){
     else{
         return hubs[0].id 
     }
-    //log.debug "hub count: ${hubs.size()}"
-    //log.debug "hubID: ${hubID}"    
+    log.debug "hub count: ${hubs.size()}"
+    log.debug "hubID: ${hubID}"    
 }
 
 
@@ -1025,7 +1042,7 @@ private apiPut(apiPath, apiBody = [], callback = {}) {
 }
 
 // HTTP POST call
-private apiPostLogin(apiPath, apiBody = [], callback = {}) {    
+private apiPostLogin(apiPath, apiBody = [], callback = {}) {
 	// set up body
 	apiBody = apiBody
     def myHeaders = [ "User-Agent": "Chamberlain/3.73",
