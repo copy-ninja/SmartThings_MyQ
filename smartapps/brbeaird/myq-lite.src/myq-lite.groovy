@@ -39,6 +39,7 @@ preferences {
     page(name: "prefSensor6", title: "MyQ")
     page(name: "prefSensor7", title: "MyQ")
     page(name: "prefSensor8", title: "MyQ")
+    page(name: "noDoorsSelected", title: "MyQ")
     page(name: "summary", title: "MyQ")
 }
 
@@ -60,9 +61,9 @@ def prefLogIn() {
 		section("Gateway Brand"){
 			input(name: "brand", title: "Gateway Brand", type: "enum",  metadata:[values:["Liftmaster","Chamberlain","Craftsman"]] )
 		}
-        section("Extra Security") {
-        	paragraph "Enable the below option if you would like to force the door to only open via an unlock command (useful if you want to lock down voice control)"
-        	input "prefDisableSwitch", "bool", required: false, title: "Disable switch capability?"            
+        section("Lock Option") {
+        	paragraph "Enable the below option if you would like to force the door(s) to behave as locks instead of doors (sensor required). This may be desirable if you only want doors to open up via PIN with voice commands."
+        	input "prefUseLockType", "bool", required: false, title: "Treat doors as locks?"
     	}
 	}
 }
@@ -130,21 +131,32 @@ def prefSensor1() {
     def nextPage = "summary"    
     def titleText = ""
     
+    //If no doors chosen, skip to summary
+    if (!state.validatedDoors){
+        return dynamicPage(name: "noDoorsSelected",  title: "No doors selected. Tap next to finish.", nextPage:nextPage, install:false, uninstall:true) {
+            section(titleText){
+                paragraph "No doors selected. Tap next to finish"                
+            }
+        }
+    }
+    
+    
     //Determine if we have multiple doors and need to send to another page
     if (doors instanceof String){ //simulator seems to just make a single door a string. For that reason we have this weird check.
-    	log.debug "Single door detected (string)."
+        log.debug "Single door detected (string)."
         titleText = "Select Sensors for Door 1 (" + state.data[doors].name + ")"
     }
     else if (doors.size() == 1){
-    	log.debug "Single door detected (array)."
+        log.debug "Single door detected (array)."
         titleText = "Select Sensors for Door 1 (" + state.data[doors[0]].name + ")"
     }
     else{
-    	log.debug "Multiple doors detected."
+        log.debug "Multiple doors detected."
         log.debug state.validatedDoors[0]
         nextPage = "prefSensor2"
         titleText = "OPTIONAL: Select Sensors for Door 1 (" + state.data[state.validatedDoors[0]].name + ")"
-    }    
+    }
+    
     
     return dynamicPage(name: "prefSensor1",  title: "Optional Sensors and Push Buttons", nextPage:nextPage, install:false, uninstall:true) {
         section(titleText){			
@@ -329,15 +341,24 @@ def summary() {
 }
 
 /* Initialization */
-def installed() { 	
+def installed() {
+	if (door1Sensor && state.validatedDoors){    
+    	refreshAll()
+        unschedule()
+    	runEvery30Minutes(refreshAll)
+    }
 }
 
 def updated() { 
 	log.debug "Updated..."
     if (state.previousVersion != state.thisSmartAppVersion){    	
     	getVersionInfo(state.previousVersion, state.thisSmartAppVersion);
-    } 
-    refreshAll()
+    }    
+    if (door1Sensor && state.validatedDoors){    
+    	refreshAll()
+        unschedule()
+    	runEvery30Minutes(refreshAll)
+    }
 }
 
 def uninstall(){
@@ -464,9 +485,11 @@ def initialize() {
     if (door8Acceleration)    	
         subscribe(door8Acceleration, "acceleration", sensorHandler)
         
-    //Set initial values
-    if (door1Sensor)
+    //Set initial values    
+    if (door1Sensor && state.validatedDoors){
+    	log.debug "Doing the sync"
     	syncDoorsWithSensors()
+    }
         
     //Force a refresh sync with sensors on mode change and each day at sunrise and sunset (in cases where the devices become out of sync)
     subscribe(location, "mode", refreshAll)    
@@ -476,6 +499,10 @@ def initialize() {
 
 def createChilDevices(door, sensor, doorName, prefPushButtons){
 	log.debug "In CreateChild"
+    def sensorTypeName = "MyQ Garage Door Opener"
+    def noSensorTypeName = "MyQ Garage Door Opener-NoSensor"
+    def lockTypeName = "MyQ Lock Door"
+
     if (door){
         //Has door's child device already been created?
         def existingDev = getChildDevice(door)
@@ -484,58 +511,85 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
         if (existingDev){
         	log.debug "Child already exists for " + doorName + ". Sensor name is: " + sensor
             state.installMsg = state.installMsg + doorName + ": door device already exists. \r\n\r\n"
-            if ((!sensor) && existingType == "MyQ Garage Door Opener"){
+            
+            if (prefUseLockType && existingType != lockTypeName){
+                try{
+                    log.debug "Type needs updating to Lock version"
+                    existingDev.deviceType = lockTypeName
+                    state.installMsg = state.installMsg + doorName + ": changed door device to lock version." + "\r\n\r\n"
+                }
+                catch(physicalgraph.exception.NotFoundException e)
+                {
+                    log.debug "Error! " + e
+                    state.installMsg = state.installMsg + doorName + ": problem changing door to no-sensor type. Check your IDE to make sure the brbeaird : " + lockTypeName + " device handler is installed and published. \r\n\r\n"
+                }
+            }
+            else if ((!sensor) && existingType != noSensorTypeName){
             	try{
-                    log.debug "Type needs updating to non-sensor version"
-                    existingDev.deviceType = "MyQ Garage Door Opener-NoSensor"
+                    log.debug "Type needs updating to no-sensor version"
+                    existingDev.deviceType = noSensorTypeName
                     state.installMsg = state.installMsg + doorName + ": changed door device to No-sensor version." + "\r\n\r\n"
                 }
                 catch(physicalgraph.exception.NotFoundException e)
                 {
                     log.debug "Error! " + e
-                    state.installMsg = state.installMsg + doorName + ": problem changing door to no-sensor type. Check your IDE to make sure the brbeaird : MyQ Garage Door Opener-NoSensor device handler is installed and published. \r\n\r\n"
+                    state.installMsg = state.installMsg + doorName + ": problem changing door to no-sensor type. Check your IDE to make sure the brbeaird : " + noSensorTypeName + " device handler is installed and published. \r\n\r\n"
                 }
             }
             
-            if (sensor && existingType == "MyQ Garage Door Opener-NoSensor"){
+            else if (sensor && existingType != sensorTypeName && !prefUseLockType){
             	try{
                     log.debug "Type needs updating to sensor version"
-                    existingDev.deviceType = "MyQ Garage Door Opener"
+                    existingDev.deviceType = sensorTypeName
                     state.installMsg = state.installMsg + doorName + ": changed door device to sensor version." + "\r\n\r\n"
                 }
                 catch(physicalgraph.exception.NotFoundException e)
                 {
                     log.debug "Error! " + e
-                    state.installMsg = state.installMsg + doorName + ": problem changing door to sensor type. Check your IDE to make sure the brbeaird : MyQ Garage Door Opener device handler is installed and published. \r\n\r\n"                        
+                    state.installMsg = state.installMsg + doorName + ": problem changing door to sensor type. Check your IDE to make sure the brbeaird : " + sensorTypeName + " device handler is installed and published. \r\n\r\n"                        
                 }
             }
         }
         else{
             log.debug "Creating child door device " + door
             
-                if (sensor){
+                if (prefUseLockType){
+                try{
+                        log.debug "Creating door with lock type"
+                        addChildDevice("brbeaird", lockTypeName, door, getHubID(), ["name": doorName]) 
+                        state.installMsg = state.installMsg + doorName + ": created lock device \r\n\r\n"
+                    }
+                    catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
+                    {
+                        log.debug "Error! " + e
+                        state.installMsg = state.installMsg + doorName + ": problem creating door device (lock type). Check your IDE to make sure the brbeaird : " + sensorTypeName + " device handler is installed and published. \r\n\r\n"                        
+                        
+                    }
+                }                
+                
+                else if (sensor){
                     try{
                         log.debug "Creating door with sensor"
-                        addChildDevice("brbeaird", "MyQ Garage Door Opener", door, getHubID(), ["name": doorName]) 
+                        addChildDevice("brbeaird", sensorTypeName, door, getHubID(), ["name": doorName]) 
                         state.installMsg = state.installMsg + doorName + ": created door device (sensor version) \r\n\r\n"
                     }
                     catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
                     {
                         log.debug "Error! " + e
-                        state.installMsg = state.installMsg + doorName + ": problem creating door device (sensor type). Check your IDE to make sure the brbeaird : MyQ Garage Door Opener device handler is installed and published. \r\n\r\n"                        
+                        state.installMsg = state.installMsg + doorName + ": problem creating door device (sensor type). Check your IDE to make sure the brbeaird : " + sensorTypeName + " device handler is installed and published. \r\n\r\n"                        
                         
                     }
                 }
                 else{
                     try{
                         log.debug "Creating door with no sensor"
-                        addChildDevice("brbeaird", "MyQ Garage Door Opener-NoSensor", door, getHubID(), ["name": doorName]) 
+                        addChildDevice("brbeaird", noSensorTypeName, door, getHubID(), ["name": doorName]) 
                         state.installMsg = state.installMsg + doorName + ": created door device (no-sensor version) \r\n\r\n"
                     }
                     catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
                     {
                         log.debug "Error! " + e
-                        state.installMsg = state.installMsg + doorName + ": problem creating door device (no-sensor type). Check your IDE to make sure the brbeaird : MyQ Garage Door Opener-NoSensor device handler is installed and published. \r\n\r\n"
+                        state.installMsg = state.installMsg + doorName + ": problem creating door device (no-sensor type). Check your IDE to make sure the brbeaird : " + noSensorTypeName + " device handler is installed and published. \r\n\r\n"
                     }
                 }
             
@@ -604,7 +658,7 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
 }
 
 
-def syncDoorsWithSensors(child){	
+def syncDoorsWithSensors(child){
     def firstDoor = state.validatedDoors[0]
         
     //Handle single door (sometimes it's just a dumb string thanks to the simulator)

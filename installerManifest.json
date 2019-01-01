@@ -19,7 +19,7 @@
             "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
             "published": true,
             "oAuth": true,
-            "version": "2.1.1",
+            "version": "2.1.2",
             "appSettings": {},
             "appUrl": "smartapps/brbeaird/myq-lite.src/myq-lite.groovy"
         },
@@ -32,18 +32,28 @@
             "oAuth": false,
             "appUrl": "devicetypes/brbeaird/myq-garage-door-opener.src/myq-garage-door-opener.groovy",
             "appSettings": {},
-            "version": "2.2.0",
+            "version": "2.2.1",
             "optional": false
-    },
-    {
+        },
+        {
 	        "name": "MyQ Garage Door Opener-NoSensor",
 	        "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
 	        "published": true,
 	        "oAuth": false,
 	        "appUrl": "devicetypes/brbeaird/myq-garage-door-opener-nosensor.src/myq-garage-door-opener-nosensor.groovy",
 	        "appSettings": {},
-	        "version": "1.1.5",
+	        "version": "1.1.6",
 	        "optional": false
+        },
+        {
+	        "name": "MyQ Lock Door",
+	        "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
+	        "published": true,
+	        "oAuth": false,
+	        "appUrl": "devicetypes/brbeaird/myq-lock-door.src/myq-lock-door.groovy",
+	        "appSettings": {},
+	        "version": "1.0.0",
+	        "optional": true
 	    },
 	    {
 	        "name": "MyQ Light Controller",

@@ -12,13 +12,12 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 11/23/2018
+ *  Last Updated : 1/1/2019
  *
  */
 metadata {
 	definition (name: "MyQ Garage Door Opener-NoSensor", namespace: "brbeaird", author: "Brian Beaird", vid: "generic-contact-4", ocfdevicetype: "oic.d.garagedoor", mnmn: "SmartThings") {
-		capability "Garage Door Control"
-		capability "Door Control"
+		capability "Garage Door Control"		
 		capability "Actuator"
         //capability "Health Check" Will be needed eventually for new app compatability but is not documented well enough yet
         
@@ -94,20 +93,5 @@ def log(msg){
 }
 
 def showVersion(){
-	return "1.1.5"
+	return "1.1.6"
 }
-
-/*Experimental settings in preparation for new ST app.
-def installed(){
-	sendEvent(name: "checkInterval", value: 4 * 60 * 60 + 2 * 60, displayed: false, data: [protocol: "cloud", scheme:"untracked"])
-}
-
-def updated(){
-	sendEvent(name: "checkInterval", value: 4 * 60 * 60 + 2 * 60, displayed: false, data: [protocol: "cloud", scheme:"untracked"])
-}
-
-def ping() {
-    logDebug "ping()"	
-    return refresh()
-}
-*/
