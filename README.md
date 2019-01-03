@@ -2,6 +2,7 @@
 # SmartThings MyQ Lite SmartApp
 
 ### Current Notes
+* Please note this SmartApp cannot read the status of the MyQ door using the MyQ tilt sensor. Getting the door status will require a separate SmartThings-compatible sensor. It's an unfortunate hassle but is the only way we can do this without polling MyQ for status (which they will not allow done from the SmartThings cloud).
 * This SmartApp is currently only supported in the **SmartThings Classic mobile app**; the new app does not yet support custom apps like this
 * If you get an error saying "No supported devices found," the most likely cause is you're running an older version of the SmartApp. Double check to see you're using the latest code. If you're still having trouble, there's a small chance your IDE info is not sync'd properly across all SmartThings cloud shards. One way to tell this is by checking the Hubs link and noticing your hub missing. Another  way to check that is to reset all cookies and log in again (or try from a different computer) to see if it logs you into a different shard at that point, which will let you verify if things are out of sync. If there's a problem with that, SmartThings support can help.
 
@@ -74,10 +75,16 @@ Since we have no way to keep an exact on/off status on the light, it is strongly
 
 Alexa should be able to control the light device just like any other switch in your environment.
 
+### Lock Door Functionality
+During SmartApp setup, you have the option to enable your doors to be treated with lock functionality (sensor is required for this). This adds lock capability to the door device while removing switch capability. The main use case for this is to have the door show up in ActionTiles, Alexa, and Google Home as a lock. With Alexa, this allows you to set a PIN to unlock the door, which is more secure than allowing someone to simply say "open the garage door." With ActionTiles, you could also just set a PIN on the door. With Google Home, this still doesn't get us full lock functionality but is at least partially there for now. This option is not used in most setups but is here if you really want an extra layer of security.
+
 ## Installation Instructions:
 
-###Code Needed:
-There are 5 code files available for the installations of this app - 1 SmartApp and 4 Device Handlers. At minimum, you need the main SmartApp and at least one of the device handlers. Note that you only need to install the device handlers you'll plan on using (ex: you can leave off the light controller if you don't have any lights).
+### SmartThings Community Installer (Strongly Recommended install/update method)
+By far, the easiest way to install this Smartapp (and many other popular ones) and keep it updated is to use the SmartThings Community Installer. Instructions for that can be found <a href="http://thingsthataresmart.wiki/index.php?title=Community_Installer_(Free_Marketplace)">here</a>. If you go that route, you can find MyQ on the list of apps, tap to install, and ignore the other install information below. The same goes for installing updates in the future.
+
+### Code Needed:
+There are 6 code files available for the installations of this app - 1 SmartApp and 5 Device Handlers. At minimum, you need the main SmartApp and at least one of the device handlers. Note that you only need to install the device handlers you'll plan on using (ex: you can leave off the light controller if you don't have any lights).
 
 | Code Type        | Name           | Location  | Notes |
 | ------------- |-------------| -----|-----|
@@ -86,6 +93,7 @@ There are 5 code files available for the installations of this app - 1 SmartApp 
 | Device Handler | MyQ Garage Door Opener-NoSensor | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-garage-door-opener-nosensor.src/myq-garage-door-opener-nosensor.groovy">Link</a> |Needed if NOT using door sensors|
 | Device Handler | Momentary Button Tile | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/smartthings/momentary-button-tile.src/momentary-button-tile.groovy">Link</a> |Helpful for no-sensor installs to add buttons in routines/ActionTiles/Alexa|
 | Device Handler | Light Controller | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-light-controller.src/myq-light-controller.groovy">Link</a> |Only needed if using a plug-in MyQ Lamp Controller|
+| Device Handler | MyQ Lock Door | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-lock-door.src/myq-lock-door.groovy">Link</a> |Only needed if using the lock-type door functionality|
 
 
 ### Manually:

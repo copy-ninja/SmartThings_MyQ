@@ -470,7 +470,7 @@ def initialize() {
         if (!(DNI in selectedDevices)){
             log.debug "found device to delete: " + it
             try{
-                	deleteChildDevice(it.deviceNetworkId)
+                	deleteChildDevice(it.deviceNetworkId, true)
             } catch (e){
                 	sendPush("Warning: unable to delete door or button - " + it + "- you'll need to manually remove it.")
                     log.debug "Error trying to delete device " + it + " - " + e
@@ -673,7 +673,7 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
 			devsToDelete.each{
             	log.debug "deleting button: " + it
                 try{
-                	deleteChildDevice(it.deviceNetworkId)
+                	deleteChildDevice(it.deviceNetworkId, true)
                 } catch (e){
                 	//sendPush("Warning: unable to delete virtual on/off push button - you'll need to manually remove it.")
                     state.installMsg = state.installMsg + "Warning: unable to delete virtual on/off push button - you'll need to manually remove it. \r\n\r\n"
