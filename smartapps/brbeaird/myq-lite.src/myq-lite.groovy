@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 2019-01-02 
+ *  Last Updated : 2019-01-03
  */
 include 'asynchttp_v1'
 
@@ -50,7 +50,7 @@ def prefLogIn() {
     if (state.previousVersion == null){
     	state.previousVersion = 0;
     }
-    state.thisSmartAppVersion = "2.1.4"
+    state.thisSmartAppVersion = "2.1.5"
     state.installMsg = ""
     def showUninstall = username != null && password != null 
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:false, install: false, submitOnChange: true) {
@@ -1048,17 +1048,27 @@ private getDeviceList() {
 	return deviceList
 }
 
-def getHubID(){
-    def hubID    
+def getHubID(){          
     def hubs = location.hubs.findAll{ it.type == physicalgraph.device.HubType.PHYSICAL }
-    log.debug "hub count: ${hubs.size()}"
-    log.debug "hubID: ${hubID}"    
-    if (hubs == null || hubs.size() == 0){
-        return null;
+    log.debug "Found ${hubs.size()} hub(s) at this location."
+    
+    //Try and find a valid hub on the account
+    def chosenHub
+    hubs.each {    	
+        if (it != null){
+        	log.debug "Valid hub found: ${it} (${it.id})"            
+            chosenHub = it
+        }
+    }
+
+    if (chosenHub != null){
+        log.debug "Chosen hub for child devices: ${chosenHub} (${chosenHub.id})"
+        return chosenHub.id
     }
     else{
-        return hubs[0].id 
-    }    
+        log.debug "No physical hubs found. Sending NULL"
+        return null
+    }
 }
 
 
