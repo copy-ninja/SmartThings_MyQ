@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 1/1/2019
+ *  Last Updated : 2019-01-02
  *
  */
 metadata {
@@ -145,7 +145,7 @@ def updateDeviceStatus(status) {
     log.debug "Request received to update door status to : " + status    
     
     //Don't do anything if nothing changed
-    if (currentState == status && switchState != status){
+    if (currentState == status && switchState == status){
     	log.debug "No change; door is already set to " + status
         status = ""
     }
@@ -217,5 +217,5 @@ def log(msg){
 }
 
 def showVersion(){
-	return "2.2.1"
+	return "2.2.2"
 }

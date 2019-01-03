@@ -12,8 +12,8 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 12/28/2018
- *  SmartApp version: 2.1.1
+ *  Last Updated : 2019-01-02
+ *  SmartApp version: 2.1.3
  */
 include 'asynchttp_v1'
 
@@ -41,6 +41,7 @@ preferences {
     page(name: "prefSensor8", title: "MyQ")
     page(name: "noDoorsSelected", title: "MyQ")
     page(name: "summary", title: "MyQ")
+    page(name: "prefUninstall", title: "MyQ")
 }
 
 
@@ -50,10 +51,10 @@ def prefLogIn() {
     if (state.previousVersion == null){
     	state.previousVersion = 0;
     }
-    state.thisSmartAppVersion = "2.1.1"
+    state.thisSmartAppVersion = "2.1.3"
     state.installMsg = ""
     def showUninstall = username != null && password != null 
-	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:showUninstall, install: false, submitOnChange: true) {
+	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:false, install: false, submitOnChange: true) {
 		section("Login Credentials"){
 			input("username", "email", title: "Username", description: "MyQ Username (email address)")
 			input("password", "password", title: "Password", description: "MyQ password")
@@ -65,7 +66,20 @@ def prefLogIn() {
         	paragraph "Enable the below option if you would like to force the door(s) to behave as locks instead of doors (sensor required). This may be desirable if you only want doors to open up via PIN with voice commands."
         	input "prefUseLockType", "bool", required: false, title: "Treat doors as locks?"
     	}
+        section("Uninstall") {
+            paragraph "Tap below to completely uninstall this SmartApp and devices (doors and lamp control devices will be force-removed from automations and SmartApps)"
+            href(name: "href", title: "Uninstall", required: false, page: "prefUninstall")
+        }    	
 	}
+}
+
+def prefUninstall() {	
+    uninstall()
+    return dynamicPage(name: "prefUninstall",  title: "Uninstall", install:false, uninstall:true) {
+        section("Uninstallation successful"){
+			paragraph "Devices have been removed. Tap remove to complete the process."
+		}
+    }
 }
 
 def prefListDevices() {
@@ -363,11 +377,14 @@ def updated() {
 
 def uninstall(){
     log.debug "Removing MyQ Devices..."
-    def delete = getChildDevices().findAll { !settings.devices.contains(it.deviceNetworkId) }
-
-    delete.each {
-        deleteChildDevice(it.deviceNetworkId, true)
-    }
+    childDevices.each {
+		try{
+			deleteChildDevice(it.deviceNetworkId)
+		}
+		catch (e) {
+			log.debug "Error deleting ${it.deviceNetworkId}: ${e}"
+		}
+	}
 }
 
 def uninstalled() {
