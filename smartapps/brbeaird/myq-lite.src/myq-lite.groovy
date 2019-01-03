@@ -12,8 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 2019-01-02
- *  SmartApp version: 2.1.3
+ *  Last Updated : 2019-01-02 
  */
 include 'asynchttp_v1'
 
@@ -51,7 +50,7 @@ def prefLogIn() {
     if (state.previousVersion == null){
     	state.previousVersion = 0;
     }
-    state.thisSmartAppVersion = "2.1.3"
+    state.thisSmartAppVersion = "2.1.4"
     state.installMsg = ""
     def showUninstall = username != null && password != null 
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:false, install: false, submitOnChange: true) {
@@ -74,10 +73,23 @@ def prefLogIn() {
 }
 
 def prefUninstall() {	
-    uninstall()
+    log.debug "Removing MyQ Devices..."
+    def msg = ""
+    childDevices.each {
+		try{
+			deleteChildDevice(it.deviceNetworkId, true)
+            msg = "Devices have been removed. Tap remove to complete the process."
+            
+		}
+		catch (e) {
+			log.debug "Error deleting ${it.deviceNetworkId}: ${e}"
+            msg = "There was a problem removing your device(s). Check the IDE logs for details."
+		}
+	}
+    
     return dynamicPage(name: "prefUninstall",  title: "Uninstall", install:false, uninstall:true) {
-        section("Uninstallation successful"){
-			paragraph "Devices have been removed. Tap remove to complete the process."
+        section("Uninstallation"){
+			paragraph msg
 		}
     }
 }
@@ -379,7 +391,7 @@ def uninstall(){
     log.debug "Removing MyQ Devices..."
     childDevices.each {
 		try{
-			deleteChildDevice(it.deviceNetworkId)
+			deleteChildDevice(it.deviceNetworkId, true)
 		}
 		catch (e) {
 			log.debug "Error deleting ${it.deviceNetworkId}: ${e}"
