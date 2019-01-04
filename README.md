@@ -75,8 +75,8 @@ Since we have no way to keep an exact on/off status on the light, it is strongly
 
 Alexa should be able to control the light device just like any other switch in your environment.
 
-### Lock Door Functionality
-During SmartApp setup, you have the option to enable your doors to be treated with lock functionality (sensor is required for this). This adds lock capability to the door device while removing switch capability. The main use case for this is to have the door show up in ActionTiles, Alexa, and Google Home as a lock. With Alexa, this allows you to set a PIN to unlock the door, which is more secure than allowing someone to simply say "open the garage door." With ActionTiles, you could also just set a PIN on the door. With Google Home, this still doesn't get us full lock functionality but is at least partially there for now. This option is not used in most setups but is here if you really want an extra layer of security.
+### Lock Door Functionality (BETA and Highly Experimental - For advanced users only)
+During SmartApp setup, you have the option to enable your doors to be treated with lock functionality (sensor is required for this). This adds lock capability to the garage door device while removing switch capability. The main use case for this is to have the door show up in Alexa as a lock. This allows you to set a PIN to unlock the door, which is more secure than allowing someone to simply say "open the garage door." This option is not used in most setups but is here if you really want an extra layer of security. Beware it's considered highly experimental and may break other automations that use the standard door control.
 
 ## Installation Instructions:
 
