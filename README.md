@@ -68,8 +68,6 @@ If your door has a sensor, Alexa will respond simply to **"Alexa, turn ON [garag
 
 If you want a less-awkward way to open the door, you can set up an Alexa routine or a Google Home shortcut that translates something like "Alexa, open the garage" to the full "Alexa, turn on..." phrase from above.
 
-### Garage Door Usage with Alexa/Google Home (With a door sensor):
-
 ### Special notes when using Light Controllers:
 Since we have no way to keep an exact on/off status on the light, it is strongly recommended that you ONLY control the light via SmartThings (not through the MyQ app or manually at the physical device itself). As long as SmartThings is the only thing making changes, it will essentially always have the correct status. If for some reason the status does get out of sync, you may just need to turn it off and back on in SmartThings to sync it back up.
 
