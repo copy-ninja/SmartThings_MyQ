@@ -35,14 +35,7 @@ metadata {
 		
 		multiAttributeTile(name:"door", type: "lighting", width: 6, height: 4, canChangeIcon: false) {
 			tileAttribute ("device.door", key: "PRIMARY_CONTROL") {
-				attributeState "unknown", label:'MyQ Door (No sensor)', icon:"st.doors.garage.garage-closed",    backgroundColor:"#6495ED"
-				attributeState "moving",  label:'${name}', action:"door control.open",   icon:"st.doors.garage.garage-closed",  backgroundColor:"#00a0dc", nextState: "opening"
-				attributeState "open",    label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-open",    backgroundColor:"#e86d13", nextState: "waiting"
-                attributeState "closed",    label:'${name}', action:"door control.open",  icon:"st.doors.garage.garage-closed",    backgroundColor:"#00a0dc", nextState: "opening"
-				attributeState "opening", label:'${name}', 								 icon:"st.doors.garage.garage-opening", backgroundColor:"#cec236"
-				attributeState "closing", label:'${name}', 								 icon:"st.doors.garage.garage-closing", backgroundColor:"#cec236"
-				attributeState "waiting", label:'${name}', 								 icon:"st.doors.garage.garage-closing", backgroundColor:"#cec236", nextState: "closing"
-				attributeState "stopped", label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-closing", backgroundColor:"#1ee3ff", nextState: "closing"
+				attributeState "unknown", label:'MyQ Door (No sensor)', icon:"st.doors.garage.garage-closed",    backgroundColor:"#6495ED"				
 			}			
 		}
       
@@ -94,5 +87,5 @@ def log(msg){
 }
 
 def showVersion(){
-	return "1.1.7"
+	return "1.1.8"
 }

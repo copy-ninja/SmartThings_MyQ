@@ -46,13 +46,13 @@ metadata {
 		
 		multiAttributeTile(name:"door", type: "lighting", width: 6, height: 4, canChangeIcon: false) {
 			tileAttribute ("device.door", key: "PRIMARY_CONTROL") {
-				attributeState "unknown", label:'${name}', icon:"st.doors.garage.garage-closed",    backgroundColor:"#ffa81e", nextState: "closing"
-				attributeState "closed",  label:'${name}', action:"door control.open",   icon:"st.doors.garage.garage-closed",  backgroundColor:"#00a0dc"
-				attributeState "open",    label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-open",    backgroundColor:"#e86d13"
-				attributeState "opening", label:'${name}', 								 icon:"st.doors.garage.garage-opening", backgroundColor:"#cec236"
-				attributeState "closing", label:'${name}', 								 icon:"st.doors.garage.garage-closing", backgroundColor:"#cec236"
-				attributeState "waiting", label:'${name}', 								 icon:"st.doors.garage.garage-closing", backgroundColor:"#cec236"
-				attributeState "stopped", label:'${name}', action:"door control.close",  icon:"st.doors.garage.garage-closing", backgroundColor:"#1ee3ff"
+				attributeState "unknown", label:'${name}', icon:"st.doors.garage.garage-closed",    backgroundColor:"#ffa81e"
+				attributeState "closed",  label:'${name}', action:"push",   icon:"st.doors.garage.garage-closed",  backgroundColor:"#00a0dc", nextState: "opening"
+				attributeState "open",    label:'${name}', action:"push",  icon:"st.doors.garage.garage-open",    backgroundColor:"#e86d13", nextState: "closing"
+				attributeState "opening", label:'${name}', action:"push",	 icon:"st.doors.garage.garage-opening", backgroundColor:"#cec236"
+				attributeState "closing", label:'${name}', action:"push",	 icon:"st.doors.garage.garage-closing", backgroundColor:"#cec236"
+				attributeState "waiting", label:'${name}', action:"push",	 icon:"st.doors.garage.garage-closing", backgroundColor:"#cec236"
+				attributeState "stopped", label:'${name}', action:"push",  icon:"st.doors.garage.garage-closing", backgroundColor:"#1ee3ff"
 			}
             tileAttribute("device.lastActivity", key: "SECONDARY_CONTROL") {
         		attributeState("lastActivity", label:'Last Activity: ${currentValue}', defaultState: true)
@@ -100,8 +100,8 @@ def off() {
 	sendEvent(name: "switch", value: "off", isStateChange: true, display: true, displayed: true)
 }
 
-def push() {
-	def doorState = device.currentState("door")?.value
+def push() {	
+    def doorState = device.currentState("door")?.value
 	if (doorState == "open" || doorState == "stopped") {
 		close()
 	} else if (doorState == "closed") {
@@ -218,5 +218,5 @@ def log(msg){
 }
 
 def showVersion(){
-	return "2.2.3"
+	return "2.2.4"
 }

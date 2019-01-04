@@ -50,7 +50,7 @@ def prefLogIn() {
     if (state.previousVersion == null){
     	state.previousVersion = 0;
     }
-    state.thisSmartAppVersion = "2.1.5"
+    state.thisSmartAppVersion = "2.1.6"
     state.installMsg = ""
     def showUninstall = username != null && password != null 
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:false, install: false, submitOnChange: true) {
@@ -61,10 +61,6 @@ def prefLogIn() {
 		section("Gateway Brand"){
 			input(name: "brand", title: "Gateway Brand", type: "enum",  metadata:[values:["Liftmaster","Chamberlain","Craftsman"]] )
 		}
-        section("Lock Option") {
-        	paragraph "Enable the below option if you would like to force the door(s) to behave as locks instead of doors (sensor required). This may be desirable if you only want doors to open up via PIN with voice commands."
-        	input "prefUseLockType", "bool", required: false, title: "Treat doors as locks?"
-    	}
         section("Uninstall") {
             paragraph "Tap below to completely uninstall this SmartApp and devices (doors and lamp control devices will be force-removed from automations and SmartApps)"
             href(name: "href", title: "Uninstall", required: false, page: "prefUninstall")
@@ -112,7 +108,13 @@ def prefListDevices() {
                         section("Select which lights to use"){
                             input(name: "lights", type: "enum", required:false, multiple:true, metadata:[values:state.lightList])
                         }
-                    } 
+                    }
+                    section("Advanced (optional)", hideable: true, hidden:true){
+        	            paragraph "BETA: Enable the below option if you would like to force the Garage Doors to behave as Door Locks (sensor required)." +
+                        			"This may be desirable if you only want doors to open up via PIN with Alexa voice commands. " +
+                                    "Note this is still considered highly experimental and may break many other automations/apps that need the garage door capability."
+        	            input "prefUseLockType", "bool", required: false, title: "Create garage doors as door locks?"
+					}
                 }
         
         }else {
