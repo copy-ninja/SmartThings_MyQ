@@ -44,11 +44,15 @@ SmartThings thread here: <a href="https://community.smartthings.com/t/release-my
 
 Credit to copy-ninja, whose version I branched off to create this app to integrate without the need to poll MyQ for the device status. 
 
-## Optional Tilt/Contact Sensor
+### Optional Tilt/Contact Sensor
 This app has the (strongly recommended) option of interfacing with a tilt sensor on the garage door. When present, a sensor will allow the door status to be known and displayed on the device. This also allows for the "switch" capability on the device, which is necessary for routines, ActionTiles dashboard, and Alexa use. <a href="https://www.amazon.com/gp/product/B00HGVJRX2/ref=as_li_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=B00HGVJRX2&linkCode=as2&tag=brbeaird0e-20&linkId=05e7b850708aa7cda815de18103d4805">Here's an example of one you can purchase from Amazon.</a>
 
-## Optional MultiSensor Support (Accelerometer Only)
+### Optional MultiSensor Support (Accelerometer Only)
 This version now supports the additional use of an Acceleromter for each door, as in a Samsung/SmartThings MultiSensor. If configured, the accelerometer will be used to more accurately track states of opening, closing, and waiting (the alarm before closing actually begins). Generally, this will return the visual status updates from the original version, still without making any status requests from the MyQ servers.
+
+### Using MyQ Premium with IFTTT and Virtual Sensors
+If you have a subscription to MyQ premium, you can use IFTTT and virtual sensors to use the full "sensor version" device handler that knows the door status. You can find a good write-up of that here: 
+https://community.smartthings.com/t/how-to-smartthings-myq-smartapp-using-myq-sensors-with-ifttt/149601
 
 ### Special notes when using routines with the no-sensor door version
 We have discovered that the no-sensor version of the garage door does not work well with SmartThings routines. This is because routines only take action if the device's status is in the correct position. For example, the no-sensor version of the door has no way to accurately track whether the door is open or closed, so it defaults to "unknown." In this state, a routine will never close the door because it believes the door to always be in a "closed" state.
