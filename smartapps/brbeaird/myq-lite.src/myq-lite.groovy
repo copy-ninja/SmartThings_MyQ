@@ -50,7 +50,7 @@ def prefLogIn() {
     if (state.previousVersion == null){
     	state.previousVersion = 0;
     }
-    state.thisSmartAppVersion = "2.1.7"
+    state.thisSmartAppVersion = "2.1.8"
     state.installMsg = ""
     def showUninstall = username != null && password != null 
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:false, install: false, submitOnChange: true) {
@@ -733,66 +733,74 @@ def syncDoorsWithSensors(child){
 }
 
 def updateDoorStatus(doorDNI, sensor, acceleration, threeAxis, child){
+    try{
 
-	if (sensor == null)
-    	return 0
-    
-    //Get door to update and set the new value
-    def doorToUpdate = getChildDevice(doorDNI)
-    def doorName = state.data[doorDNI].name
-    
-    def value = "unknown"
-    def moving = "unknown"
-    def door = doorToUpdate.latestValue("door")
-    
-    if (acceleration) moving = acceleration.latestValue("acceleration")
-    if (sensor) value = sensor.latestValue("contact")
-
-    if (moving == "active") {
-    	if (value == "open") {			
-        	if (door != "opening") value = "closing" else value = "opening"  // if door is "open" or "waiting" change to "closing", else it must be "opening"
-    	} else if (value == "closed") { 
-        	if (door != "closing") 	value = "opening" else value = "closed"
-    	}
-    } else if (moving == "inactive") {
-    	if (door == "closing") {
-    		if (value == "open") { 	// just stopped but door is still open
-    			value = "stopped"
-        	}
+        if (sensor == null)
+            return 0
+        
+        //Get door to update and set the new value
+        def doorToUpdate = getChildDevice(doorDNI)
+        def doorName = "unknown"
+        if (state.data[doorDNI]){
+            doorName = state.data[doorDNI].name
         }
-    }
-    	
-    doorToUpdate.updateDeviceStatus(value)
-    doorToUpdate.updateDeviceSensor("${sensor} is ${sensor?.currentContact}")
-    
-    log.debug "Door: " + doorName + ": Updating with status - " + value + " -  from sensor " + sensor
-    
-    //Write to child log if this was initiated from one of the doors    
-    if (child)
-    	child.log("Door: " + doorName + ": Updating with status - " + value + " -  from sensor " + sensor)
- 
-     if (acceleration) {
-     	doorToUpdate.updateDeviceMoving("${acceleration} is ${moving}")
-        log.debug "Door: " + doorName + ": Updating with status - " + moving + " - from sensor " + acceleration
+        
+        def value = "unknown"
+        def moving = "unknown"
+        def door = doorToUpdate.latestValue("door")
+        
+        if (acceleration) moving = acceleration.latestValue("acceleration")
+        if (sensor) value = sensor.latestValue("contact")
+
+        if (moving == "active") {
+            if (value == "open") {			
+                if (door != "opening") value = "closing" else value = "opening"  // if door is "open" or "waiting" change to "closing", else it must be "opening"
+            } else if (value == "closed") { 
+                if (door != "closing") 	value = "opening" else value = "closed"
+            }
+        } else if (moving == "inactive") {
+            if (door == "closing") {
+                if (value == "open") { 	// just stopped but door is still open
+                    value = "stopped"
+                }
+            }
+        }
+            
+        doorToUpdate.updateDeviceStatus(value)
+        doorToUpdate.updateDeviceSensor("${sensor} is ${sensor?.currentContact}")
+        
+        log.debug "Door: " + doorName + ": Updating with status - " + value + " -  from sensor " + sensor
+        
+        //Write to child log if this was initiated from one of the doors    
         if (child)
-        	child.log("Door: " + doorName + ": Updating with status - " + moving + " - from sensor " + acceleration)
-     }
+            child.log("Door: " + doorName + ": Updating with status - " + value + " -  from sensor " + sensor)
     
-    //Get latest activity timestamp for the sensor (data saved for up to a week)
-    def eventsSinceYesterday = sensor.eventsSince(new Date() - 7)    
-    def latestEvent = eventsSinceYesterday[0]?.date
-    def timeStampLogText = "Door: " + doorName + ": Updating timestamp to: " + latestEvent + " -  from sensor " + sensor
-    
-    if (!latestEvent)	//If the door has been inactive for more than a week, timestamp data will be null. Keep current value in that case.
-    	timeStampLogText = "Door: " + doorName + ": Null timestamp detected "  + " -  from sensor " + sensor + " . Keeping current value."
-    else
-    	doorToUpdate.updateDeviceLastActivity(latestEvent)    	
-    	
-    log.debug timeStampLogText    
-    
-    //Write to child log if this was initiated from one of the doors
-    if (child)
-    	child.log(timeStampLogText)
+        if (acceleration) {
+            doorToUpdate.updateDeviceMoving("${acceleration} is ${moving}")
+            log.debug "Door: " + doorName + ": Updating with status - " + moving + " - from sensor " + acceleration
+            if (child)
+                child.log("Door: " + doorName + ": Updating with status - " + moving + " - from sensor " + acceleration)
+        }
+        
+        //Get latest activity timestamp for the sensor (data saved for up to a week)
+        def eventsSinceYesterday = sensor.eventsSince(new Date() - 7)    
+        def latestEvent = eventsSinceYesterday[0]?.date
+        def timeStampLogText = "Door: " + doorName + ": Updating timestamp to: " + latestEvent + " -  from sensor " + sensor
+        
+        if (!latestEvent)	//If the door has been inactive for more than a week, timestamp data will be null. Keep current value in that case.
+            timeStampLogText = "Door: " + doorName + ": Null timestamp detected "  + " -  from sensor " + sensor + " . Keeping current value."
+        else
+            doorToUpdate.updateDeviceLastActivity(latestEvent)    	
+            
+        log.debug timeStampLogText    
+        
+        //Write to child log if this was initiated from one of the doors
+        if (child)
+            child.log(timeStampLogText)
+
+    }catch (e) {
+        log.debug "Error updating door: ${doorDNI}: ${e}"        
+    }
 }
 
 def refresh(child){	
@@ -1010,7 +1018,7 @@ private getDoorList() {
 					}
                     
                     //Ignore any lights with blank descriptions
-                    if (description != ''){
+                    if (description && description != ''){
                         log.debug "Storing light info: " + description + "type: " + device.MyQDeviceTypeId + " status: " + doorState +  " type: " + device.MyQDeviceTypeName
                         deviceList[dni] = description
                         state.lightList[dni] = description
@@ -1038,7 +1046,7 @@ private getDeviceList() {
                         	description = it.Value
 						
                         //Ignore any doors with blank descriptions
-                        if (description != ''){
+                        if (description && description != ''){
                         	log.debug "found device: " + description
                         	deviceList.add( device.MyQDeviceTypeId.toString() + "|" + device.TypeID )
                         }
