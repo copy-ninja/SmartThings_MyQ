@@ -1,14 +1,6 @@
 
 # SmartThings MyQ Lite SmartApp
 
-### **2019-02-27: URGENT UPDATE: If you have this integration currently working, do not delete your existing doors!**
-
-At some point recently, the MyQ "get devices" call this SmartApp uses in the setup process to automatically grab the list of devices has changed somehow and is currently broken in this App.
-
-If you delete your doors and try to go through setup again, it will not work in its current state.
-
-I'm hopeful to figure out the change, but I have no idea at this point how long it might take to identify it and update the SmartApp to handle it. Will keep this repo updated as I learn more.
-
 ### Current Notes
 * Please note this SmartApp cannot read the status of the MyQ door using the MyQ tilt sensor. Getting the door status will require a separate SmartThings-compatible sensor. It's an unfortunate hassle but is the only way we can do this without polling MyQ for status (which they will not allow done from the SmartThings cloud).
 * This SmartApp is currently only supported in the **SmartThings Classic mobile app**; the new app does not yet support custom apps like this
