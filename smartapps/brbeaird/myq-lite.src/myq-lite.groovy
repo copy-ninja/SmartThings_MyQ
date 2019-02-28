@@ -12,7 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 2019-01-03
+ *  Last Updated : 2019-02-28
  */
 include 'asynchttp_v1'
 
@@ -50,7 +50,7 @@ def prefLogIn() {
     if (state.previousVersion == null){
     	state.previousVersion = 0;
     }
-    state.thisSmartAppVersion = "2.1.6"
+    state.thisSmartAppVersion = "2.1.7"
     state.installMsg = ""
     def showUninstall = username != null && password != null 
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:false, install: false, submitOnChange: true) {
@@ -926,7 +926,7 @@ private getDoorList() {
     state.lightList = [:]
     
     def deviceList = [:]
-	apiGet("/api/v4/userdevicedetails/get", []) { response ->
+	apiGet("/api/v4/UserDeviceDetails/Get", []) { response ->
 		if (response.status == 200) {
             //log.debug "response data: " + response.data
             //sendAlert("response data: " + response.data.Devices)
@@ -1088,7 +1088,7 @@ private getApiAppID() {
 	if (settings.brand == "Craftsman") {
 		return "eU97d99kMG4t3STJZO/Mu2wt69yTQwM0WXZA5oZ74/ascQ2xQrLD/yjeVhEQccBZ"
 	} else {
-		return "NWknvuBd7LoFHfXmKNMBcgajXtZEgKUh4V7WNzMidrpUUluDpVYVZx+xT4PCM5Kx"
+		return "Vj8pQggXLhLy0WHahglCD4N1nAkkXQtGYpq2HrHD7H1nvmbT55KqtN6RSF4ILB/i"
 	}
 }
 	
@@ -1101,8 +1101,10 @@ private apiGet(apiPath, apiQuery = [], callback = {}) {
 	apiQuery = [ appId: getApiAppID() ] + apiQuery
 	if (state.session.securityToken) { 
     	apiQuery = apiQuery + [SecurityToken: state.session.securityToken ] 
-        myHeaders = [ "SecurityToken": state.session.securityToken,
-                         "MyQApplicationId": getApiAppID() ]
+        myHeaders = [ 
+					"User-Agent": "Chamberlain/3773 (iPhone; iOS 11.0.3; Scale/2.00)",
+					"SecurityToken": state.session.securityToken,
+                    "MyQApplicationId": getApiAppID() ]
         }
        
 	try {
