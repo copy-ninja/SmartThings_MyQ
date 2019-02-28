@@ -926,7 +926,7 @@ private getDoorList() {
     state.lightList = [:]
     
     def deviceList = [:]
-	apiGet("/api/v4/UserDeviceDetails/Get", []) { response ->
+	apiGet(getDevicesURL(), []) { response ->
 		if (response.status == 200) {
             //log.debug "response data: " + response.data
             //sendAlert("response data: " + response.data.Devices)
@@ -1025,7 +1025,7 @@ private getDoorList() {
 
 private getDeviceList() { 	    
 	def deviceList = []
-	apiGet("/api/v4/userdevicedetails/get", []) { response ->
+	apiGet(getDevicesURL(), []) { response ->
 		if (response.status == 200) {
 			response.data.Devices.each { device ->
 				log.debug "MyQDeviceTypeId : " + device.MyQDeviceTypeId.toString()
@@ -1075,6 +1075,11 @@ def getHubID(){
 
 
 /* api connection */
+private getDevicesURL(){
+	return "/api/v4/UserDeviceDetails/Get"
+}
+
+
 // get URL 
 private getApiURL() {
 	if (settings.brand == "Craftsman") {
@@ -1108,7 +1113,11 @@ private apiGet(apiPath, apiQuery = [], callback = {}) {
         }
        
 	try {
-		httpGet([ uri: getApiURL(), path: apiPath, headers: myHeaders, query: apiQuery ]) { response -> callback(response) }
+    	log.debug "headers: " + myHeaders
+        log.debug "appid: " + getApiAppID()
+        log.debug "uri: " + getApiURL()
+        log.debug "path: " + apiPath
+		httpGet([ uri: getApiURL(), path: apiPath, headers: myHeaders ]) { response -> callback(response) }
 	}	catch (SocketException e)	{
 		//sendAlert("API Error: $e")
         log.debug "API Error: $e"
