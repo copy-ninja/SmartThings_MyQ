@@ -1,4 +1,8 @@
 /**
+ * -----------------------
+ * --- DEVICE HANDLER ----
+ * -----------------------
+ *
  *  MyQ Garage Door Opener NoSensor
  *
  *  Copyright 2018 Brian Beaird

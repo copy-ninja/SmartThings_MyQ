@@ -1,4 +1,8 @@
 /**
+ * -----------------------
+ * --- DEVICE HANDLER ----
+ * -----------------------
+ *
  *  MyQ Light Controller
  *
  *  Copyright 2017 Jason Mok/Brian Beaird

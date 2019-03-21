@@ -1,7 +1,11 @@
 /**
+ * -----------------------
+ * ------ SMART APP ------
+ * -----------------------
+ *
  *  MyQ Lite
  *
- *  Copyright 2018 Jason Mok/Brian Beaird/Barry Burke
+ *  Copyright 2018 Jason Mok/Brian Beaird/Barry Burke/RBoy Apps
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -12,7 +16,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 2019-02-28
+ *  Last Updated : 2019-03-12
  */
 include 'asynchttp_v1'
 
@@ -910,22 +914,21 @@ private forceLogin() {
 private login() { return (!(state.session.expiration > now())) ? doLogin() : true }
 
 private doLogin() { 
-    apiPostLogin("/api/v4/User/Validate", [ username: settings.username, password: settings.password ]) { response ->	
-		log.debug "got login response: " + response
-        if (response.status == 200) {
-			if (response.data.SecurityToken != null) {
-				state.session.brandID = response.data.BrandId
-				state.session.brandName = response.data.BrandName
-				state.session.securityToken = response.data.SecurityToken
-				state.session.expiration = now() + 150000
-				return true
-			} else {
-				return false
-			}
-		} else {
-			return false
-		}
-	} 	
+    log.trace "Logging in"
+
+    return apiPostLogin("/api/v4/User/Validate", [username: settings.username, password: settings.password] ) { response ->
+        if (response.data.SecurityToken != null) {
+            state.session.brandID = response.data.BrandId
+            state.session.brandName = response.data.BrandName
+            state.session.securityToken = response.data.SecurityToken
+            state.session.expiration = now() + (24*60*60*1000) // 24 hours default
+            return true
+        } else {
+            log.warn "No security token found, login unsuccessful"
+            state.session = [ brandID: 0, brandName: settings.brand, securityToken: null, expiration: 0 ] // Reset token and expiration
+            return false
+        }
+    }
 }
 
 // Listing all the garage doors you have in MyQ
@@ -1087,6 +1090,9 @@ private getDevicesURL(){
 	return "/api/v4/UserDeviceDetails/Get"
 }
 
+import groovy.transform.Field
+
+@Field final MAX_RETRIES = 2 // Retry count before giving up
 
 // get URL 
 private getApiURL() {
@@ -1107,68 +1113,132 @@ private getApiAppID() {
 	
 // HTTP GET call
 private apiGet(apiPath, apiQuery = [], callback = {}) {	
-	// set up query
-    def myHeaders = ""
-    
-    
-	apiQuery = [ appId: getApiAppID() ] + apiQuery
-	if (state.session.securityToken) { 
-    	apiQuery = apiQuery + [SecurityToken: state.session.securityToken ] 
-        myHeaders = [ 
-					"User-Agent": "Chamberlain/3773 (iPhone; iOS 11.0.3; Scale/2.00)",
-					"SecurityToken": state.session.securityToken,
-                    "MyQApplicationId": getApiAppID() ]
+    if (!state.session.securityToken) { // Get a token
+        if (!doLogin()) {
+            log.error "Unable to complete GET, login failed"
+            return
         }
-       
-	try {
-    	log.debug "headers: " + myHeaders
-        log.debug "appid: " + getApiAppID()
-        log.debug "uri: " + getApiURL()
-        log.debug "path: " + apiPath
-		httpGet([ uri: getApiURL(), path: apiPath, headers: myHeaders ]) { response -> callback(response) }
-	}	catch (SocketException e)	{
-		//sendAlert("API Error: $e")
-        log.debug "API Error: $e"
-	}
+    }
+
+    def myHeaders = [
+        "User-Agent": "Chamberlain/3773 (iPhone; iOS 11.0.3; Scale/2.00)",
+        "SecurityToken": state.session.securityToken,                        
+        "MyQApplicationId": getApiAppID(),
+    ]
+
+    try {
+        httpGet([ uri: getApiURL(), path: apiPath, headers: myHeaders, query: apiQuery, contentType: "application/json; charset=utf-8" ]) { response ->
+            log.debug "Got GET response: Retry: ${atomicState.retryCount} of ${MAX_RETRIES}\nSTATUS: ${response.status}\nHEADERS: ${response.headers?.collect { "${it.name}: ${it.value}\n" }}\nDATA: ${response.data}"
+            if (response.status == 200) {
+                switch (response.data.ReturnCode as Integer) {
+                    case -3333: // Login again
+                    	if (atomicState.retryCount <= MAX_RETRIES) {
+                        	atomicState.retryCount = (atomicState.retryCount ?: 0) + 1
+                            log.warn "GET: Login expired, logging in again"
+                            doLogin()
+                            apiGet(apiPath, apiQuery, callback) // Try again
+                        } else {
+                            log.warn "Too many retries, dropping request"
+                        }
+                        break
+                        
+                    case 0: // Process response
+                    	atomicState.retryCount = 0 // Reset it
+                    	callback(response)
+                        break
+                        
+                    default:
+                    	log.error "Unknown GET return code ${response.data.ReturnCode}, error ${response.data.ErrorMessage}"
+                }
+            } else {
+                log.error "Unknown GET status: ${response.status}"
+            }
+        }
+    }	catch (e)	{
+        log.error "API GET Error: $e"
+    }
 }
 
 // HTTP PUT call
 private apiPut(apiPath, apiBody = [], callback = {}) {    
-	// set up body
-	apiBody = [ ApplicationId: getApiAppID() ] + apiBody
-	if (state.session.securityToken) { apiBody = apiBody + [SecurityToken: state.session.securityToken ] }
-    
-	def myHeaders = ""  
-    
-    // set up query
-	def apiQuery = [ appId: getApiAppID() ]
-	if (state.session.securityToken) { 
-    	apiQuery = apiQuery + [SecurityToken: state.session.securityToken ]
-        myHeaders = [ "SecurityToken": state.session.securityToken,
-                         "MyQApplicationId": getApiAppID() ]
+    if (!state.session.securityToken) { // Get a token
+        if (!doLogin()) {
+            log.error "Unable to complete PUT, login failed"
+            return
+        }
     }
     
-	try {
-		httpPut([ uri: getApiURL(), path: apiPath, headers: myHeaders, contentType: "application/json; charset=utf-8", body: apiBody, query: apiQuery ]) { response -> callback(response) }
-	} catch (SocketException e)	{
-		log.debug "API Error: $e"
-	}
+    def myHeaders = [
+        "SecurityToken": state.session.securityToken,                        
+        "MyQApplicationId": getApiAppID(),
+    ]
+
+    try {
+        httpPut([ uri: getApiURL(), path: apiPath, headers: myHeaders, body: apiBody, contentType: "application/json; charset=utf-8" ]) { response ->
+            log.debug "Got PUT response: Retry: ${atomicState.retryCount} of ${MAX_RETRIES}\nSTATUS: ${response.status}\nHEADERS: ${response.headers?.collect { "${it.name}: ${it.value}\n" }}\nDATA: ${response.data}"
+            if (response.status == 200) {
+                switch (response.data.ReturnCode as Integer) {
+                    case -3333: // Login again
+                    	if (atomicState.retryCount <= MAX_RETRIES) {
+                        	atomicState.retryCount = (atomicState.retryCount ?: 0) + 1
+                            log.warn "PUT: Login expired, logging in again"
+                            doLogin()
+                            apiPut(apiPath, apiBody, callback) // Try again
+                        } else {
+                            log.warn "Too many retries, dropping request"
+                        }
+                        break
+                        
+                    case 0: // Process response
+                    	atomicState.retryCount = 0 // Reset it
+                    	callback(response)
+                        break
+                        
+                    default:
+                    	log.error "Unknown PUT return code ${response.data.ReturnCode}, error ${response.data.ErrorMessage}"
+                }
+            } else {
+                log.error "Unknown PUT status: ${response.status}"
+            }
+        }
+    } catch (e)	{
+        log.error "API PUT Error: $e"
+    }
 }
 
 // HTTP POST call
 private apiPostLogin(apiPath, apiBody = [], callback = {}) {
-	// set up body
-	apiBody = apiBody
-    def myHeaders = [ "User-Agent": "Chamberlain/3.73",
-                        "BrandId": "2",
-                         "ApiVersion": "4.1",
-                         "Culture": "en",
-                         "MyQApplicationId": getApiAppID() ]
-	try {
-		httpPost([ uri: getApiURL(), path: apiPath, headers: myHeaders, contentType: "application/json; charset=utf-8", body: apiBody ]) { response -> callback(response) }
-	} catch (SocketException e)	{
-		log.debug "API Error: $e"
-	}
+    def myHeaders = [
+        "User-Agent": "Chamberlain/3773 (iPhone; iOS 11.0.3; Scale/2.00)",
+        "BrandId": "2",
+        "ApiVersion": "4.1",
+        "Culture": "en",
+        "MyQApplicationId": getApiAppID(),
+    ]
+    
+    try {
+        return httpPost([ uri: getApiURL(), path: apiPath, headers: myHeaders, body: apiBody, contentType: "application/json; charset=utf-8" ]) { response -> 
+            log.debug "Got LOGIN POST response: STATUS: ${response.status}\nHEADERS: ${response.headers?.collect { "${it.name}: ${it.value}\n" }}\nDATA: ${response.data}"
+            if (response.status == 200) {
+                switch (response.data.ReturnCode as Integer) {
+                    case 0: // Process response
+                    	return callback(response)
+                        break
+                        
+                    default:
+                    	log.error "Unknown LOGIN POST return code ${response.data.ReturnCode}, error ${response.data.ErrorMessage}"
+                }
+            } else {
+                log.error "Unknown LOGIN POST status: ${response.status}"
+            }
+            
+            return false
+        }
+    } catch (e)	{
+        log.warn "API POST Error: $e"
+    }
+    
+    return false
 }
 
 // Get Device ID

@@ -1,4 +1,8 @@
 /**
+ * -----------------------
+ * --- DEVICE HANDLER ----
+ * -----------------------
+ *
  *  MyQ Garage Door Opener
  *
  *  Copyright 2018 Jason Mok/Brian Beaird/Barry Burke

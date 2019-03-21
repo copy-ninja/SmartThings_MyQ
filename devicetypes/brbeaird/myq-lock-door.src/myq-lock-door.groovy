@@ -1,4 +1,8 @@
 /**
+ * -----------------------
+ * --- DEVICE HANDLER ----
+ * -----------------------
+ *
  *  MyQ Garage Door Opener
  *
  *  Copyright 2019 Brian Beaird
