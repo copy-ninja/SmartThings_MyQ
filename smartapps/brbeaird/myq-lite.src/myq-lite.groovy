@@ -16,7 +16,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 2019-03-12
+ *  Last Updated : 2019-03-21
  */
 include 'asynchttp_v1'
 
@@ -54,7 +54,7 @@ def prefLogIn() {
     if (state.previousVersion == null){
     	state.previousVersion = 0;
     }
-    state.thisSmartAppVersion = "2.1.8"
+    state.thisSmartAppVersion = "2.1.9"
     state.installMsg = ""
     def showUninstall = username != null && password != null 
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:false, install: false, submitOnChange: true) {
@@ -921,7 +921,7 @@ private doLogin() {
             state.session.brandID = response.data.BrandId
             state.session.brandName = response.data.BrandName
             state.session.securityToken = response.data.SecurityToken
-            state.session.expiration = now() + (24*60*60*1000) // 24 hours default
+            state.session.expiration = now() + (7*24*60*60*1000) // 7 days default
             return true
         } else {
             log.warn "No security token found, login unsuccessful"
