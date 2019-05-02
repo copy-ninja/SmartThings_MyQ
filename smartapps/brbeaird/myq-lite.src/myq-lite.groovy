@@ -54,7 +54,7 @@ def prefLogIn() {
     if (state.previousVersion == null){
     	state.previousVersion = 0;
     }
-    state.thisSmartAppVersion = "2.1.10"
+    state.thisSmartAppVersion = "2.1.11"
     state.installMsg = ""
     def showUninstall = username != null && password != null
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"prefListDevices", uninstall:false, install: false, submitOnChange: true) {
@@ -1130,7 +1130,7 @@ private apiGet(apiPath, apiQuery = [], callback = {}) {
     ]
 
     try {
-        httpGet([ uri: getApiURL(), path: apiPath, headers: myHeaders, query: apiQuery, contentType: "application/json; charset=utf-8" ]) { response ->
+        httpGet([ uri: getApiURL(), path: apiPath, headers: myHeaders, query: apiQuery ]) { response ->
             log.debug "Got GET response: Retry: ${atomicState.retryCount} of ${MAX_RETRIES}\nSTATUS: ${response.status}\nHEADERS: ${response.headers?.collect { "${it.name}: ${it.value}\n" }}\nDATA: ${response.data}"
             if (response.status == 200) {
                 switch (response.data.ReturnCode as Integer) {
@@ -1180,7 +1180,7 @@ private apiPut(apiPath, apiBody = [], callback = {}) {
     ]
 
     try {
-        httpPut([ uri: getApiURL(), path: apiPath, headers: myHeaders, body: apiBody, contentType: "application/json; charset=utf-8" ]) { response ->
+        httpPut([ uri: getApiURL(), path: apiPath, headers: myHeaders, body: apiBody ]) { response ->
             log.debug "Got PUT response: Retry: ${atomicState.retryCount} of ${MAX_RETRIES}\nSTATUS: ${response.status}\nHEADERS: ${response.headers?.collect { "${it.name}: ${it.value}\n" }}\nDATA: ${response.data}"
             if (response.status == 200) {
                 switch (response.data.ReturnCode as Integer) {
@@ -1223,7 +1223,7 @@ private apiPostLogin(apiPath, apiBody = [], callback = {}) {
     ]
 
     try {
-        return httpPost([ uri: getApiURL(), path: apiPath, headers: myHeaders, body: apiBody, contentType: "application/json; charset=utf-8" ]) { response ->
+        return httpPost([ uri: getApiURL(), path: apiPath, headers: myHeaders, body: apiBody ]) { response ->
             log.debug "Got LOGIN POST response: STATUS: ${response.status}\nHEADERS: ${response.headers?.collect { "${it.name}: ${it.value}\n" }}\nDATA: ${response.data}"
             if (response.status == 200) {
                 switch (response.data.ReturnCode as Integer) {
