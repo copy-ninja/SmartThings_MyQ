@@ -5,7 +5,7 @@
  *
  *  MyQ Garage Door Opener
  *
- *  Copyright 2018 Jason Mok/Brian Beaird/Barry Burke
+ *  Copyright 2019 Jason Mok/Brian Beaird/Barry Burke
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -16,7 +16,6 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- *  Last Updated : 2019-01-04
  *
  */
 metadata {
@@ -38,10 +37,12 @@ metadata {
         attribute "doorMoving", "string"
         attribute "OpenButton", "string"
         attribute "CloseButton", "string"
+        attribute "myQDeviceId", "string"
         
 		command "updateDeviceStatus", ["string"]
 		command "updateDeviceLastActivity", ["number"]
-        command "updateDeviceMoving", ["string"]        
+        command "updateDeviceMoving", ["string"]
+        command "updateMyQDeviceId", ["string"]
 	}
 
 	simulator {	}
@@ -125,12 +126,22 @@ def open()  {
 def close() { 
 	log.debug "Garage door close command called."
     parent.notify("Garage door close command called.")
-	parent.sendCommand(this, "desireddoorstate", 0) 
+	parent.sendCommand(this, "desireddoorstate", 0)
 //	updateDeviceStatus("closing")			// Now handled in the parent (in case we have an Acceleration sensor, we can handle "waiting" state)
     runIn(30, refresh, [overwrite: true]) //Force a sync with tilt sensor after 30 seconds
 }
 
-def refresh() {	    
+def getMyQDeviceId(){	    
+    if (device.currentState("myQDeviceId")?.value)
+    	return device.currentState("myQDeviceId").value
+	else{    	
+        def newId = device.deviceNetworkId.split("\\|")[2]        
+        sendEvent(name: "myQDeviceId", value: newId, display: true , displayed: true)
+        return newId
+    }	
+}
+
+def refresh() {	        
     parent.refresh(this)
     sendEvent(name: "OpenButton", value: "normal", displayed: false, isStateChange: true)
     sendEvent(name: "CloseButton", value: "normal", displayed: false, isStateChange: true)
@@ -145,9 +156,8 @@ def updateDeviceStatus(status) {
     
     def switchState
     if (device.currentState("switch")?.value == "on"){switchState = "open"}
-    if (device.currentState("switch")?.value == "off"){switchState = "closed"}    
+    if (device.currentState("switch")?.value == "off"){switchState = "closed"}       
     
-    log.debug "Request received to update door status to : " + status    
     
     //Don't do anything if nothing changed
     if (currentState == status && switchState == status){
@@ -217,10 +227,15 @@ def updateDeviceMoving(moving) {
 	sendEvent(name: "doorMoving", value: moving, display: false , displayed: false)
 }
 
+def updateMyQDeviceId(Id) {
+	log.debug "Setting MyQID to ${Id}"
+    sendEvent(name: "myQDeviceId", value: Id, display: true , displayed: true)
+}
+
 def log(msg){
 	log.debug msg
 }
 
 def showVersion(){
-	return "2.2.4"
+	return "3.0.0"
 }

@@ -1,11 +1,7 @@
 /**
- * -----------------------
- * --- DEVICE HANDLER ----
- * -----------------------
- *
  *  MyQ Garage Door Opener NoSensor
  *
- *  Copyright 2018 Brian Beaird
+ *  Copyright 2019 Brian Beaird
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -15,8 +11,6 @@
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
- *
- *  Last Updated : 2019-01-04
  *
  */
 metadata {
@@ -28,9 +22,11 @@ metadata {
         
         attribute "OpenButton", "string"
         attribute "CloseButton", "string"
+        attribute "myQDeviceId", "string"
         
         command "open"
         command "close"
+        command "updateMyQDeviceId", ["string"]
 	}
 
 	simulator {	}
@@ -86,10 +82,25 @@ def resetToUnknown(){
     sendEvent(name: "CloseButton", value: "normal", displayed: false, isStateChange: true)
 }
 
+def getMyQDeviceId(){	    
+    if (device.currentState("myQDeviceId")?.value)
+    	return device.currentState("myQDeviceId").value
+	else{    	
+        def newId = device.deviceNetworkId.split("\\|")[2]        
+        sendEvent(name: "myQDeviceId", value: newId, display: true , displayed: true)
+        return newId
+    }	
+}
+
+def updateMyQDeviceId(Id) {
+	log.debug "Setting MyQID to ${Id}"
+    sendEvent(name: "myQDeviceId", value: Id, display: true , displayed: true)
+}
+
 def log(msg){
 	log.debug msg
 }
 
 def showVersion(){
-	return "1.1.8"
+	return "3.0.0"
 }
