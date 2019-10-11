@@ -19,8 +19,8 @@
  */
 include 'asynchttp_v1'
 
-String appVersion() { return "3.0.0" }
-String appModified() { return "2019-10-07"}
+String appVersion() { return "3.0.1" }
+String appModified() { return "2019-10-11"}
 String appAuthor() { return "Brian Beaird" }
 String gitBranch() { return "brbeaird" }
 String getAppImg(imgName) 	{ return "https://raw.githubusercontent.com/${gitBranch()}/SmartThings_MyQ/master/icons/$imgName" }
@@ -805,21 +805,35 @@ def sensorHandler(evt) {
 }
 
 def doorButtonOpenHandler(evt) {
-    log.debug "Door open button push detected: Event name  " + evt.name + " value: " + evt.value   + " deviceID: " + evt.deviceId + " DNI: " + evt.getDevice().deviceNetworkId
-    def myQDeviceId = evt.getDevice().deviceNetworkId.replace(" Closer", "")
-	def doorDevice = getChildDevice(state.data[myQDeviceId].child)
-    log.debug "Opening door."
-    doorDevice.openPrep()
-    sendCommand(doorDevice, "desireddoorstate", 1)
+    try{
+        log.debug "Door open button push detected: Event name  " + evt.name + " value: " + evt.value   + " deviceID: " + evt.deviceId + " DNI: " + evt.getDevice().deviceNetworkId
+        def myQDeviceId = evt.getDevice().deviceNetworkId.replace(" Opener", "")
+        def doorDevice = getChildDevice(state.data[myQDeviceId].child)
+        log.debug "Opening door."
+        doorDevice.openPrep()
+        sendCommand(doorDevice, "desireddoorstate", 1)
+    }catch(e){
+    	def errMsg = "Warning: MyQ Open button command failed - ${e}"
+        log.error errMsg
+        sendNotificationEvent(errMsg)
+        if (prefDoorErrorNotify){sendPush(errMsg)}
+    }
 }
 
 def doorButtonCloseHandler(evt) {
-    log.debug "Door close button push detected: Event name  " + evt.name + " value: " + evt.value   + " deviceID: " + evt.deviceId + " DNI: " + evt.getDevice().deviceNetworkId
-    def myQDeviceId = evt.getDevice().deviceNetworkId.replace(" Closer", "")
-	def doorDevice = getChildDevice(state.data[myQDeviceId].child)
-    log.debug "Closing door."
-    doorDevice.closePrep()
-    sendCommand(doorDevice, "desireddoorstate", 0)
+	try{
+		log.debug "Door close button push detected: Event name  " + evt.name + " value: " + evt.value   + " deviceID: " + evt.deviceId + " DNI: " + evt.getDevice().deviceNetworkId
+        def myQDeviceId = evt.getDevice().deviceNetworkId.replace(" Closer", "")
+        def doorDevice = getChildDevice(state.data[myQDeviceId].child)
+        log.debug "Closing door."
+        doorDevice.closePrep()
+        sendCommand(doorDevice, "desireddoorstate", 0)
+	}catch(e){
+    	def errMsg = "Warning: MyQ Close button command failed - ${e}"
+        log.error errMsg
+        sendNotificationEvent(errMsg)
+        if (prefDoorErrorNotify){sendPush(errMsg)}
+    }
 }
 
 
@@ -1048,7 +1062,7 @@ private apiPut(apiPath, apiBody = [], callback = {}) {
     if (!login()){
         log.error "Unable to complete PUT, login failed"
         sendNotificationEvent("Warning: MyQ command failed due to bad login.")
-        if (prefDoorErrorNotify){log.error "would have pushed notification"}
+        if (prefDoorErrorNotify){sendPush("Warning: MyQ command failed due to bad login.")}
         return
     }
     try {
@@ -1065,7 +1079,7 @@ private apiPut(apiPath, apiBody = [], callback = {}) {
     } catch (e)	{
         log.error "API PUT Error: $e"
         sendNotificationEvent("Warning: MyQ command failed - ${e}")
-        if (prefDoorErrorNotify){log.error "would have pushed notification"}
+        if (prefDoorErrorNotify){sendPush("Warning: MyQ command failed - ${e}")}
     }
 }
 
