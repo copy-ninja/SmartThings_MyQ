@@ -20,7 +20,7 @@
 include 'asynchttp_v1'
 
 String appVersion() { return "3.0.1" }
-String appModified() { return "2019-10-11"}
+String appModified() { return "2019-10-13"}
 String appAuthor() { return "Brian Beaird" }
 String gitBranch() { return "brbeaird" }
 String getAppImg(imgName) 	{ return "https://raw.githubusercontent.com/${gitBranch()}/SmartThings_MyQ/master/icons/$imgName" }
@@ -55,6 +55,10 @@ def appInfoSect(sect=true)	{
 }
 
 def mainPage() {
+
+    if (state.previousVersion == null){
+    	state.previousVersion = 0;
+    }
 
     if (!state.latestVersion){
     	getVersionInfo(0, 0)
@@ -308,11 +312,12 @@ def installed() {
 
 def updated() {
 	log.debug "MyQ Lite changes saved."
+    state.previousVersion = appVersion()
     unschedule()
     runEvery3Hours(updateVersionInfo)   //Check for new version every 3 hours
 
-    if (state.previousVersion != state.thisSmartAppVersion){
-    	getVersionInfo(state.previousVersion, state.thisSmartAppVersion);
+    if (state.previousVersion != state.currentVersion.SmartApp){
+    	getVersionInfo(state.previousVersion, state.currentVersion.SmartApp);
     }
     if (door1Sensor && state.validatedDoors){
     	refreshAll()
