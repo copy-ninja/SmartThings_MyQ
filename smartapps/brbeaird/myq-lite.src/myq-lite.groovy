@@ -19,8 +19,8 @@
  */
 include 'asynchttp_v1'
 
-String appVersion() { return "3.0.1" }
-String appModified() { return "2019-10-13"}
+String appVersion() { return "3.1.0" }
+String appModified() { return "2019-10-18"}
 String appAuthor() { return "Brian Beaird" }
 String gitBranch() { return "brbeaird" }
 String getAppImg(imgName) 	{ return "https://raw.githubusercontent.com/${gitBranch()}/SmartThings_MyQ/master/icons/$imgName" }
@@ -60,10 +60,16 @@ def mainPage() {
     	state.previousVersion = 0;
     }
 
+    //Brand new install (need to grab version info)
     if (!state.latestVersion){
     	getVersionInfo(0, 0)
         state.currentVersion = [:]
         state.currentVersion['SmartApp'] = appVersion()
+    }
+    //Version updated
+    else if (appVersion() != state.previousVersion){
+    	state.previousVersion = appVersion()
+        getVersionInfo(state.previousVersion, appVersion());
     }
 
     //If fresh install, go straight to login page
@@ -145,10 +151,7 @@ def prefLogIn(params) {
 		section("Login Credentials"){
 			input("username", "email", title: "Username", description: "MyQ Username (email address)")
 			input("password", "password", title: "Password", description: "MyQ password")
-		}
-		section("Gateway Brand"){
-			input(name: "brand", title: "Gateway Brand", type: "enum",  metadata:[values:["Liftmaster","Chamberlain","Craftsman"]] )
-		}
+		}		
 	}
 }
 
@@ -311,14 +314,10 @@ def installed() {
 }
 
 def updated() {
-	log.debug "MyQ Lite changes saved."
-    state.previousVersion = appVersion()
+	log.debug "MyQ Lite changes saved."    
     unschedule()
     runEvery3Hours(updateVersionInfo)   //Check for new version every 3 hours
-
-    if (state.previousVersion != state.currentVersion.SmartApp){
-    	getVersionInfo(state.previousVersion, state.currentVersion.SmartApp);
-    }
+    
     if (door1Sensor && state.validatedDoors){
     	refreshAll()
     	runEvery30Minutes(refreshAll)
@@ -462,7 +461,8 @@ def initialize() {
                 def myQDeviceId = state.data[light].myQDeviceId
                 def DNI = [ app.id, "LightController", myQDeviceId ].join('|')
                 def lightName = state.data[light].name
-                def childLight = getChildDevice(DNI)
+                def childLight = getChildDevice(state.data[light].child)
+                
                 if (!childLight) {
                     log.debug "Creating child light device: " + light
 
@@ -527,29 +527,31 @@ def initialize() {
 
 def verifyChildDeviceIds(){
 	//Try to match existing child devices with latest MyQ data
-    childDevices.each { child ->
+    childDevices.each { child ->        
         def matchingId
+        if (child.typeName != 'Momentary Button Tile'){
+            //Look for a matching entry in MyQ
+            state.data.each { myQId, myQData ->
+                if (child.getMyQDeviceId() == myQId){
+                    log.debug "Found matching ID for ${child}"
+                    matchingId = myQId
+                }
 
-        //Look for a matching entry in MyQ
-        state.data.each { myQId, myQData ->
-            if (child.getMyQDeviceId() == myQId){
-            	log.debug "Found matching ID for ${child}"
-                matchingId = myQId
+                //If no matching ID, try to match on name
+                else if (child.name == myQData.name || child.label == myQData.name){
+                    log.debug "Found matching ID (via name) for ${child}"
+                    child.updateMyQDeviceId(myQId)	//Update child to new ID
+                    matchingId = myQId
+                }
             }
 
-            //If no matching ID, try to match on name
-            else if (child.name == myQData.name || child.label == myQData.name){
-            	log.debug "Found matching ID (via name) for ${child}"
-                child.updateMyQDeviceId(myQId)	//Update child to new ID
-                matchingId = myQId
+            log.debug "final matchingid for ${child.name} ${matchingId}"
+            if (matchingId){
+                state.data[matchingId].child = child.deviceNetworkId
             }
-        }
-
-        if (matchingId){
-        	state.data[matchingId].child = child.deviceNetworkId
-        }
-        else{
-			log.debug "WARNING: Existing child ${child} does not seem to have a valid MyQID"
+            else{
+                log.debug "WARNING: Existing child ${child} does not seem to have a valid MyQID"
+            }
         }
     }
 }
@@ -721,19 +723,19 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
 def syncDoorsWithSensors(child){
 
     // refresh only the requesting door (makes things a bit more efficient if you have more than 1 door
-    if (child) {
+    /*if (child) {
         def doorMyQId = child.getMyQDeviceId()
         updateDoorStatus(child.device.deviceNetworkId, settings[state.data[doorMyQId].sensor], child)
     }
     //Otherwise, refresh everything
-    else{
+    else{*/
         state.validatedDoors.each { door ->
         	log.debug "Refreshing ${door} ${state.data[door].child}"
         	if (state.data[door].sensor){
             	updateDoorStatus(state.data[door].child, settings[state.data[door].sensor], '')
             }
         }
-    }
+    //}
 }
 
 def updateDoorStatus(doorDNI, sensor, child){
@@ -816,7 +818,7 @@ def doorButtonOpenHandler(evt) {
         def doorDevice = getChildDevice(state.data[myQDeviceId].child)
         log.debug "Opening door."
         doorDevice.openPrep()
-        sendCommand(doorDevice, "desireddoorstate", 1)
+        sendCommand(myQDeviceId, "open")
     }catch(e){
     	def errMsg = "Warning: MyQ Open button command failed - ${e}"
         log.error errMsg
@@ -832,7 +834,7 @@ def doorButtonCloseHandler(evt) {
         def doorDevice = getChildDevice(state.data[myQDeviceId].child)
         log.debug "Closing door."
         doorDevice.closePrep()
-        sendCommand(doorDevice, "desireddoorstate", 0)
+        sendCommand(myQDeviceId, "close")
 	}catch(e){
     	def errMsg = "Warning: MyQ Close button command failed - ${e}"
         log.error errMsg
@@ -867,11 +869,23 @@ private login() {
 }
 
 private doLogin() {
-    return apiPostLogin("/api/v4/User/Validate", [username: settings.username, password: settings.password] ) { response ->
+    return apiPostLogin("/api/v5/Login", "{\"username\":\"${settings.username}\",\"password\": \"${settings.password}\"}" ) { response ->
         if (response.data.SecurityToken != null) {
-            state.session.brandName = settings.brand
             state.session.securityToken = response.data.SecurityToken
-            state.session.expiration = now() + (7*24*60*60*1000) // 7 days default
+            state.session.expiration = now() + (5*60*1000) // 5 minutes default
+            
+            //Now get account ID
+            return apiGet(getAccountIdURL(), [expand: "account"]) { acctResponse ->
+                if (acctResponse.status == 200) {                    
+                    state.session.accountId = acctResponse.data.Account.Id
+                    log.debug "got accountid ${acctResponse.data.Account.Id}"
+                    return true
+                }
+                else{
+                	log.warn "Failed to get AccountId, login unsuccessful"
+                    return false
+                }
+            }
             return true
         } else {
             log.warn "No security token found, login unsuccessful"
@@ -888,14 +902,23 @@ private getMyQDevices() {
 
 	apiGet(getDevicesURL(), []) { response ->
 		if (response.status == 200) {
-			response.data.Devices.each { device ->
-				// 2 = garage door, 5 = gate, 7 = MyQGarage(no gateway), 9 = commercial door, 17 = Garage Door Opener WGDO
-				if (device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7||device.MyQDeviceTypeId == 17||device.MyQDeviceTypeId == 9) {
-                    def dni = device.MyQDeviceId
-					def description = ''
-                    def doorState = ''
-                    def updatedTime = ''
-                    device.Attributes.each {
+			response.data.items.each { device ->
+                // 2 = garage door, 5 = gate, 7 = MyQGarage(no gateway), 9 = commercial door, 17 = Garage Door Opener WGDO
+				//if (device.MyQDeviceTypeId == 2||device.MyQDeviceTypeId == 5||device.MyQDeviceTypeId == 7||device.MyQDeviceTypeId == 17||device.MyQDeviceTypeId == 9) {
+                if (device.device_family == "garagedoor") {
+					log.debug "Found door: ${device.name}"
+                    def dni = device.serial_number
+					def description = device.name
+                    def doorState = device.state.door_state
+                    def updatedTime = device.last_update
+                
+                
+                
+                    //def dni = device.MyQDeviceId
+					//def description = ''
+                    //def doorState = ''
+                    //def updatedTime = ''
+                    /*device.Attributes.each {
                         if (it.AttributeDisplayName=="desc")
                         {
                         	description = it.Value
@@ -929,12 +952,13 @@ private getMyQDevices() {
                         if (doorToRemove){
                         	log.debug "Removing older duplicate."
                             state.MyQDataPending.remove(door)
-                        }
+                        }*/
 
                     //Ignore any doors with blank descriptions
                     if (description != ''){
-                        log.debug "Got valid door: ${description} type: ${device.MyQDeviceTypeId} status: ${doorState} type: ${device.MyQDeviceTypeName}"
-                        state.MyQDataPending[dni] = [ status: doorState, lastAction: updatedTime, name: description, typeId: device.MyQDeviceTypeId, typeName: 'door', sensor: '', myQDeviceId: device.MyQDeviceId]
+                        log.debug "Got valid door: ${description} type: ${device.device_family} status: ${doorState} type: ${device.device_type}"
+                        //log.debug "Storing door info: " + description + "type: " + device.device_family + " status: " + doorState +  " type: " + device.device_type
+                        state.MyQDataPending[dni] = [ status: doorState, lastAction: updatedTime, name: description, typeId: device.MyQDeviceTypeId, typeName: 'door', sensor: '', myQDeviceId: device.serial_number]
                     }
                     else{
                     	log.debug "Door " + device.MyQDeviceId + " has blank desc field. This is unusual..."
@@ -942,11 +966,14 @@ private getMyQDevices() {
 				}
 
                 //Lights
-                else if (device.MyQDeviceTypeId == 3) {
-                    def dni = device.MyQDeviceId
-					def description = ''
-                    def lightState = ''
-                    def updatedTime = ''
+                else if (device.device_family == "lamp") {
+                    def dni = device.serial_number
+					def description = device.name
+                    def lightState = device.state.lamp_state
+                    def updatedTime = device.state.last_update
+                    
+                    
+                    /*
                     device.Attributes.each {
 
                         if (it.AttributeDisplayName=="desc")
@@ -958,23 +985,18 @@ private getMyQDevices() {
                         	lightState = it.Value
                             updatedTime = it.UpdatedTime
 						}
-					}
+					}*/
 
                     //Ignore any lights with blank descriptions
-                    if (description && description != ''){
-                        log.debug "Got valid light: ${description} type: ${device.MyQDeviceTypeId} status: ${lightState} type: ${device.MyQDeviceTypeName}"
-                        state.MyQDataPending[dni] = [ status: lightState, lastAction: updatedTime, name: description, typeName: 'light', type: device.MyQDeviceTypeId, myQDeviceId: device.MyQDeviceId ]
+                    if (description && description != ''){                    	
+                        log.debug "Got valid light: ${description} type: ${device.device_family} status: ${lightState} type: ${device.device_type}"
+                        state.MyQDataPending[dni] = [ status: lightState, lastAction: updatedTime, name: description, typeName: 'light', type: device.MyQDeviceTypeId, myQDeviceId: device.serial_number ]
                     }
 				}
 
                 //Unsupported devices
-                else{
-                    def description = ''
-                    device.Attributes.each {
-                        if (it.AttributeDisplayName=="desc")
-                        	description = it.Value
-					}
-                    state.unsupportedList.add([name: description, typeId: device.MyQDeviceTypeId, typeName: device.MyQDeviceTypeName])
+                else{                    
+                    state.unsupportedList.add([name: device.name, typeId: device.device_family, typeName: device.device_type])
                 }
 			}
 		}
@@ -1004,7 +1026,11 @@ def getHubID(){
 
 /* API Methods */
 private getDevicesURL(){
-	return "/api/v4/UserDeviceDetails/Get"
+	return "/api/v5.1/Accounts/${state.session.accountId}/Devices"
+}
+
+private getAccountIdURL(){
+	return "/api/v5/My"
 }
 
 import groovy.transform.Field
@@ -1013,29 +1039,18 @@ import groovy.transform.Field
 
 // get URL
 private getApiURL() {
-	if (settings.brand == "Craftsman") {
-		return "https://craftexternal.myqdevice.com"
-	} else {
-		return "https://myqexternal.myqdevice.com"
-	}
+	return "https://api.myqdevice.com"	
 }
 
-private getApiAppID() {
-	if (settings.brand == "Craftsman") {
-		return "eU97d99kMG4t3STJZO/Mu2wt69yTQwM0WXZA5oZ74/ascQ2xQrLD/yjeVhEQccBZ"
-	} else {
-		return "NWknvuBd7LoFHfXmKNMBcgajXtZEgKUh4V7WNzMidrpUUluDpVYVZx+xT4PCM5Kx"
-	}
+private getApiAppID() {	
+    return "JVM/G9Nwih5BwKgNCjLxiFUQxQijAebyyg8QUHr7JOrP+tuPb8iHfRHKwTmDzHOu"	
 }
 
 private getMyQHeaders() {
-	return [
-        "User-Agent": "Chamberlain/3.73",
+	return [        
         "SecurityToken": state.session.securityToken,
-        "BrandId": "2",
-        "ApiVersion": "4.1",
-        "Culture": "en",
-        "MyQApplicationId": getApiAppID()
+        "MyQApplicationId": getApiAppID(),
+        "Content-Type": "application/json"
     ]
 }
 
@@ -1046,16 +1061,22 @@ private apiGet(apiPath, apiQuery = [], callback = {}) {
         log.error "Unable to complete GET, login failed"
         return
     }
-    try {
-        log.debug "API Callout: GET ${getApiURL()} ${apiPath}"
-        httpGet([ uri: getApiURL(), path: apiPath, headers: getMyQHeaders(), query: apiQuery ]) { response ->
+    try {        
+        def myHeaders = [        
+        "SecurityToken": state.session.securityToken,
+        "MyQApplicationId": getApiAppID(),
+        "Content-Type": "application/json"
+    ]
+        //log.debug "API Callout: GET ${getApiURL()}${apiPath} headers: ${getMyQHeaders()}"
+        httpGet([ uri: getApiURL(), path: apiPath, headers: getMyQHeaders(), query: apiQuery ]) { response ->            
             def result = isGoodResponse(response)
+            log.debug "Got result: ${result}"            
             if (result == 0) {
             	callback(response)
             }
-            else if (result == 1){
+            /*else if (result == 1){
             	apiGet(apiPath, apiQuery, callback) // Try again
-            }
+            }*/
         }
     }	catch (e)	{
         log.error "API GET Error: $e"
@@ -1063,7 +1084,7 @@ private apiGet(apiPath, apiQuery = [], callback = {}) {
 }
 
 // HTTP PUT call (Send commands)
-private apiPut(apiPath, apiBody = [], callback = {}) {
+private apiPut(apiPath, apiBody = [], actionText = "") {
     if (!login()){
         log.error "Unable to complete PUT, login failed"
         sendNotificationEvent("Warning: MyQ command failed due to bad login.")
@@ -1071,58 +1092,55 @@ private apiPut(apiPath, apiBody = [], callback = {}) {
         return
     }
     try {
-        log.debug "Calling out PUT ${apiPath} ${apiBody}"
+        //log.debug "Calling out PUT ${getApiURL()}${apiPath}${apiBody} ${getMyQHeaders()}"
         httpPut([ uri: getApiURL(), path: apiPath, headers: getMyQHeaders(), body: apiBody ]) { response ->
             def result = isGoodResponse(response)
             if (result == 0) {
-            	callback(response)
+            	return
             }
             else if (result == 1){
             	apiPut(apiPath, apiBody, callback) // Try again
-            }
+            }            
         }
     } catch (e)	{
         log.error "API PUT Error: $e"
         sendNotificationEvent("Warning: MyQ command failed - ${e}")
-        if (prefDoorErrorNotify){sendPush("Warning: MyQ command failed - ${e}")}
+        if (prefDoorErrorNotify){sendPush("Warning: MyQ command failed for ${actionText} - ${e}")}
     }
 }
 
 //Check response and retry login if needed
 def isGoodResponse(response){
-    //log.debug "Got response: STATUS: ${response.status}\nDATA: ${response.data}"
-    def returnCode = -1
-    if (response.status == 200) {
-        switch (response.data.ReturnCode as Integer) {
-            //Good response
-            case 0:
-                state.retryCount = 0 // Reset it
-                returnCode = 0
-                break
-
-            //If bad login response, clear out token and try again
-            case -3333: // Login again
-                if (state.retryCount <= MAX_RETRIES) {
-                    state.retryCount = (state.retryCount ?: 0) + 1
-                    log.warn "GET: Login expired, logging in again"
-                    if (forceLogin()){
-                    	returnCode = 1
-                        log.warn "GET: Re-login successful."
-                    }
-                    else{
-                    	returnCode = -1
-                        log.warn "GET: Re-login failed."
-                    }
-                } else {
-                    log.warn "Too many retries, dropping request"
-                }
-                break
-
-            default:
-                log.error "Unknown return code ${response.data.ReturnCode}, error ${response.data.ErrorMessage}"
+    log.debug "Got response: STATUS: ${response.status}"
+    
+    //Good response
+    if (response.status == 200 || response.status == 204) {
+        state.retryCount = 0 // Reset it
+        return 0
+    }
+    
+    //Bad token response
+    else if(response.status == 401){
+    	if (state.retryCount <= MAX_RETRIES) {
+            state.retryCount = (state.retryCount ?: 0) + 1
+            log.warn "GET: Login expired, logging in again"
+            if (forceLogin()){
+                returnCode = 1
+                log.warn "GET: Re-login successful."
+            }
+            else{
+                returnCode = -1
+                log.warn "GET: Re-login failed."
+            }
+        } else {
+            log.warn "Too many retries, dropping request"
         }
-    } else {
-        log.error "Unknown status: ${response.status}"
+    }
+    
+    //Unknown response
+    else{
+    	log.error "Unknown status: ${response.status} ${response.data}"
+        return -1
     }
     return returnCode
 }
@@ -1130,21 +1148,14 @@ def isGoodResponse(response){
 // HTTP POST call (Login)
 private apiPostLogin(apiPath, apiBody = [], callback = {}) {
     try {
+        //log.debug "Logging into ${getApiURL()}/${apiPath} headers: ${getMyQHeaders()}"
         return httpPost([ uri: getApiURL(), path: apiPath, headers: getMyQHeaders(), body: apiBody ]) { response ->
-            //log.debug "Got LOGIN POST response: STATUS: ${response.status}\n\nDATA: ${response.data}"
-            if (response.status == 200) {
-                switch (response.data.ReturnCode as Integer) {
-                    case 0: // Process response
-                    	return callback(response)
-                        break
-
-                    default:
-                    	log.error "Unknown LOGIN POST return code ${response.data.ReturnCode}, error ${response.data.ErrorMessage}"
-                }
+            log.debug "Got LOGIN POST response: STATUS: ${response.status}\n\nDATA: ${response.data}"
+            if (response.status == 200) {            	
+                	return callback(response)
             } else {
-                log.error "Unknown LOGIN POST status: ${response.status}"
+                log.error "Unknown LOGIN POST status: ${response.status} data: ${response.data}"
             }
-
             return false
         }
     } catch (e)	{
@@ -1153,10 +1164,13 @@ private apiPostLogin(apiPath, apiBody = [], callback = {}) {
     return false
 }
 
+
+
+
 // Send command to start or stop
-def sendCommand(child, attributeName, attributeValue) {
+def sendCommand(myQDeviceId, command) {
 	state.lastCommandSent = now()
-    apiPut("/api/v4/DeviceAttribute/PutDeviceAttribute", [ MyQDeviceId: child.getMyQDeviceId(), AttributeName: attributeName, AttributeValue: attributeValue ])
+    apiPut("/api/v5.1/Accounts/${state.session.accountId}/Devices/${myQDeviceId}/actions", "{\"action_type\":\"${command}\"}", "${state.data[myQDeviceId].name}(${command})")
     return true
 }
 

@@ -55,11 +55,11 @@ metadata {
 
 def open()  {
     openPrep()
-    parent.sendCommand(this, "desireddoorstate", 1)    
+    parent.sendCommand(getMyQDeviceId(), "open")
 }
 def close() {
     closePrep()
-    parent.sendCommand(this, "desireddoorstate", 0) 
+    parent.sendCommand(getMyQDeviceId(), "close")
 }
 
 def openPrep(){
@@ -102,5 +102,5 @@ def log(msg){
 }
 
 def showVersion(){
-	return "3.0.0"
+	return "3.1.0"
 }

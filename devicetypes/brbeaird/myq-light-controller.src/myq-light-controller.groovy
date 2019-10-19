@@ -41,23 +41,22 @@ metadata {
 
 def on() {
 	log.debug "Light turned on"    
-    parent.sendCommand(this, "desiredlightstate", 1)
-    updateDeviceStatus(1)
+    parent.sendCommand(getMyQDeviceId(), "on")
+    updateDeviceStatus("on")
 	
 }
 def off() {
 	log.debug "Light turned off"
-    parent.sendCommand(this, "desiredlightstate", 0)
-    updateDeviceStatus(0)
+    parent.sendCommand(getMyQDeviceId(), "off")
+    updateDeviceStatus("off")
 }
 
 def updateDeviceStatus(status) {	
-    if (status.toInteger() == 0)
-    {  
+    if (status == "off"){  
     	log.debug "Updating status to off"
         sendEvent(name: "switch", value: "off", display: true, displayed: true, isStateChange: true, descriptionText: device.displayName + " was off")        
     }   
-	else if (status.toInteger() == 1) {         
+	else if (status == "on"){
     	log.debug "Updating status to on"
         sendEvent(name: "switch", value: "on", displayed: true, display: true, isStateChange: true, descriptionText: device.displayName + " was on")  
     }
@@ -82,5 +81,5 @@ def updateMyQDeviceId(Id) {
 }
 
 def showVersion(){
-	return "3.0.0"
+	return "3.1.0"
 }

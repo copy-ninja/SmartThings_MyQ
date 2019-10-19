@@ -119,14 +119,14 @@ def open()  {
 	log.debug "Garage door open command called."
     parent.notify("Garage door open command called.")
     updateDeviceStatus("opening")
-    parent.sendCommand(this, "desireddoorstate", 1) 
+    parent.sendCommand(getMyQDeviceId(), "open")
 	
     runIn(20, refresh, [overwrite: true])	//Force a sync with tilt sensor after 20 seconds
 }
 def close() { 
 	log.debug "Garage door close command called."
     parent.notify("Garage door close command called.")
-	parent.sendCommand(this, "desireddoorstate", 0)
+	parent.sendCommand(getMyQDeviceId(), "close")
 //	updateDeviceStatus("closing")			// Now handled in the parent (in case we have an Acceleration sensor, we can handle "waiting" state)
     runIn(30, refresh, [overwrite: true]) //Force a sync with tilt sensor after 30 seconds
 }
@@ -237,5 +237,5 @@ def log(msg){
 }
 
 def showVersion(){
-	return "3.0.0"
+	return "3.1.0"
 }
