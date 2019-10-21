@@ -123,7 +123,7 @@ In the future, should you wish to update, simply repeat steps 2 and 3. The only 
 
 ### Donate/Sponsor:
 
-If you love this app, feel free to donate or check out the GitHub Spnsor program.
+If you love this app, feel free to donate or check out the GitHub Sponsor program.
 
 | Platform        | Wallet/Link | QR Code  | 
 |------------- |-------------|------|
