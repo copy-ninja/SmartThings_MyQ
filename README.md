@@ -127,7 +127,7 @@ If you love this app, feel free to donate or check out the GitHub Spnsor program
 
 | Platform        | Wallet/Link | QR Code
 | ------------- |-------------|------|
-| GitHub Sponsorship      | https://github.com/sponsors/brbeaird | <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" /> |
+| GitHub Sponsorship      | https://github.com/sponsors/brbeaird | <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width=100 /> |
 | Bitcoin      | 1gLEpa5VUpYx77p4nfqHkWrpZK4opFrgV | <img src="https://i.imgur.com/ubrZjaz.png" />
 | Paypal      | [![PayPal - The safer, easier way to give online!](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif "Donate")](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6QH4Y5KCESYPY) |
 
