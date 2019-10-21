@@ -125,7 +125,7 @@ In the future, should you wish to update, simply repeat steps 2 and 3. The only 
 
 If you love this app, feel free to donate or check out the GitHub Spnsor program.
 
-| Platform        | Wallet/Link | QR Code
+| Platform        | Wallet/Link | 
 | ------------- |-------------|------|
 | GitHub Sponsorship      | https://github.com/sponsors/brbeaird | <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" width=100 /> |
 | Bitcoin      | 1gLEpa5VUpYx77p4nfqHkWrpZK4opFrgV | <img src="https://i.imgur.com/ubrZjaz.png" />
