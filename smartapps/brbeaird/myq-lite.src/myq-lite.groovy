@@ -49,7 +49,7 @@ preferences {
 
 def appInfoSect(sect=true)	{
 	def str = ""
-	str += "${app?.name}"
+	str += "${app?.name} (v${appVersion()})"
 	str += "\nAuthor: ${appAuthor()}"
 	section() { paragraph str, image: getAppImg("myq@2x.png") }
 }
@@ -57,7 +57,7 @@ def appInfoSect(sect=true)	{
 def mainPage() {
 
     if (state.previousVersion == null){
-    	state.previousVersion = 0;
+        state.previousVersion = 0;
     }
 
     //Brand new install (need to grab version info)
@@ -67,9 +67,9 @@ def mainPage() {
         state.currentVersion['SmartApp'] = appVersion()
     }
     //Version updated
-    else if (appVersion() != state.previousVersion){
-    	state.previousVersion = appVersion()
-        getVersionInfo(state.previousVersion, appVersion());
+    else{
+        getVersionInfo(state.previousVersion, appVersion())
+        state.previousVersion = appVersion()
     }
 
     //If fresh install, go straight to login page
@@ -81,7 +81,6 @@ def mainPage() {
     state.lastPage = "mainPage"
 
     dynamicPage(name: "mainPage", nextPage: "", uninstall: false, install: true) {
-    	getVersionInfo(0,0)
         appInfoSect()
         def devs = refreshChildren()
         section("MyQ Account"){
@@ -151,7 +150,7 @@ def prefLogIn(params) {
 		section("Login Credentials"){
 			input("username", "email", title: "Username", description: "MyQ Username (email address)")
 			input("password", "password", title: "Password", description: "MyQ password")
-		}		
+		}
 	}
 }
 
@@ -314,10 +313,10 @@ def installed() {
 }
 
 def updated() {
-	log.debug "MyQ Lite changes saved."    
+	log.debug "MyQ Lite changes saved."
     unschedule()
     runEvery3Hours(updateVersionInfo)   //Check for new version every 3 hours
-    
+
     if (door1Sensor && state.validatedDoors){
     	refreshAll()
     	runEvery30Minutes(refreshAll)
@@ -336,7 +335,7 @@ def updateVersionInfo(){
 def getVersionInfo(oldVersion, newVersion){
     //Don't check for updates more 5 minutes
 
-    if (state.lastVersionCheck && (now() - state.lastVersionCheck) / 1000/60 < 5 ){
+    if (state.lastVersionCheck && oldVersion == newVersion && (now() - state.lastVersionCheck) / 1000/60 < 5 ){
     	return
     }
     state.lastVersionCheck = now()
@@ -462,7 +461,7 @@ def initialize() {
                 def DNI = [ app.id, "LightController", myQDeviceId ].join('|')
                 def lightName = state.data[light].name
                 def childLight = getChildDevice(state.data[light].child)
-                
+
                 if (!childLight) {
                     log.debug "Creating child light device: " + light
 
@@ -527,7 +526,7 @@ def initialize() {
 
 def verifyChildDeviceIds(){
 	//Try to match existing child devices with latest MyQ data
-    childDevices.each { child ->        
+    childDevices.each { child ->
         def matchingId
         if (child.typeName != 'Momentary Button Tile'){
             //Look for a matching entry in MyQ
@@ -873,10 +872,10 @@ private doLogin() {
         if (response.data.SecurityToken != null) {
             state.session.securityToken = response.data.SecurityToken
             state.session.expiration = now() + (5*60*1000) // 5 minutes default
-            
+
             //Now get account ID
             return apiGet(getAccountIdURL(), [expand: "account"]) { acctResponse ->
-                if (acctResponse.status == 200) {                    
+                if (acctResponse.status == 200) {
                     state.session.accountId = acctResponse.data.Account.Id
                     log.debug "got accountid ${acctResponse.data.Account.Id}"
                     return true
@@ -911,9 +910,9 @@ private getMyQDevices() {
 					def description = device.name
                     def doorState = device.state.door_state
                     def updatedTime = device.last_update
-                
-                
-                
+
+
+
                     //def dni = device.MyQDeviceId
 					//def description = ''
                     //def doorState = ''
@@ -971,8 +970,8 @@ private getMyQDevices() {
 					def description = device.name
                     def lightState = device.state.lamp_state
                     def updatedTime = device.state.last_update
-                    
-                    
+
+
                     /*
                     device.Attributes.each {
 
@@ -988,14 +987,14 @@ private getMyQDevices() {
 					}*/
 
                     //Ignore any lights with blank descriptions
-                    if (description && description != ''){                    	
+                    if (description && description != ''){
                         log.debug "Got valid light: ${description} type: ${device.device_family} status: ${lightState} type: ${device.device_type}"
                         state.MyQDataPending[dni] = [ status: lightState, lastAction: updatedTime, name: description, typeName: 'light', type: device.MyQDeviceTypeId, myQDeviceId: device.serial_number ]
                     }
 				}
 
                 //Unsupported devices
-                else{                    
+                else{
                     state.unsupportedList.add([name: device.name, typeId: device.device_family, typeName: device.device_type])
                 }
 			}
@@ -1039,15 +1038,15 @@ import groovy.transform.Field
 
 // get URL
 private getApiURL() {
-	return "https://api.myqdevice.com"	
+	return "https://api.myqdevice.com"
 }
 
-private getApiAppID() {	
-    return "JVM/G9Nwih5BwKgNCjLxiFUQxQijAebyyg8QUHr7JOrP+tuPb8iHfRHKwTmDzHOu"	
+private getApiAppID() {
+    return "JVM/G9Nwih5BwKgNCjLxiFUQxQijAebyyg8QUHr7JOrP+tuPb8iHfRHKwTmDzHOu"
 }
 
 private getMyQHeaders() {
-	return [        
+	return [
         "SecurityToken": state.session.securityToken,
         "MyQApplicationId": getApiAppID(),
         "Content-Type": "application/json"
@@ -1061,16 +1060,16 @@ private apiGet(apiPath, apiQuery = [], callback = {}) {
         log.error "Unable to complete GET, login failed"
         return
     }
-    try {        
-        def myHeaders = [        
+    try {
+        def myHeaders = [
         "SecurityToken": state.session.securityToken,
         "MyQApplicationId": getApiAppID(),
         "Content-Type": "application/json"
     ]
         //log.debug "API Callout: GET ${getApiURL()}${apiPath} headers: ${getMyQHeaders()}"
-        httpGet([ uri: getApiURL(), path: apiPath, headers: getMyQHeaders(), query: apiQuery ]) { response ->            
+        httpGet([ uri: getApiURL(), path: apiPath, headers: getMyQHeaders(), query: apiQuery ]) { response ->
             def result = isGoodResponse(response)
-            log.debug "Got result: ${result}"            
+            log.debug "Got result: ${result}"
             if (result == 0) {
             	callback(response)
             }
@@ -1100,7 +1099,7 @@ private apiPut(apiPath, apiBody = [], actionText = "") {
             }
             else if (result == 1){
             	apiPut(apiPath, apiBody, callback) // Try again
-            }            
+            }
         }
     } catch (e)	{
         log.error "API PUT Error: $e"
@@ -1112,13 +1111,13 @@ private apiPut(apiPath, apiBody = [], actionText = "") {
 //Check response and retry login if needed
 def isGoodResponse(response){
     log.debug "Got response: STATUS: ${response.status}"
-    
+
     //Good response
     if (response.status == 200 || response.status == 204) {
         state.retryCount = 0 // Reset it
         return 0
     }
-    
+
     //Bad token response
     else if(response.status == 401){
     	if (state.retryCount <= MAX_RETRIES) {
@@ -1136,7 +1135,7 @@ def isGoodResponse(response){
             log.warn "Too many retries, dropping request"
         }
     }
-    
+
     //Unknown response
     else{
     	log.error "Unknown status: ${response.status} ${response.data}"
@@ -1151,7 +1150,7 @@ private apiPostLogin(apiPath, apiBody = [], callback = {}) {
         //log.debug "Logging into ${getApiURL()}/${apiPath} headers: ${getMyQHeaders()}"
         return httpPost([ uri: getApiURL(), path: apiPath, headers: getMyQHeaders(), body: apiBody ]) { response ->
             log.debug "Got LOGIN POST response: STATUS: ${response.status}\n\nDATA: ${response.data}"
-            if (response.status == 200) {            	
+            if (response.status == 200) {
                 	return callback(response)
             } else {
                 log.error "Unknown LOGIN POST status: ${response.status} data: ${response.data}"

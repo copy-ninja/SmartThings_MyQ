@@ -62,7 +62,7 @@
 	        "oAuth": false,
 	        "appUrl": "devicetypes/brbeaird/myq-light-controller.src/myq-light-controller.groovy",
 	        "appSettings": {},
-	        "version": "3.1.0",
+	        "version": "3.1.1",
 	        "optional": true
 	    },
 	    {

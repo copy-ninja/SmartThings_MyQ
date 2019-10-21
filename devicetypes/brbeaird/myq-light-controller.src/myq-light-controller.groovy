@@ -32,47 +32,47 @@ metadata {
 			tileAttribute ("device.switch", key: "PRIMARY_CONTROL") {
 				attributeState "off", label: '${name}', action: "switch.on", icon: "st.Lighting.light13", backgroundColor: "#ffffff", nextState: "on"
 				attributeState "on", label: '${name}', action: "switch.off", icon: "st.Lighting.light13", backgroundColor: "#00a0dc", nextState: "off"
-			}			
-		}              
+			}
+		}
 		main "switch"
 		details(["switch"])
 	}
 }
 
 def on() {
-	log.debug "Light turned on"    
-    parent.sendCommand(getMyQDeviceId(), "on")
+	log.debug "Light turned on"
+    parent.sendCommand(getMyQDeviceId(), "turnon")
     updateDeviceStatus("on")
-	
+
 }
 def off() {
 	log.debug "Light turned off"
-    parent.sendCommand(getMyQDeviceId(), "off")
+    parent.sendCommand(getMyQDeviceId(), "turnoff")
     updateDeviceStatus("off")
 }
 
-def updateDeviceStatus(status) {	
-    if (status == "off"){  
+def updateDeviceStatus(status) {
+    if (status == "off"){
     	log.debug "Updating status to off"
-        sendEvent(name: "switch", value: "off", display: true, displayed: true, isStateChange: true, descriptionText: device.displayName + " was off")        
-    }   
+        sendEvent(name: "switch", value: "off", display: true, displayed: true, isStateChange: true, descriptionText: device.displayName + " was off")
+    }
 	else if (status == "on"){
     	log.debug "Updating status to on"
-        sendEvent(name: "switch", value: "on", displayed: true, display: true, isStateChange: true, descriptionText: device.displayName + " was on")  
+        sendEvent(name: "switch", value: "on", displayed: true, display: true, isStateChange: true, descriptionText: device.displayName + " was on")
     }
     else{
     	log.warn "Unknown light status."
-    }       
+    }
 }
 
-def getMyQDeviceId(){	    
+def getMyQDeviceId(){
     if (device.currentState("myQDeviceId")?.value)
     	return device.currentState("myQDeviceId").value
-	else{    	
-        def newId = device.deviceNetworkId.split("\\|")[2]        
+	else{
+        def newId = device.deviceNetworkId.split("\\|")[2]
         sendEvent(name: "myQDeviceId", value: newId, display: true , displayed: true)
         return newId
-    }	
+    }
 }
 
 def updateMyQDeviceId(Id) {
@@ -81,5 +81,5 @@ def updateMyQDeviceId(Id) {
 }
 
 def showVersion(){
-	return "3.1.0"
+	return "3.1.1"
 }
