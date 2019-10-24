@@ -84,7 +84,7 @@ def mainPage() {
         appInfoSect()
         def devs = refreshChildren()
         section("MyQ Account"){
-            paragraph title: "", "Email: ${settings.username}\nGateway Brand: ${settings.brand}"
+            paragraph title: "", "Email: ${settings.username}"
             href "prefLogIn", title: "", description: "Tap to modify account", params: [nextPageName: "mainPage"]
         }
         section("Connected Devices") {
@@ -328,7 +328,7 @@ def updated() {
 
 //Called from scheduler every 3 hours
 def updateVersionInfo(){
-	getVersionInfo('versionCheck', '0')
+	getVersionInfo('versionCheck', appVersion())
 }
 
 //Get latest versions for SmartApp and Device Handlers
