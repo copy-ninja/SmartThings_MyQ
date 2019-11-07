@@ -19,8 +19,8 @@
  */
 include 'asynchttp_v1'
 
-String appVersion() { return "3.1.0" }
-String appModified() { return "2019-10-18"}
+String appVersion() { return "3.1.1" }
+String appModified() { return "2019-11-07"}
 String appAuthor() { return "Brian Beaird" }
 String gitBranch() { return "brbeaird" }
 String getAppImg(imgName) 	{ return "https://raw.githubusercontent.com/${gitBranch()}/SmartThings_MyQ/master/icons/$imgName" }
@@ -96,6 +96,9 @@ def mainPage() {
             state.currentVersion.each { device, version ->
             	paragraph title: "", "${device} ${version} (${versionCompare(device)})"
             }
+            href(name: "Release notes", title: "Release notes",             
+             required: false,             
+             url: "https://github.com/${gitBranch()}/SmartThings_MyQ/blob/master/CHANGELOG.md")
             input "prefUpdateNotify", "bool", required: false, title: "Notify when new version is available"
         }
         section("Uninstall") {
@@ -105,8 +108,10 @@ def mainPage() {
     }
 }
 
-def versionCompare(deviceName){
-    if (!state.currentVersion || !state.latestVersion){return 'checking...'}
+def versionCompare(deviceName){    
+    if (!state.currentVersion || !state.latestVersion || state.latestVersion == [:]){
+        return 'latest'
+    }    
     if (state.currentVersion[deviceName] == state.latestVersion[deviceName]){
     	return 'latest'
     }
@@ -341,19 +346,30 @@ def getVersionInfo(oldVersion, newVersion){
     state.lastVersionCheck = now()
     log.info "Checking for latest version..."
     def params = [
-        uri:  'http://www.brbeaird.com/getVersion/myq/' + oldVersion + '/' + newVersion,
-        contentType: 'application/json'
+        uri:  'http://www.brbeaird.com/getVersion',
+        contentType: 'application/json',
+        body: [
+        	app: "myq",
+            platform: "ST",
+            prevVersion: oldVersion,
+            currentVersion: newVersion,
+        	sensor: door1Sensor ? true : false,
+            door: state.validatedDoors?.size(),
+            lock: prefUseLock ? true: false,
+            light: state.validatedLights?.size(),
+            button: prefDoor1PushButtons
+        ]
     ]
-    def callbackMethod = oldVersion == 'versionCheck' ? 'updateCheck' : 'handleVersionUpdateResponse'
-    asynchttp_v1.get(callbackMethod, params)
+    def callbackMethod = oldVersion == 'versionCheck' ? 'updateCheck' : 'handleVersionUpdateResponse'    
+    asynchttp_v1.post(callbackMethod, params)
 }
 
 //When version response received (async), update state with the data
-def handleVersionUpdateResponse(response, data) {
-    if (response.hasError()) {
+def handleVersionUpdateResponse(response, data) {    
+    if (response.hasError() || !response.json?.SmartApp) {
         log.error "Error getting version info: ${response.errorMessage}"
-        sendNotificationEvent("Warning: problem getting MyQ version info: ${response.errorMessage}")
-    }
+        state.latestVersion = [:]
+    }    
     else {state.latestVersion = response.json}
 }
 
@@ -759,6 +775,7 @@ def updateDoorStatus(doorDNI, sensor, child){
         def currentSensorValue = "unknown"
         currentSensorValue = sensor.latestValue("contact")
         def currentDoorState = doorToUpdate.latestValue("contact")
+        doorToUpdate.updateSensorBattery(sensor.latestValue("battery"))
 
         //If sensor and door are out of sync, update the door
 		if (currentDoorState != currentSensorValue){

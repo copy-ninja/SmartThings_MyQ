@@ -27,6 +27,7 @@ metadata {
 		capability "Actuator"
 		capability "Sensor"
         capability "Lock"
+        capability "Battery"
         //capability "Health Check"
 
 		attribute "lastActivity", "string"
@@ -43,6 +44,7 @@ metadata {
         command "lock"
         command "unlock"
 		command "updateMyQDeviceId", ["string"]
+        command "updateSensorBattery", ["number"]
 	}
 
 	simulator {	}
@@ -218,7 +220,7 @@ def log(msg){
 }
 
 def showVersion(){
-	return "3.1.0"
+	return "3.1.1"
 }
 
 def getMyQDeviceId(){
@@ -229,6 +231,10 @@ def getMyQDeviceId(){
         sendEvent(name: "myQDeviceId", value: newId, display: true , displayed: true)
         return newId
     }
+}
+
+def updateSensorBattery(batteryValue) {	
+	sendEvent(name: "battery", value: batteryValue, display: true, displayed: true)
 }
 
 def updateMyQDeviceId(Id) {

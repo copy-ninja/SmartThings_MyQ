@@ -30,6 +30,7 @@ metadata {
 		capability "Switch"
 		capability "Momentary"
 		capability "Sensor"
+        capability "Battery"
         //capability "Health Check" Will be needed eventually for new app compatability but is not documented well enough yet
 		
 		attribute "lastActivity", "string"
@@ -43,6 +44,7 @@ metadata {
 		command "updateDeviceLastActivity", ["number"]
         command "updateDeviceMoving", ["string"]
         command "updateMyQDeviceId", ["string"]
+        command "updateSensorBattery", ["number"]
 	}
 
 	simulator {	}
@@ -64,7 +66,7 @@ metadata {
     		}
 		}
 
-		standardTile("refresh", "device.door", width: 3, height: 2, decoration: "flat") {
+		standardTile("refresh", "device.door", width: 2, height: 2, decoration: "flat") {
 			state("default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh")
 		}
 		standardTile("contact", "device.contact") {
@@ -83,14 +85,17 @@ metadata {
             state "normal", label: 'Close', icon: "st.doors.garage.garage-closed", backgroundColor: "#00a0dc", action: "close", nextState: "closing"
             state "closing", label: 'Closing', icon: "st.doors.garage.garage-closing", backgroundColor: "#cec236", action: "close"
 		}
-        valueTile("doorSensor", "device.doorSensor", width: 3, height: 2, inactiveLabel: false, decoration: "flat") {
+        valueTile("doorSensor", "device.doorSensor", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "default", label:'${currentValue}', backgroundColor:"#ffffff"
 		}
 		valueTile("doorMoving", "device.doorMoving", width: 6, height: 2, inactiveLavel: false, decoration: "flat") {
 			state "default", label: '${currentValue}', backgroundColor:"#ffffff"
 		}        
+        valueTile("battery", "device.battery", width: 2, height: 2, inactiveLavel: false, decoration: "flat") {
+			state "default", label: '${currentValue}% battery', backgroundColor:"#ffffff"
+		}        
         main "door"
-		details(["door", "openBtn", "closeBtn", "doorSensor", "refresh"])
+		details(["door", "openBtn", "closeBtn", "doorSensor", "battery", "refresh"])
 	}
 }
 
@@ -141,7 +146,7 @@ def getMyQDeviceId(){
     }	
 }
 
-def refresh() {	        
+def refresh() {
     parent.refresh(this)
     sendEvent(name: "OpenButton", value: "normal", displayed: false, isStateChange: true)
     sendEvent(name: "CloseButton", value: "normal", displayed: false, isStateChange: true)
@@ -223,6 +228,10 @@ def updateDeviceSensor(sensor) {
 	sendEvent(name: "doorSensor", value: sensor, display: false , displayed: false)
 }
 
+def updateSensorBattery(batteryValue) {	
+	sendEvent(name: "battery", value: batteryValue, display: true, displayed: true)
+}
+
 def updateDeviceMoving(moving) {	
 	sendEvent(name: "doorMoving", value: moving, display: false , displayed: false)
 }
@@ -237,5 +246,5 @@ def log(msg){
 }
 
 def showVersion(){
-	return "3.1.0"
+	return "3.1.1"
 }
