@@ -55,3 +55,7 @@ def on() {
 def off() {
 	push()
 }
+
+def showVersion(){
+	return "1.0.1"
+}
