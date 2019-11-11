@@ -16,10 +16,10 @@ This SmartApp integrates Chamberlain/LiftMaster MyQ doors and plug-in lamp modul
 
 
 ### Device and ActionTiles
-![Door device](http://i.imgur.com/zBXS6nQm.png "Door device")  ![Routine](http://i.imgur.com/fmDa1t6m.png "Routine") 
+![Door device](http://i.imgur.com/zBXS6nQm.png "Door device")  ![Routine](http://i.imgur.com/fmDa1t6m.png "Routine")
 
 
-![With ActionTiles](https://i.imgur.com/8BSYtMI.png "With ActionTiles")    
+![With ActionTiles](https://i.imgur.com/8BSYtMI.png "With ActionTiles")
 
 
 ### Setup
@@ -34,22 +34,22 @@ This SmartApp integrates Chamberlain/LiftMaster MyQ doors and plug-in lamp modul
 
 
 
-This SmartApp works best when you have a Tilt/Contact sensor on the door to keep an accurate status in SmartThings. **Unfortunately, the MyQ included tilt sensor will not work as SmartThings cannot communicate with it**. That said, you can maintain most functionality without a sensor at all (see no-sensor special notes below). 
+This SmartApp works best when you have a Tilt/Contact sensor on the door to keep an accurate status in SmartThings. **Unfortunately, the MyQ included tilt sensor will not work as SmartThings cannot communicate with it**. That said, you can maintain most functionality without a sensor at all (see no-sensor special notes below).
 
-This SmartApp can control MyQ lamp modules (not the actual lights in the garage door openers) For the lamp controllers, there's no way for SmartThings to know the status, but as long as you only control the light from SmartThings, the status should stay in sync. 
+This SmartApp can control MyQ lamp modules (not the actual lights in the garage door openers) For the lamp controllers, there's no way for SmartThings to know the status, but as long as you only control the light from SmartThings, the status should stay in sync.
 
 Previous versions of this app (known as simply SmartThings_MyQ) relied on polling MyQ for status updates; however, MyQ/SmartThings have restricted the ability to poll the MyQ servers, although sending open/close/on/off commands via API still works as normal.
 
 SmartThings thread here: <a href="https://community.smartthings.com/t/release-myq-lite-for-liftmaster-chamberlain/49150">https://community.smartthings.com/t/beta-myq-lite-for-liftmaster-chamberlain/49150</a>
 
-Credit to copy-ninja, whose version I branched off to create this app to integrate without the need to poll MyQ for the device status. 
+Credit to copy-ninja, whose version I branched off to create this app to integrate without the need to poll MyQ for the device status.
 
 ### Optional Tilt/Contact Sensor
 This app has the (strongly recommended) option of interfacing with a tilt sensor on the garage door. When present, a sensor will allow the door status to be known and displayed on the device. This also allows for the "switch" capability on the device, which is necessary for routines, ActionTiles dashboard, and Alexa use. <a href="https://www.amazon.com/gp/product/B00HGVJRX2/ref=as_li_tl?ie=UTF8&camp=1789&creative=9325&creativeASIN=B00HGVJRX2&linkCode=as2&tag=brbeaird0e-20&linkId=05e7b850708aa7cda815de18103d4805">Here's an example of one you can purchase from Amazon.</a>
 
 
 ### Using MyQ Premium with IFTTT and Virtual Sensors
-If you have a subscription to MyQ premium, you can use IFTTT and virtual sensors to use the full "sensor version" device handler that knows the door status. You can find a good write-up of that here: 
+If you have a subscription to MyQ premium, you can use IFTTT and virtual sensors to use the full "sensor version" device handler that knows the door status. You can find a good write-up of that here:
 https://community.smartthings.com/t/how-to-smartthings-myq-smartapp-using-myq-sensors-with-ifttt/149601
 
 ### Special notes when using routines with the no-sensor door version
@@ -61,7 +61,7 @@ You have two options to work around this limitation:
 
 
 ### Garage Door Usage with Alexa/Google Home (Without a door sensor):
-For Alexa to respond to commands to open/close the door, make sure you choose the option during setup to create the Pushbutton switches. This will create an "Opener" and "Closer" switch. Once setup is done and you see those switches in your Things, go back into Alexa and run the discovery process. Those switches should show up in the Alexa app and should respond to **"Alexa, turn ON [garage door name] Opener"** and **"Alexa, turn ON [garage door name] Closer."** 
+For Alexa to respond to commands to open/close the door, make sure you choose the option during setup to create the Pushbutton switches. This will create an "Opener" and "Closer" switch. Once setup is done and you see those switches in your Things, go back into Alexa and run the discovery process. Those switches should show up in the Alexa app and should respond to **"Alexa, turn ON [garage door name] Opener"** and **"Alexa, turn ON [garage door name] Closer."**
 
 If you want a less-awkward way to open the door, you can set up an Alexa routine or a Google Home shortcut that translates something like "Alexa, open the garage" to the full "Alexa, turn on..." phrase from above.
 
@@ -91,7 +91,7 @@ There are 6 code files available for the installations of this app - 1 SmartApp 
 | SmartApp      | MyQ Lite | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/smartapps/brbeaird/myq-lite.src/myq-lite.groovy">Link</a> |Required|
 | Device Handler | MyQ Garage Door Opener | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-garage-door-opener.src/myq-garage-door-opener.groovy">Link</a> |Needed if using door sensors|
 | Device Handler | MyQ Garage Door Opener-NoSensor | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-garage-door-opener-nosensor.src/myq-garage-door-opener-nosensor.groovy">Link</a> |Needed if NOT using door sensors|
-| Device Handler | Momentary Button Tile | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/smartthings/momentary-button-tile.src/momentary-button-tile.groovy">Link</a> |Helpful for no-sensor installs to add buttons in routines/ActionTiles/Alexa|
+| Device Handler | Momentary Button Tile | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/momentary-button-tile.src/momentary-button-tile.groovy">Link</a> |Helpful for no-sensor installs to add buttons in routines/ActionTiles/Alexa|
 | Device Handler | Light Controller | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-light-controller.src/myq-light-controller.groovy">Link</a> |Only needed if using a plug-in MyQ Lamp Controller|
 | Device Handler | MyQ Lock Door | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-lock-door.src/myq-lock-door.groovy">Link</a> |Only needed if using the lock-type door functionality|
 
@@ -106,8 +106,8 @@ There are 6 code files available for the installations of this app - 1 SmartApp 
 6. Repeat the previous step for the Light Controller device type code: <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-light-controller.src/myq-light-controller.groovy">Light Controller</a>
 6. Now we create the SmartApp code. Click **My SmartApps** -> **New Smartapp** -> **From Code**.
 7. Copy contents of <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/smartapps/brbeaird/myq-lite.src/myq-lite.groovy">SmartApp</a> and paste into text area. in SmartApps section. Click **Create**. Click **Publish** > **For Me**
-8. In your SmartThings mobile app, tap **Automation** -> **SmartApps** -> **Add a SmartApp**. Scroll down and tap **My Apps**. Tap **MyQ Lite**. 
-9. Enter in your login details and pick your gateway brand. If login is successful, you'll see a list of doors available for you to pick. After you choose your doors, you can select optional sensors to be tied to those doors. 
+8. In your SmartThings mobile app, tap **Automation** -> **SmartApps** -> **Add a SmartApp**. Scroll down and tap **My Apps**. Tap **MyQ Lite**.
+9. Enter in your login details and pick your gateway brand. If login is successful, you'll see a list of doors available for you to pick. After you choose your doors, you can select optional sensors to be tied to those doors.
 
 ### SmartThings IDE GitHub Integration:
 
@@ -125,12 +125,8 @@ In the future, should you wish to update, simply repeat steps 2 and 3. The only 
 
 If you love this app, feel free to donate or check out the GitHub Sponsor program.
 
-| Platform        | Wallet/Link | QR Code  | 
+| Platform        | Wallet/Link | QR Code  |
 |------------- |-------------|------|
 | GitHub Sponsorship      | https://github.com/sponsors/brbeaird |  |
 | Bitcoin      | 1gLEpa5VUpYx77p4nfqHkWrpZK4opFrgV | <img src="https://i.imgur.com/ubrZjaz.png" />
 | Paypal      | [![PayPal - The safer, easier way to give online!](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif "Donate")](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=6QH4Y5KCESYPY) |
-
-
-
-

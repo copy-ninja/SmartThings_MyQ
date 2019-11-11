@@ -96,8 +96,8 @@ def mainPage() {
             state.currentVersion.each { device, version ->
             	paragraph title: "", "${device} ${version} (${versionCompare(device)})"
             }
-            href(name: "Release notes", title: "Release notes",             
-             required: false,             
+            href(name: "Release notes", title: "Release notes",
+             required: false,
              url: "https://github.com/${gitBranch()}/SmartThings_MyQ/blob/master/CHANGELOG.md")
             input "prefUpdateNotify", "bool", required: false, title: "Notify when new version is available"
         }
@@ -108,10 +108,10 @@ def mainPage() {
     }
 }
 
-def versionCompare(deviceName){    
+def versionCompare(deviceName){
     if (!state.currentVersion || !state.latestVersion || state.latestVersion == [:]){
         return 'latest'
-    }    
+    }
     if (state.currentVersion[deviceName] == state.latestVersion[deviceName]){
     	return 'latest'
     }
@@ -360,16 +360,16 @@ def getVersionInfo(oldVersion, newVersion){
             button: prefDoor1PushButtons
         ]
     ]
-    def callbackMethod = oldVersion == 'versionCheck' ? 'updateCheck' : 'handleVersionUpdateResponse'    
+    def callbackMethod = oldVersion == 'versionCheck' ? 'updateCheck' : 'handleVersionUpdateResponse'
     asynchttp_v1.post(callbackMethod, params)
 }
 
 //When version response received (async), update state with the data
-def handleVersionUpdateResponse(response, data) {    
+def handleVersionUpdateResponse(response, data) {
     if (response.hasError() || !response.json?.SmartApp) {
         log.error "Error getting version info: ${response.errorMessage}"
         state.latestVersion = [:]
-    }    
+    }
     else {state.latestVersion = response.json}
 }
 
@@ -682,14 +682,14 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
             def existingCloseButtonDev = getChildDevice(door + " Closer")
             if (!existingOpenButtonDev){
                 try{
-                	def openButton = addChildDevice("smartthings", "Momentary Button Tile", door + " Opener", getHubID(), [name: doorName + " Opener", label: doorName + " Opener"])
+                	def openButton = addChildDevice("brbeaird", "Momentary Button Tile", door + " Opener", getHubID(), [name: doorName + " Opener", label: doorName + " Opener"])
                 	state.installMsg = state.installMsg + doorName + ": created push button device. \r\n\r\n"
                 	subscribe(openButton, "momentary.pushed", doorButtonOpenHandler)
                 }
                 catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
                 {
                     log.debug "Error! " + e
-                    state.installMsg = state.installMsg + doorName + ": problem creating push button device. Check your IDE to make sure the smartthings : Momentary Button Tile device handler is installed and published. \r\n\r\n"
+                    state.installMsg = state.installMsg + doorName + ": problem creating push button device. Check your IDE to make sure the brbeaird : Momentary Button Tile device handler is installed and published. \r\n\r\n"
                 }
             }
             else{
@@ -700,7 +700,7 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
 
             if (!existingCloseButtonDev){
                 try{
-                    def closeButton = addChildDevice("smartthings", "Momentary Button Tile", door + " Closer", getHubID(), [name: doorName + " Closer", label: doorName + " Closer"])
+                    def closeButton = addChildDevice("brbeaird", "Momentary Button Tile", door + " Closer", getHubID(), [name: doorName + " Closer", label: doorName + " Closer"])
                     subscribe(closeButton, "momentary.pushed", doorButtonCloseHandler)
                 }
                 catch(physicalgraph.app.exception.UnknownDeviceTypeException e)

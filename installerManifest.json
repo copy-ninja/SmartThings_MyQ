@@ -70,7 +70,7 @@
 	        "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
 	        "published": true,
 	        "oAuth": false,
-	        "appUrl": "devicetypes/smartthings/momentary-button-tile.src/momentary-button-tile.groovy",
+	        "appUrl": "devicetypes/brbeaird/momentary-button-tile.src/momentary-button-tile.groovy",
 	        "appSettings": {},
 	        "version": "1.0.1",
 	        "optional": true
