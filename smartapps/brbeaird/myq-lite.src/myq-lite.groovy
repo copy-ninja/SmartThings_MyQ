@@ -19,8 +19,8 @@
  */
 include 'asynchttp_v1'
 
-String appVersion() { return "3.1.1" }
-String appModified() { return "2019-11-07"}
+String appVersion() { return "3.1.2" }
+String appModified() { return "2020-05-25"}
 String appAuthor() { return "Brian Beaird" }
 String gitBranch() { return "brbeaird" }
 String getAppImg(imgName) 	{ return "https://raw.githubusercontent.com/${gitBranch()}/SmartThings_MyQ/master/icons/$imgName" }
@@ -774,7 +774,7 @@ def updateDoorStatus(doorDNI, sensor, child){
         //Get current sensor value
         def currentSensorValue = "unknown"
         currentSensorValue = sensor.latestValue("contact")
-        def currentDoorState = doorToUpdate.latestValue("contact")
+        def currentDoorState = doorToUpdate.latestValue("door")
         doorToUpdate.updateSensorBattery(sensor.latestValue("battery"))
 
         //If sensor and door are out of sync, update the door
