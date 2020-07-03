@@ -19,8 +19,8 @@
  */
 include 'asynchttp_v1'
 
-String appVersion() { return "3.1.2" }
-String appModified() { return "2020-05-25"}
+String appVersion() { return "3.1.3" }
+String appModified() { return "2020-07-03"}
 String appAuthor() { return "Brian Beaird" }
 String gitBranch() { return "brbeaird" }
 String getAppImg(imgName) 	{ return "https://raw.githubusercontent.com/${gitBranch()}/SmartThings_MyQ/master/icons/$imgName" }
@@ -885,7 +885,7 @@ private login() {
 }
 
 private doLogin() {
-    return apiPostLogin("/api/v5/Login", "{\"username\":\"${settings.username}\",\"password\": \"${settings.password}\"}" ) { response ->
+    return apiPostLogin("/api/v5/Login", "{\"Username\":\"${settings.username}\",\"Password\": \"${settings.password}\"}" ) { response ->
         if (response.data.SecurityToken != null) {
             state.session.securityToken = response.data.SecurityToken
             state.session.expiration = now() + (5*60*1000) // 5 minutes default
