@@ -273,14 +273,14 @@ def sensorPage() {
         state.validatedDoors.each{ door ->
             section("Setup options for " + state.MyQDataPending[door].name){
                 input "door${sensorCounter}Sensor",  "capability.contactSensor", required: false, multiple: false, title: state.MyQDataPending[door].name + " Contact Sensor"
-                input "prefDoor${sensorCounter}PushButtons", "bool", required: false, title: "Create on/off push buttons?"
+                input "prefDoor${sensorCounter}PushButtons", "bool", required: false, title: "Create separate on/off switches?"
             }
             sensorCounter++
         }
         section("Sensor setup"){
         	paragraph "For each door above, you can specify an optional sensor that allows the device type to know whether the door is open or closed. This helps the device function as a switch " +
             	"you can turn on (to open) and off (to close) in other automations and SmartApps."
-           	paragraph "Alternatively, you can choose the other option below to have separate additional On and Off push button devices created. This is recommened if you have no sensors but still want a way to open/close the " +
+           	paragraph "Alternatively, you can choose the other option below to have separate additional opener and closer switch devices created. This is recommened if you have no sensors but still want a way to open/close the " +
             "garage from SmartTiles and other interfaces like Google Home that can't function with the built-in open/close capability. See wiki for more details"
         }
     }
