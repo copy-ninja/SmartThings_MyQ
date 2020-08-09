@@ -19,7 +19,7 @@
             "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
             "published": true,
             "oAuth": true,
-            "version": "3.1.3",
+            "version": "3.1.4",
             "appSettings": {},
             "appUrl": "smartapps/brbeaird/myq-lite.src/myq-lite.groovy"
         },
@@ -66,13 +66,13 @@
 	        "optional": true
 	    },
 	    {
-	        "name": "Momentary Button Tile",
+	        "name": "Virtual Switch",
 	        "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
 	        "published": true,
 	        "oAuth": false,
-	        "appUrl": "devicetypes/brbeaird/momentary-button-tile.src/momentary-button-tile.groovy",
+	        "appUrl": "devicetypes/brbeaird/virtual-switch.src/virtual-switch.groovy",
 	        "appSettings": {},
-	        "version": "1.0.1",
+	        "version": "1.0.0",
 	        "optional": true
 	    }
         ]
