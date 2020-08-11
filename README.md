@@ -3,7 +3,7 @@
 
 ### Current Notes
 * Please note this SmartApp cannot read the status of the MyQ door using the MyQ tilt sensor. Getting the door status will require a separate SmartThings-compatible sensor. It's an unfortunate hassle but is the only way we can do this without polling MyQ for status (which they will not allow done from the SmartThings cloud).
-* This SmartApp is currently only supported in the **SmartThings Classic mobile app**; the new app does not yet support custom apps like this
+* This SmartApp generally works with the new SmartThings app but still has some bugs when viewing the door tiles (a fix for this is in progress). It is still fully supported in the Classic mobile app.
 * If you get an error saying "No supported devices found," the most likely cause is you're running an older version of the SmartApp. Double check to see you're using the latest code. If you're still having trouble, there's a small chance your IDE info is not sync'd properly across all SmartThings cloud shards. One way to tell this is by checking the Hubs link and noticing your hub missing. Another  way to check that is to reset all cookies and log in again (or try from a different computer) to see if it logs you into a different shard at that point, which will let you verify if things are out of sync. If there's a problem with that, SmartThings support can help.
 
 ### Overview
