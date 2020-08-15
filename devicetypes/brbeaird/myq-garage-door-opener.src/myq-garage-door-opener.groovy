@@ -19,7 +19,7 @@
  *
  */
 metadata {
-	definition (name: "MyQ Garage Door Opener", namespace: "brbeaird", author: "Jason Mok/Brian Beaird/Barry Burke", vid: "generic-contact-4", ocfdevicetype: "oic.d.garagedoor", mnmn: "SmartThings") {
+	definition (name: "MyQ Garage Door Opener", namespace: "brbeaird", author: "Jason Mok/Brian Beaird/Barry Burke", vid: "96fc9d77-7594-30d7-8c51-921b8998b17b", mnmn: "SmartThingsCommunity") {
 		capability "Door Control"
 		capability "Garage Door Control"
 		capability "Contact Sensor"
@@ -31,6 +31,8 @@ metadata {
 		capability "Momentary"
 		capability "Sensor"
         capability "Battery"
+        capability "towertalent27877.lastActivity"
+        capability "towertalent27877.connectedSensor"
         //capability "Health Check" Will be needed eventually for new app compatability but is not documented well enough yet
 
 		attribute "lastActivity", "string"
@@ -222,10 +224,14 @@ def updateDeviceStatus(status) {
 def updateDeviceLastActivity(lastActivity) {
 	def finalString = lastActivity?.format('MM/d/yyyy hh:mm a',location.timeZone)
 	sendEvent(name: "lastActivity", value: finalString, display: false , displayed: false)
+    sendEvent(name: "towertalent27877.lastActivity", value: finalString)
 }
 
 def updateDeviceSensor(sensor) {
 	sendEvent(name: "doorSensor", value: sensor, display: false , displayed: false)
+    sendEvent(name: "connectedSensor", value: sensor)
+    sendEvent(name: "SensorStatus", value: sensor)
+
 }
 
 def updateSensorBattery(batteryValue) {
@@ -234,6 +240,11 @@ def updateSensorBattery(batteryValue) {
     	newBattery = 100
     }
     sendEvent(name: "battery", value: newBattery, display: true, displayed: true)
+    sendEvent(name: "SensorBattery", value: newBattery, display: true, displayed: true)
+
+    //sendEvent( name: "sensorBattery", value: "30" )
+    //sendEvent(name: "sensorBattery", value: newBattery, display: true, displayed: true)
+    //sendEvent( name: "airConditionerTemperature", value: "30" ) seemed to work.
 }
 
 def updateDeviceMoving(moving) {
@@ -250,5 +261,5 @@ def log(msg){
 }
 
 def showVersion(){
-	return "3.1.1"
+	return "3.2.0"
 }
