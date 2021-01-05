@@ -19,8 +19,8 @@
  */
 include 'asynchttp_v1'
 
-String appVersion() { return "3.1.4" }
-String appModified() { return "2020-08-09"}
+String appVersion() { return "3.1.5" }
+String appModified() { return "2021-01-05"}
 String appAuthor() { return "Brian Beaird" }
 String gitBranch() { return "brbeaird" }
 String getAppImg(imgName) 	{ return "https://raw.githubusercontent.com/${gitBranch()}/SmartThings_MyQ/master/icons/$imgName" }
@@ -1047,7 +1047,7 @@ def getHubID(){
 
 /* API Methods */
 private getDevicesURL(){
-	return "/api/v5.1/Accounts/${state.session.accountId}/Devices"
+	return "/api/v5.1/accounts/${state.session.accountId}/devices"
 }
 
 private getAccountIdURL(){
