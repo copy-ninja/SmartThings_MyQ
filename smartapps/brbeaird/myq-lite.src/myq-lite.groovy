@@ -1191,7 +1191,7 @@ private apiPostLogin(apiPath, apiBody = [], callback = {}) {
 // Send command to start or stop
 def sendCommand(myQDeviceId, command) {
 	state.lastCommandSent = now()
-    apiPut("/api/v5.1/Accounts/${state.session.accountId}/Devices/${myQDeviceId}/actions", "{\"action_type\":\"${command}\"}", "${state.data[myQDeviceId].name}(${command})")
+    apiPut("/api/v5.1/accounts/${state.session.accountId}/devices/${myQDeviceId}/actions", "{\"action_type\":\"${command}\"}", "${state.data[myQDeviceId].name}(${command})")
     return true
 }
 
