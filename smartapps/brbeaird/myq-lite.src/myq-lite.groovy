@@ -739,24 +739,15 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
 
 
 def syncDoorsWithSensors(child){
-
-    // refresh only the requesting door (makes things a bit more efficient if you have more than 1 door
-    /*if (child) {
-        def doorMyQId = child.getMyQDeviceId()
-        updateDoorStatus(child.device.deviceNetworkId, settings[state.data[doorMyQId].sensor], child)
-    }
-    //Otherwise, refresh everything
-    else{*/
-        state.validatedDoors.each { door ->
-        	log.debug "Refreshing ${door} ${state.data[door].child}"
-        	if (state.data[door].sensor){
-            	updateDoorStatus(state.data[door].child, settings[state.data[door].sensor], '')
-            }
+    state.validatedDoors.each { door ->
+        log.debug "Refreshing ${door} ${state.data[door].child}"
+        if (state.data[door].sensor){
+            updateDoorStatus(state.data[door].child, settings[state.data[door].sensor], '', state.data[door].name)
         }
-    //}
+    }
 }
 
-def updateDoorStatus(doorDNI, sensor, child){
+def updateDoorStatus(doorDNI, sensor, child, doorName){
     try{
         log.debug "Updating door status: ${doorDNI} ${sensor} ${child}"
 
@@ -771,8 +762,6 @@ def updateDoorStatus(doorDNI, sensor, child){
 
         //Get door to update and set the new value
         def doorToUpdate = getChildDevice(doorDNI)
-        def doorName = "unknown"
-        if (state.data[doorDNI]){doorName = state.data[doorDNI].name}
 
         //Get current sensor value
         def currentSensorValue = "unknown"
@@ -780,34 +769,32 @@ def updateDoorStatus(doorDNI, sensor, child){
         def currentDoorState = doorToUpdate.latestValue("door")
         doorToUpdate.updateSensorBattery(sensor.latestValue("battery"))
 
-        //If sensor and door are out of sync, update the door
-		//if (currentDoorState != currentSensorValue){
-        	log.debug "Updating ${doorName} as ${currentSensorValue} from sensor ${sensor}"
-            doorToUpdate.updateDeviceStatus(currentSensorValue)
-        	doorToUpdate.updateDeviceSensor("${sensor} is ${currentSensorValue}")
+        log.debug "Updating ${doorName} as ${currentSensorValue} from sensor ${sensor}"
+        doorToUpdate.updateDeviceStatus(currentSensorValue)
+        doorToUpdate.updateDeviceSensor("${sensor} is ${currentSensorValue}")
 
-            //Write to child log if this was initiated from one of the doors
-            if (child){child.log("Updating as ${currentSensorValue} from sensor ${sensor}")}
+        //Write to child log if this was initiated from one of the doors
+        if (child){child.log("Updating as ${currentSensorValue} from sensor ${sensor}")}
 
-            //Get latest activity timestamp for the sensor (data saved for up to a week)
-            def latestEvent
-            def eventsSinceYesterday = sensor.eventsSince(new Date() - 7)
-            def foundContactEvent = 0
-            eventsSinceYesterday.each{ event ->
-                if (foundContactEvent == 0 && event.name == "contact"){
-                    log.debug "Found latest event: ${event.name} - ${event.date} - ${event.stringValue}"
-                    foundContactEvent = 1
-                }
+        //Get latest activity timestamp for the sensor (data saved for up to a week)
+        def latestEvent
+        def eventsSinceYesterday = sensor.eventsSince(new Date() - 7)
+        def foundContactEvent = 0
+        eventsSinceYesterday.each{ event ->
+            if (foundContactEvent == 0 && event.name == "contact"){
+                log.debug "Found latest event: ${event.name} - ${event.date} - ${event.stringValue}"
+                foundContactEvent = 1
             }
+        }
 
-            //Update timestamp
-            if (latestEvent){
-            	doorToUpdate.updateDeviceLastActivity(latestEvent)
-            }
-            else{	//If the door has been inactive for more than a week, timestamp data will be null. Keep current value in that case.
-            	timeStampLogText = "Door: " + doorName + ": Null timestamp detected "  + " -  from sensor " + sensor + " . Keeping current value."
-            }
-       // }
+        //Update timestamp
+        def timeStampLogText = "Door: " + doorName + ": Updating timestamp to: " + latestEvent + " -  from sensor " + sensor
+        if (latestEvent){
+            doorToUpdate.updateDeviceLastActivity(latestEvent)
+        }
+        else{	//If the door has been inactive for more than a week, timestamp data will be null. Keep current value in that case.
+            timeStampLogText = "Door: " + doorName + ": Null timestamp detected "  + " -  from sensor " + sensor + " . Keeping current value."
+        }
     }catch (e) {
         log.debug "Error updating door: ${doorDNI}: ${e}"
     }
@@ -833,7 +820,7 @@ def sensorHandler(evt) {
 
     state.validatedDoors.each{ door ->
         if (settings[state.data[door].sensor]?.id == evt.deviceId)
-            updateDoorStatus(state.data[door].child, settings[state.data[door].sensor], null)
+            updateDoorStatus(state.data[door].child, settings[state.data[door].sensor], null, state.data[door].name)
     }
 }
 
