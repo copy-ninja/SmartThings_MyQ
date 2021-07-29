@@ -20,7 +20,7 @@
 include 'asynchttp_v1'
 
 String appVersion() { return "3.1.5" }
-String appModified() { return "2021-01-05"}
+String appModified() { return "2021-07-29"}
 String appAuthor() { return "Brian Beaird" }
 String gitBranch() { return "brbeaird" }
 String getAppImg(imgName) 	{ return "https://raw.githubusercontent.com/${gitBranch()}/SmartThings_MyQ/master/icons/$imgName" }
@@ -790,8 +790,15 @@ def updateDoorStatus(doorDNI, sensor, child){
             if (child){child.log("Updating as ${currentSensorValue} from sensor ${sensor}")}
 
             //Get latest activity timestamp for the sensor (data saved for up to a week)
+            def latestEvent
             def eventsSinceYesterday = sensor.eventsSince(new Date() - 7)
-            def latestEvent = eventsSinceYesterday[0]?.date
+            def foundContactEvent = 0
+            eventsSinceYesterday.each{ event ->
+                if (foundContactEvent == 0 && event.name == "contact"){
+                    log.debug "Found latest event: ${event.name} - ${event.date} - ${event.stringValue}"
+                    foundContactEvent = 1
+                }
+            }
 
             //Update timestamp
             if (latestEvent){
