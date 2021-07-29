@@ -19,7 +19,7 @@
  */
 include 'asynchttp_v1'
 
-String appVersion() { return "3.1.5" }
+String appVersion() { return "3.1.6" }
 String appModified() { return "2021-07-29"}
 String appAuthor() { return "Brian Beaird" }
 String gitBranch() { return "brbeaird" }

@@ -5,7 +5,7 @@
  *
  *  MyQ Garage Door Opener
  *
- *  Copyright 2019 Jason Mok/Brian Beaird/Barry Burke
+ *  Copyright 2021 Jason Mok/Brian Beaird/Barry Burke
  *
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
@@ -19,7 +19,7 @@
  *
  */
 metadata {
-	definition (name: "MyQ Garage Door Opener", namespace: "brbeaird", author: "Jason Mok/Brian Beaird/Barry Burke", vid: "96fc9d77-7594-30d7-8c51-921b8998b17b", mnmn: "SmartThingsCommunity") {
+	definition (name: "MyQ Garage Door Opener", namespace: "brbeaird", author: "Jason Mok/Brian Beaird/Barry Burke", ocfDeviceType: "oic.d.garagedoor", vid: "a277ad9b-3524-341e-908a-58cc47de27bd", mnmn: "SmartThingsCommunity") {
 		capability "Door Control"
 		capability "Garage Door Control"
 		capability "Contact Sensor"
@@ -261,5 +261,5 @@ def log(msg){
 }
 
 def showVersion(){
-	return "3.2.0"
+	return "3.2.1"
 }
