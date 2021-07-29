@@ -121,15 +121,18 @@ def versionCompare(deviceName){
 }
 
 def refreshChildren(){
-	state.currentVersion = [:]
+	def useSensors = 0
+    def useButtons = 0
+    state.currentVersion = [:]
     state.currentVersion['SmartApp'] = appVersion()
     def devices = []
     childDevices.each { child ->
-    	def myQId = child.getMyQDeviceId() ? "ID: ${child.getMyQDeviceId()}" : 'Missing MyQ ID'
+        def myQId = child.getMyQDeviceId() ? "ID: ${child.getMyQDeviceId()}" : 'Missing MyQ ID'
         def devName = child.name
         if (child.typeName == "MyQ Garage Door Opener"){
         	devName = devName + " (${child.currentContact})  ${myQId}"
             state.currentVersion['DoorDevice'] = child.showVersion()
+            useSensors = 1
         }
         else if (child.typeName == "MyQ Garage Door Opener-NoSensor"){
         	devName = devName + " (No sensor)   ${myQId}"
@@ -139,11 +142,16 @@ def refreshChildren(){
         	devName = devName + " (${child.currentSwitch})  ${myQId}"
             state.currentVersion['LightDevice'] = child.showVersion()
         }
+        else if (child.typeName == "Virtual Switch"){
+        	useButtons = 1
+        }
         else{
-        	return	//Ignore push-button devices
+        	return
 		}
         devices.push(devName)
     }
+    state.useSensors = useSensors
+    state.useButtons = useButtons
     return devices
 }
 
@@ -182,7 +190,7 @@ def prefUninstall() {
     childDevices.each {
 		try{
 			deleteChildDevice(it.deviceNetworkId, true)
-            msg = "Devices have been removed. Tap remove to complete the process."
+            msg = "Devices have been removed. Tap the three dots in the top right and then Delete to complete the process."
 
 		}
 		catch (e) {
@@ -207,6 +215,7 @@ def prefListDevices() {
     if (login()) {
     	getMyQDevices()
 
+        state.useSensors = 0
         state.doorList = [:]
         state.lightList = [:]
         state.MyQDataPending.each { id, device ->
@@ -276,6 +285,7 @@ def sensorPage() {
                 input "prefDoor${sensorCounter}PushButtons", "bool", required: false, title: "Create separate on/off switches?"
             }
             sensorCounter++
+            state.useSensors = 1
         }
         section("Sensor setup"){
         	paragraph "For each door above, you can specify an optional sensor that allows the device type to know whether the door is open or closed. This helps the device function as a switch " +
@@ -322,7 +332,7 @@ def updated() {
     unschedule()
     runEvery3Hours(updateVersionInfo)   //Check for new version every 3 hours
 
-    if (door1Sensor && state.validatedDoors){
+    if (state.useSensors == 1 && state.validatedDoors){
     	refreshAll()
     	runEvery30Minutes(refreshAll)
     }
@@ -353,11 +363,11 @@ def getVersionInfo(oldVersion, newVersion){
             platform: "ST",
             prevVersion: oldVersion,
             currentVersion: newVersion,
-        	sensor: door1Sensor ? true : false,
+        	sensor: state.useSensors == 1 ? true : false,
             door: state.validatedDoors?.size(),
             lock: prefUseLock ? true: false,
             light: state.validatedLights?.size(),
-            button: prefDoor1PushButtons
+            button: state.useButtons
         ]
     ]
     def callbackMethod = oldVersion == 'versionCheck' ? 'updateCheck' : 'handleVersionUpdateResponse'
@@ -437,15 +447,13 @@ def initialize() {
     //Check existing installed devices against MyQ data
     verifyChildDeviceIds()
 
-
-
     //Mark sensors onto state door data
     def doorSensorCounter = 1
     state.validatedDoors.each{ door ->
         if (settings["door${doorSensorCounter}Sensor"]){
             state.data[door].sensor = "door${doorSensorCounter}Sensor"
-            doorSensorCounter++
         }
+        doorSensorCounter++
     }
     state.lastSuccessfulStep = "Sensor Indexing"
 
@@ -749,8 +757,6 @@ def syncDoorsWithSensors(child){
 
 def updateDoorStatus(doorDNI, sensor, child, doorName){
     try{
-        log.debug "Updating door status: ${doorDNI} ${sensor} ${child}"
-
         if (!sensor){//If we got here somehow without a sensor, bail out
         	log.debug "Warning: no sensor found for ${doorDNI}"
             return 0}
@@ -769,7 +775,10 @@ def updateDoorStatus(doorDNI, sensor, child, doorName){
         def currentDoorState = doorToUpdate.latestValue("door")
         doorToUpdate.updateSensorBattery(sensor.latestValue("battery"))
 
-        log.debug "Updating ${doorName} as ${currentSensorValue} from sensor ${sensor}"
+        if (currentDoorState != currentSensorValue){
+        	log.debug "Updating ${doorName} from ${currentDoorState} to ${currentSensorValue} from sensor ${sensor}"
+        }
+
         doorToUpdate.updateDeviceStatus(currentSensorValue)
         doorToUpdate.updateDeviceSensor("${sensor} is ${currentSensorValue}")
 
@@ -782,7 +791,6 @@ def updateDoorStatus(doorDNI, sensor, child, doorName){
         def foundContactEvent = 0
         eventsSinceYesterday.each{ event ->
             if (foundContactEvent == 0 && event.name == "contact"){
-                log.debug "Found latest event: ${event.name} - ${event.date} - ${event.stringValue}"
                 foundContactEvent = 1
             }
         }
