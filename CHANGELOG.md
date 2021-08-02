@@ -1,5 +1,38 @@
 # Changelog
 
+## 3.1.7 (2021-08-02)
+
+### Fixed
+ - Fixed issue where Last Activity was not actually getting saved
+
+## 3.1.6 (2021-07-29)
+
+### Fixed
+ - Limit lastest activity search to contact sensor events
+ - Clean up door refresh logic
+
+ ## 3.1.5 (2021-01-05)
+
+### Fixed
+ - Lower device URL casing
+
+ ## 3.1.4 (2020-08-09)
+
+### Changed
+ - Change momentary to virtual switch to support new app
+
+## 3.1.3 (2020-07-30)
+
+### Fixed
+ - Fix username/password casing
+
+## 3.1.2 (2020-05-25)
+
+### Changed
+ - Update refresh logic to use door status instead of contact
+
+
+
 ## 3.1.1 (2019-11-07)
 
 ### Added
