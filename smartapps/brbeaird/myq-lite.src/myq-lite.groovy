@@ -19,8 +19,8 @@
  */
 include 'asynchttp_v1'
 
-String appVersion() { return "3.1.6" }
-String appModified() { return "2021-07-29"}
+String appVersion() { return "3.1.7" }
+String appModified() { return "2021-08-20"}
 String appAuthor() { return "Brian Beaird" }
 String gitBranch() { return "brbeaird" }
 String getAppImg(imgName) 	{ return "https://raw.githubusercontent.com/${gitBranch()}/SmartThings_MyQ/master/icons/$imgName" }
@@ -791,17 +791,17 @@ def updateDoorStatus(doorDNI, sensor, child, doorName){
         def foundContactEvent = 0
         eventsSinceYesterday.each{ event ->
             if (foundContactEvent == 0 && event.name == "contact"){
+                latestEvent = event.date
                 foundContactEvent = 1
             }
         }
 
         //Update timestamp
-        def timeStampLogText = "Door: " + doorName + ": Updating timestamp to: " + latestEvent + " -  from sensor " + sensor
         if (latestEvent){
             doorToUpdate.updateDeviceLastActivity(latestEvent)
         }
         else{	//If the door has been inactive for more than a week, timestamp data will be null. Keep current value in that case.
-            timeStampLogText = "Door: " + doorName + ": Null timestamp detected "  + " -  from sensor " + sensor + " . Keeping current value."
+            log.debug "Door: ${doorName} Null timestamp detected from sensor ${sensor}. Keeping current value."
         }
     }catch (e) {
         log.debug "Error updating door: ${doorDNI}: ${e}"
