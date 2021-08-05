@@ -20,7 +20,7 @@
 include 'asynchttp_v1'
 
 String appVersion() { return "3.1.7" }
-String appModified() { return "2021-08-20"}
+String appModified() { return "2021-08-02"}
 String appAuthor() { return "Brian Beaird" }
 String gitBranch() { return "brbeaird" }
 String getAppImg(imgName) 	{ return "https://raw.githubusercontent.com/${gitBranch()}/SmartThings_MyQ/master/icons/$imgName" }
