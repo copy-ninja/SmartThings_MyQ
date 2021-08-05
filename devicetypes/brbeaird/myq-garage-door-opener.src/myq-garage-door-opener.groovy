@@ -19,7 +19,7 @@
  *
  */
 metadata {
-	definition (name: "MyQ Garage Door Opener", namespace: "brbeaird", author: "Jason Mok/Brian Beaird/Barry Burke", ocfDeviceType: "oic.d.garagedoor", vid: "a277ad9b-3524-341e-908a-58cc47de27bd", mnmn: "SmartThingsCommunity") {
+	definition (name: "MyQ Garage Door Opener", namespace: "brbeaird", author: "Jason Mok/Brian Beaird/Barry Burke", ocfDeviceType: "oic.d.garagedoor", vid: "4a6ffe28-21d4-308f-bc0f-34ca2eb3c85f", mnmn: "SmartThingsCommunity") {
 		capability "Door Control"
 		capability "Garage Door Control"
 		capability "Contact Sensor"
@@ -261,5 +261,5 @@ def log(msg){
 }
 
 def showVersion(){
-	return "3.2.1"
+	return "3.2.2"
 }

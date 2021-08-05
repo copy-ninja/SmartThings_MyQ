@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.2.2 (2021-08-04)
+
+### Changed
+ - Clean up automation capabilities - limit to door control
+
 ## 3.2.1 (2021-07-29)
 
 ### Changed
