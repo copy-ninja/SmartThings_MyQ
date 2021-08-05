@@ -1,0 +1,174 @@
+{
+    "mnmn": "SmartThingsCommunity",
+    "vid": "9a894a1f-5648-3799-ab9f-4a157697ef5a",
+    "version": "0.0.6",
+    "dashboard": {
+        "states": [
+            {
+                "label": "{{door.value}}",
+                "alternatives": [
+                    {
+                        "key": "closed",
+                        "value": "___PO_CODE_CAPABILITY.SMARTTHINGS.DOORCONTROL_DEFAULT_ATTRIBUTES_DOOR_CLOSED",
+                        "type": "inactive"
+                    },
+                    {
+                        "key": "open",
+                        "value": "___PO_CODE_CAPABILITY.SMARTTHINGS.DOORCONTROL_DEFAULT_ATTRIBUTES_DOOR_OPEN",
+                        "type": "active"
+                    },
+                    {
+                        "key": "unknown",
+                        "value": "___PO_CODE_CAPABILITY.SMARTTHINGS.DOORCONTROL_DEFAULT_ATTRIBUTES_DOOR_UNKNOWN",
+                        "type": "active"
+                    },
+                    {
+                        "key": "opening",
+                        "value": "___PO_CODE_CAPABILITY.SMARTTHINGS.DOORCONTROL_DEFAULT_ATTRIBUTES_DOOR_OPENING",
+                        "type": "active"
+                    },
+                    {
+                        "key": "closing",
+                        "value": "___PO_CODE_CAPABILITY.SMARTTHINGS.DOORCONTROL_DEFAULT_ATTRIBUTES_DOOR_CLOSING",
+                        "type": "active"
+                    }
+                ],
+                "group": "main",
+                "capability": "doorControl",
+                "version": 1,
+                "component": "main"
+            }
+        ],
+        "actions": [
+            {
+                "displayType": "toggleSwitch",
+                "toggleSwitch": {
+                    "command": {
+                        "on": "open",
+                        "off": "close"
+                    },
+                    "state": {
+                        "value": "door.value",
+                        "on": "open",
+                        "off": "closed"
+                    }
+                },
+                "group": "main",
+                "capability": "doorControl",
+                "version": 1,
+                "component": "main"
+            }
+        ],
+        "basicPlus": []
+    },
+    "detailView": [
+        {
+            "capability": "towertalent27877.myqopen",
+            "version": 2,
+            "label": "Open",
+            "displayType": "pushButton",
+            "pushButton": {
+                "command": "sendOpen"
+            },
+            "state": null,
+            "component": "main"
+        },
+        {
+            "capability": "towertalent27877.myqclose",
+            "version": 1,
+            "label": "Close",
+            "displayType": "pushButton",
+            "pushButton": {
+                "command": "sendClose"
+            },
+            "state": null,
+            "component": "main"
+        }
+    ],
+    "automation": {
+        "conditions": [],
+        "actions": [
+            {
+                "capability": "doorControl",
+                "version": 1,
+                "label": "___PO_CODE_CAPABILITY.SMARTTHINGS.DOORCONTROL_DEFAULT",
+                "displayType": "list",
+                "list": {
+                    "alternatives": [
+                        {
+                            "key": "close",
+                            "value": "___PO_CODE_CAPABILITY.SMARTTHINGS.DOORCONTROL_DEFAULT_COMMANDS_CLOSE",
+                            "type": "inactive"
+                        },
+                        {
+                            "key": "open",
+                            "value": "___PO_CODE_CAPABILITY.SMARTTHINGS.DOORCONTROL_DEFAULT_COMMANDS_OPEN",
+                            "type": "active"
+                        }
+                    ]
+                },
+                "component": "main",
+                "exclusion": []
+            }
+        ]
+    },
+    "dpInfo": [
+        {
+            "os": "ios",
+            "dpUri": "plugin://com.samsung.ios.plugin.stplugin/assets/files/index.html"
+        },
+        {
+            "os": "android",
+            "dpUri": "plugin://com.samsung.android.plugin.stplugin"
+        },
+        {
+            "os": "web",
+            "dpUri": "wwst://com.samsung.one.plugin.stplugin"
+        }
+    ],
+    "language": [
+        {
+            "locale": "en",
+            "poCodes": [
+                {
+                    "label": "Door",
+                    "po": "___PO_CODE_CAPABILITY.SMARTTHINGS.DOORCONTROL_DEFAULT"
+                },
+                {
+                    "label": "Door",
+                    "po": "___PO_CODE_CAPABILITY.SMARTTHINGS.DOORCONTROL_DEFAULT_ATTRIBUTES_DOOR"
+                },
+                {
+                    "label": "Closed",
+                    "po": "___PO_CODE_CAPABILITY.SMARTTHINGS.DOORCONTROL_DEFAULT_ATTRIBUTES_DOOR_CLOSED"
+                },
+                {
+                    "label": "Closing…",
+                    "po": "___PO_CODE_CAPABILITY.SMARTTHINGS.DOORCONTROL_DEFAULT_ATTRIBUTES_DOOR_CLOSING"
+                },
+                {
+                    "label": "Open",
+                    "po": "___PO_CODE_CAPABILITY.SMARTTHINGS.DOORCONTROL_DEFAULT_ATTRIBUTES_DOOR_OPEN"
+                },
+                {
+                    "label": "Opening…",
+                    "po": "___PO_CODE_CAPABILITY.SMARTTHINGS.DOORCONTROL_DEFAULT_ATTRIBUTES_DOOR_OPENING"
+                },
+                {
+                    "label": "Unknown",
+                    "po": "___PO_CODE_CAPABILITY.SMARTTHINGS.DOORCONTROL_DEFAULT_ATTRIBUTES_DOOR_UNKNOWN"
+                },
+                {
+                    "label": "Closed",
+                    "po": "___PO_CODE_CAPABILITY.SMARTTHINGS.DOORCONTROL_DEFAULT_COMMANDS_CLOSE"
+                },
+                {
+                    "label": "Open",
+                    "po": "___PO_CODE_CAPABILITY.SMARTTHINGS.DOORCONTROL_DEFAULT_COMMANDS_OPEN"
+                }
+            ]
+        }
+    ],
+    "manufacturerName": "SmartThingsCommunity",
+    "presentationId": "9a894a1f-5648-3799-ab9f-4a157697ef5a"
+}

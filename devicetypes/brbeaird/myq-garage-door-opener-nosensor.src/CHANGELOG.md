@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.2.0 (2021-08-04)
+
+### Changed
+ - Update custom handler for new app - suppot buttons and automations
+
 ## 3.1.0 (2019-10-18)
 
 ### Changed
