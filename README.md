@@ -1,4 +1,6 @@
 
+## Notice: 2021-08-26 - This app is currently broken for everyone due to a MyQ API change. I am hoping to get a fix for it, but it is not a minor change and could take several days to get going.
+
 # SmartThings MyQ Lite SmartApp
 
 ### Current Notes
