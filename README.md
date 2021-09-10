@@ -62,9 +62,9 @@ The newest version of the MyQ API uses an OAuth flow. This involves logging into
    ![SmartApp List](/icons/TokenGenerator.png "Token Generator") 
 7. Back in the SmartThings IDE, go to the MyQ SmartApp settings. Click the link to edit SmartApp settings.
    ![SmartApp List](/icons/SmartAppList.png "SmartApp List") 
-
 6. Scroll down and click the Settings link to expand the section. Paste your access token into the  MyQToken setting.
 ![SmartApp Settings](/icons/SmartAppToken.png "SmartApp Token")
+7. If you are doing an app update with these steps, make sure you open the SmartApp, tap modify devices, then tap through that process.
 
 ### Overview
 This SmartApp integrates Chamberlain/LiftMaster MyQ doors and plug-in lamp module controllers into SmartThings. It creates a garage door device and/or a light device in your list of Things and allows you to control the device...
