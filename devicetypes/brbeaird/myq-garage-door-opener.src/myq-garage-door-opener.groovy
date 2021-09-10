@@ -41,6 +41,7 @@ metadata {
         attribute "OpenButton", "string"
         attribute "CloseButton", "string"
         attribute "myQDeviceId", "string"
+        attribute "myQAccountId", "string"
 
 		command "updateDeviceStatus", ["string"]
 		command "updateDeviceLastActivity", ["number"]
@@ -102,14 +103,12 @@ metadata {
 }
 
 def on() {
-    log.debug "Turning door on!"
-    open()
-    sendEvent(name: "switch", value: "on", isStateChange: true, display: true, displayed: true)
+    if (open())
+    	sendEvent(name: "switch", value: "on", isStateChange: true, display: true, displayed: true)
 }
 def off() {
-    log.debug "Turning door off!"
-    close()
-	sendEvent(name: "switch", value: "off", isStateChange: true, display: true, displayed: true)
+    if (close())
+		sendEvent(name: "switch", value: "off", isStateChange: true, display: true, displayed: true)
 }
 
 def push() {
@@ -123,17 +122,14 @@ def push() {
 }
 
 def open()  {
-	log.debug "Garage door open command called."
     parent.notify("Garage door open command called.")
-    updateDeviceStatus("opening")
-    parent.sendCommand(getMyQDeviceId(), "open")
-
+    if (parent.sendDoorCommand(getMyQDeviceId(), device.currentState("myQAccountId").value, "open"))
+    	updateDeviceStatus("opening")
     runIn(20, refresh, [overwrite: true])	//Force a sync with tilt sensor after 20 seconds
 }
 def close() {
-	log.debug "Garage door close command called."
     parent.notify("Garage door close command called.")
-	parent.sendCommand(getMyQDeviceId(), "close")
+	parent.sendDoorCommand(getMyQDeviceId(), device.currentState("myQAccountId").value, "close")
 //	updateDeviceStatus("closing")			// Now handled in the parent (in case we have an Acceleration sensor, we can handle "waiting" state)
     runIn(30, refresh, [overwrite: true]) //Force a sync with tilt sensor after 30 seconds
 }
@@ -236,7 +232,7 @@ def updateDeviceSensor(sensor) {
 
 def updateSensorBattery(batteryValue) {
 	def newBattery = batteryValue
-    if (!batteryValue){
+    if (!batteryValue || batteryValue == 1){
     	newBattery = 100
     }
     sendEvent(name: "battery", value: newBattery, display: true, displayed: true)
@@ -251,9 +247,10 @@ def updateDeviceMoving(moving) {
 	sendEvent(name: "doorMoving", value: moving, display: false , displayed: false)
 }
 
-def updateMyQDeviceId(Id) {
-	log.debug "Setting MyQID to ${Id}"
+def updateMyQDeviceId(Id, account) {
+	log.debug "Setting MyQID to ${Id}, accountId to ${account}"
     sendEvent(name: "myQDeviceId", value: Id, display: true , displayed: true)
+    sendEvent(name: "myQAccountId", value: account, display: true , displayed: true)
 }
 
 def log(msg){
@@ -261,5 +258,5 @@ def log(msg){
 }
 
 def showVersion(){
-	return "3.2.2"
+	return "4.0.0"
 }

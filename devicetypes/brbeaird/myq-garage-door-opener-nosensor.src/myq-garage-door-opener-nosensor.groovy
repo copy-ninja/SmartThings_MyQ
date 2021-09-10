@@ -24,6 +24,7 @@ metadata {
         attribute "OpenButton", "string"
         attribute "CloseButton", "string"
         attribute "myQDeviceId", "string"
+        attribute "myQAccountId", "string"
 
         command "open"
         command "close"
@@ -58,20 +59,20 @@ metadata {
 
 def open()  {
     openPrep()
-    parent.sendCommand(getMyQDeviceId(), "open")
+    parent.sendDoorCommand(getMyQDeviceId(), device.currentState("myQAccountId").value, "open")
 }
 def close() {
     closePrep()
-    parent.sendCommand(getMyQDeviceId(), "close")
+    parent.sendDoorCommand(getMyQDeviceId(), device.currentState("myQAccountId").value, "close")
 }
 
 def sendOpen()  {
     openPrep()
-    parent.sendCommand(getMyQDeviceId(), "open")
+    parent.sendDoorCommand(getMyQDeviceId(), device.currentState("myQAccountId").value,"open")
 }
 def sendClose() {
     closePrep()
-    parent.sendCommand(getMyQDeviceId(), "close")
+    parent.sendDoorCommand(getMyQDeviceId(), device.currentState("myQAccountId").value,"close")
 }
 
 def openPrep(){
@@ -102,9 +103,10 @@ def getMyQDeviceId(){
     }
 }
 
-def updateMyQDeviceId(Id) {
-	log.debug "Setting MyQID to ${Id}"
+def updateMyQDeviceId(Id, account) {
+	log.debug "Setting MyQID to ${Id}, accountId to ${account}"
     sendEvent(name: "myQDeviceId", value: Id, display: true , displayed: true)
+    sendEvent(name: "myQAccountId", value: account, display: true , displayed: true)
 }
 
 def log(msg){
@@ -112,5 +114,5 @@ def log(msg){
 }
 
 def showVersion(){
-	return "3.2.0"
+	return "4.0.0"
 }

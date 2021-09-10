@@ -1,39 +1,88 @@
 
-## Notice: 2021-08-26 - This app is currently broken for everyone due to a MyQ API change. I am hoping to get a fix for it, but it is not a minor change and could take several days to get going.
-
 # SmartThings MyQ Lite SmartApp
 
 ### Current Notes
+* **Update September 2021**: with the latest MyQ API update, an extra step is required for authentication. You will need to run a simple utility to login to MyQ and retrieve an access token. That token must be pasted into the MyQToken SmartApp App Setting in the IDE. Hopefully the need to manually re-do this step will be rare as the SmartApp will otherwise be able to refresh the token on its own automatically. See the "Generating an Access Token" below for more details.
 * Please note this SmartApp cannot read the status of the MyQ door using the MyQ tilt sensor. Getting the door status will require a separate SmartThings-compatible sensor. It's an unfortunate hassle but is the only way we can do this without polling MyQ for status (which they will not allow done from the SmartThings cloud).
 * This SmartApp generally works with the new SmartThings app but still has some bugs when viewing the door tiles (a fix for this is in progress). It is still fully supported in the Classic mobile app.
 * If you get an error saying "No supported devices found," the most likely cause is you're running an older version of the SmartApp. Double check to see you're using the latest code. If you're still having trouble, there's a small chance your IDE info is not sync'd properly across all SmartThings cloud shards. One way to tell this is by checking the Hubs link and noticing your hub missing. Another  way to check that is to reset all cookies and log in again (or try from a different computer) to see if it logs you into a different shard at that point, which will let you verify if things are out of sync. If there's a problem with that, SmartThings support can help.
+
+## Installation Instructions:
+
+
+
+### SmartThings Community Installer (Strongly Recommended install/update method)
+By far, the easiest way to install this Smartapp (and many other popular ones) and keep it updated is to use the SmartThings Community Installer. Instructions for that can be found <a href="http://thingsthataresmart.wiki/index.php?title=Community_Installer_(Free_Marketplace)">here</a>. If you go that route, you can find MyQ on the list of apps, tap to install, and ignore the other install information below. The same goes for installing updates in the future.
+
+### Code Needed:
+There are 6 code files available for the installations of this app - 1 SmartApp and 5 Device Handlers. At minimum, you need the main SmartApp and at least one of the device handlers. Note that you only need to install the device handlers you'll plan on using (ex: you can leave off the light controller if you don't have any lights).
+
+| Code Type        | Name           | Location  | Notes |
+| ------------- |-------------| -----|-----|
+| SmartApp      | MyQ Lite | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/smartapps/brbeaird/myq-lite.src/myq-lite.groovy">Link</a> |Required|
+| Device Handler | MyQ Garage Door Opener | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-garage-door-opener.src/myq-garage-door-opener.groovy">Link</a> |Needed if using door sensors|
+| Device Handler | MyQ Garage Door Opener-NoSensor | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-garage-door-opener-nosensor.src/myq-garage-door-opener-nosensor.groovy">Link</a> |Needed if NOT using door sensors|
+| Device Handler | Virtual Switch Tile | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/virtual-switch.src/virtual-switch.groovy">Link</a> |Helpful for no-sensor installs to add buttons in routines/ActionTiles/Alexa|
+| Device Handler | Light Controller | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-light-controller.src/myq-light-controller.groovy">Link</a> |Only needed if using a plug-in MyQ Lamp Controller|
+
+
+### Manual code copy/pasting:
+1. Log in to the <a href="https://account.smartthings.com">SmartThings IDE</a>. If you don't have a login yet, create one.
+2. The first step is to create device handlers for both door types.
+3. Click on **My Device Handlers** -> **Create new Device Handler** -> **From Code**.
+4. Copy contents of <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-garage-door-opener.src/myq-garage-door-opener.groovy">Door Opener (original sensor version) </a> and paste into text area. in SmartApps section. Click **Create**. Click **Publish** > **For Me** (you can ignore this step if you don't have a door sensor)
+5. Repeat the previous step for this door type code: <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-garage-door-opener-nosensor.src/myq-garage-door-opener-nosensor.groovy">Door Opener (no sensor version)</a> (you can ignore this step if using a sensor)
+6. Repeat the previous step for the Virtual Switch Tile device type code: <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/virtual-switch.src/virtual-switch.groovy">Virtual Switch Tile</a>
+6. Repeat the previous step for the Light Controller device type code: <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-light-controller.src/myq-light-controller.groovy">Light Controller</a>
+6. Now we create the SmartApp code. Click **My SmartApps** -> **New Smartapp** -> **From Code**.
+7. Copy contents of <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/smartapps/brbeaird/myq-lite.src/myq-lite.groovy">SmartApp</a> and paste into text area. in SmartApps section. Click **Create**. Click **Publish** > **For Me**
+8. In your SmartThings mobile app, tap **Automation** -> **SmartApps** -> **Add a SmartApp**. Scroll down and tap **My Apps**. Tap **MyQ Lite**.
+9. Enter in your login details and pick your gateway brand. If login is successful, you'll see a list of doors available for you to pick. After you choose your doors, you can select optional sensors to be tied to those doors.
+
+### SmartThings IDE GitHub Integration:
+
+If you have not set up the GitHub integration yet or do not know about it, take a look at the SmartThings documentation [here](http://docs.smartthings.com/en/latest/tools-and-ide/github-integration.html). Note that if you do not have a GitHub account or are not familiar with GitHub, the manual method of installation is recommended.
+
+1. If you haven't already, click on enable GitHub button (upper right). Add a new repository with user `brbeaird`, repository `SmartThings_MyQ`, and branch `master`. This can be done in either the "My Device Handlers" or "My SmartApps" sections
+2. Go to "My Device Handlers". Click "Update from Repo". Select the "SmartThings_MyQ" repository. You should see the device types in the "New (only in GitHub)" section. Check both boxes next to them. Check the "Publish" checkbox in the bottom right hand corner. Click "Execute Update".
+3. Go to "My SmartApps". Click "Update from Repo". Select the "SmartThings_MyQ" repository. You should see the SmartApp in the "New (only in GitHub)" section. Check both boxes next to them. Check the "Publish" checkbox in the bottom right hand corner. Click "Execute Update".
+4. In your mobile app, tap the "+", go to "My Apps", furnish your log in details and pick your gateway brand, and a list of devices will be available for you to pick.
+
+In the future, should you wish to update, simply repeat steps 2 and 3. The only difference is you will see the device types/SmartApp show up in the "Obsolete (updated in GitHub)" column instead.
+
+### Generating an Access Token
+The newest version of the MyQ API uses an OAuth flow. This involves logging into MyQ to get an access token. You can then enter that token into the SmartApp settings, and the SmartApp will handle the rest. Special thanks to hjdhjd and the work at [homebridge-myq](https://github.com/hjdhjd/homebridge-myq) for figuring all of this out and documenting it so well.
+1. Download the [myQTokenGenerator](/myQTokenGenerator) file applicable to your operating system
+2. On Linux or MacOS, you will need run the appropriate chmod commands and enable it to be run. For MacOS:
+   1. Make sure your system allows running these files: System preferences > Security & Privacy > give permission to run
+   2. From the terminal, navigate to the directory of the utility and run `chmod u+x myqtokengenerator-macos`
+   3. Run `./myqtokengenerator-macos`   
+4. On Windows, double-click and run, granting permissions as needed.
+5. At the prompt, enter your MyQ username and password. If successful, the utility will output an access token.
+   ![SmartApp List](/icons/TokenGenerator.png "Token Generator") 
+7. Back in the SmartThings IDE, go to the MyQ SmartApp settings. Click the link to edit SmartApp settings.
+   ![SmartApp List](/icons/SmartAppList.png "SmartApp List") 
+
+6. Scroll down and click the Settings link to expand the section. Paste your access token into the  MyQToken setting.
+![SmartApp Settings](/icons/SmartAppToken.png "SmartApp Token")
 
 ### Overview
 This SmartApp integrates Chamberlain/LiftMaster MyQ doors and plug-in lamp module controllers into SmartThings. It creates a garage door device and/or a light device in your list of Things and allows you to control the device...
 
 * By tapping the device in the SmartThings mobile app
-* Automatically by your presence (coming or going) in a Routine or other SmartThings rules app
+* Automatically by your presence (coming or going) in an automation or other SmartThings rules app
 * Via tiles in an ActionTiles dashboard
 * By asking Alexa or Google Home to turn the device on (open) or off (close)
 
 
 ### Device and ActionTiles
-![Door device](http://i.imgur.com/zBXS6nQm.png "Door device")  ![Routine](http://i.imgur.com/fmDa1t6m.png "Routine")
-
-
+![Door device](/icons/mobileAppDevice.jpg "Door device")
 ![With ActionTiles](https://i.imgur.com/8BSYtMI.png "With ActionTiles")
 
 
-### Setup
-![Login to MyQ](http://i.imgur.com/PLEbmsdm.png "Login to MyQ")
-![Select Door](http://i.imgur.com/XUDFLucm.png "Door Select")
-
-
-### Sensor Selection
-![Sensor Selection](http://i.imgur.com/aKf14HHm.png "Sensor selection")
-![Push Buttons](http://i.imgur.com/SIkag7Cm.png "Push Buttons")
-
-
+### Setup and Sensor Selection
+![Select Door](/icons/mobileAppSelection.jpg "Door Select")
+![Sensor Selection](/icons/mobileAppSensors.jpg "Sensor selection")
 
 
 This SmartApp works best when you have a Tilt/Contact sensor on the door to keep an accurate status in SmartThings. **Unfortunately, the MyQ included tilt sensor will not work as SmartThings cannot communicate with it**. That said, you can maintain most functionality without a sensor at all (see no-sensor special notes below).
@@ -76,51 +125,6 @@ If you want a less-awkward way to open the door, you can set up an Alexa routine
 Since we have no way to keep an exact on/off status on the light, it is strongly recommended that you ONLY control the light via SmartThings (not through the MyQ app or manually at the physical device itself). As long as SmartThings is the only thing making changes, it will essentially always have the correct status. If for some reason the status does get out of sync, you may just need to turn it off and back on in SmartThings to sync it back up.
 
 Alexa should be able to control the light device just like any other switch in your environment.
-
-### Lock Door Functionality (BETA and Highly Experimental - For advanced users only)
-During SmartApp setup, you have the option to enable your doors to be treated with lock functionality (sensor is required for this). This adds lock capability to the garage door device while removing switch capability. The main use case for this is to have the door show up in Alexa as a lock. This allows you to set a PIN to unlock the door, which is more secure than allowing someone to simply say "open the garage door." This option is not used in most setups but is here if you really want an extra layer of security. Beware it's considered highly experimental and may break other automations that use the standard door control.
-
-## Installation Instructions:
-
-### SmartThings Community Installer (Strongly Recommended install/update method)
-By far, the easiest way to install this Smartapp (and many other popular ones) and keep it updated is to use the SmartThings Community Installer. Instructions for that can be found <a href="http://thingsthataresmart.wiki/index.php?title=Community_Installer_(Free_Marketplace)">here</a>. If you go that route, you can find MyQ on the list of apps, tap to install, and ignore the other install information below. The same goes for installing updates in the future.
-
-### Code Needed:
-There are 6 code files available for the installations of this app - 1 SmartApp and 5 Device Handlers. At minimum, you need the main SmartApp and at least one of the device handlers. Note that you only need to install the device handlers you'll plan on using (ex: you can leave off the light controller if you don't have any lights).
-
-| Code Type        | Name           | Location  | Notes |
-| ------------- |-------------| -----|-----|
-| SmartApp      | MyQ Lite | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/smartapps/brbeaird/myq-lite.src/myq-lite.groovy">Link</a> |Required|
-| Device Handler | MyQ Garage Door Opener | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-garage-door-opener.src/myq-garage-door-opener.groovy">Link</a> |Needed if using door sensors|
-| Device Handler | MyQ Garage Door Opener-NoSensor | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-garage-door-opener-nosensor.src/myq-garage-door-opener-nosensor.groovy">Link</a> |Needed if NOT using door sensors|
-| Device Handler | Virtual Switch Tile | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/virtual-switch.src/virtual-switch.groovy">Link</a> |Helpful for no-sensor installs to add buttons in routines/ActionTiles/Alexa|
-| Device Handler | Light Controller | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-light-controller.src/myq-light-controller.groovy">Link</a> |Only needed if using a plug-in MyQ Lamp Controller|
-| Device Handler | MyQ Lock Door | <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-lock-door.src/myq-lock-door.groovy">Link</a> |Only needed if using the lock-type door functionality|
-
-
-### Manually:
-1. Log in to the <a href="https://account.smartthings.com">SmartThings IDE</a>. If you don't have a login yet, create one.
-2. The first step is to create device handlers for both door types.
-3. Click on **My Device Handlers** -> **Create new Device Handler** -> **From Code**.
-4. Copy contents of <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-garage-door-opener.src/myq-garage-door-opener.groovy">Door Opener (original sensor version) </a> and paste into text area. in SmartApps section. Click **Create**. Click **Publish** > **For Me** (you can ignore this step if you don't have a door sensor)
-5. Repeat the previous step for this door type code: <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-garage-door-opener-nosensor.src/myq-garage-door-opener-nosensor.groovy">Door Opener (no sensor version)</a> (you can ignore this step if using a sensor)
-6. Repeat the previous step for the Virtual Switch Tile device type code: <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/virtual-switch.src/virtual-switch.groovy">Virtual Switch Tile</a>
-6. Repeat the previous step for the Light Controller device type code: <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-light-controller.src/myq-light-controller.groovy">Light Controller</a>
-6. Now we create the SmartApp code. Click **My SmartApps** -> **New Smartapp** -> **From Code**.
-7. Copy contents of <a href="https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/smartapps/brbeaird/myq-lite.src/myq-lite.groovy">SmartApp</a> and paste into text area. in SmartApps section. Click **Create**. Click **Publish** > **For Me**
-8. In your SmartThings mobile app, tap **Automation** -> **SmartApps** -> **Add a SmartApp**. Scroll down and tap **My Apps**. Tap **MyQ Lite**.
-9. Enter in your login details and pick your gateway brand. If login is successful, you'll see a list of doors available for you to pick. After you choose your doors, you can select optional sensors to be tied to those doors.
-
-### SmartThings IDE GitHub Integration:
-
-If you have not set up the GitHub integration yet or do not know about it, take a look at the SmartThings documentation [here](http://docs.smartthings.com/en/latest/tools-and-ide/github-integration.html). Note that if you do not have a GitHub account or are not familiar with GitHub, the manual method of installation is recommended.
-
-1. If you haven't already, click on enable GitHub button (upper right). Add a new repository with user `brbeaird`, repository `SmartThings_MyQ`, and branch `master`. This can be done in either the "My Device Handlers" or "My SmartApps" sections
-2. Go to "My Device Handlers". Click "Update from Repo". Select the "SmartThings_MyQ" repository. You should see the device types in the "New (only in GitHub)" section. Check both boxes next to them. Check the "Publish" checkbox in the bottom right hand corner. Click "Execute Update".
-3. Go to "My SmartApps". Click "Update from Repo". Select the "SmartThings_MyQ" repository. You should see the SmartApp in the "New (only in GitHub)" section. Check both boxes next to them. Check the "Publish" checkbox in the bottom right hand corner. Click "Execute Update".
-4. In your mobile app, tap the "+", go to "My Apps", furnish your log in details and pick your gateway brand, and a list of devices will be available for you to pick.
-
-In the future, should you wish to update, simply repeat steps 2 and 3. The only difference is you will see the device types/SmartApp show up in the "Obsolete (updated in GitHub)" column instead.
 
 
 ### Donate/Sponsor:

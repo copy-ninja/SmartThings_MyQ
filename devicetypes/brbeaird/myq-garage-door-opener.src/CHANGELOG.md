@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.0.0 (2021-09-09)
+
+### Changed
+ - Update to support MyQ API v6
+
 ## 3.2.2 (2021-08-04)
 
 ### Changed
