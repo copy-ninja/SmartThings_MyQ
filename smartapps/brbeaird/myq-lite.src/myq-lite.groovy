@@ -19,8 +19,8 @@
  */
 include 'asynchttp_v1'
 
-String appVersion() { return "4.0.0" }
-String appModified() { return "2021-09-09"}
+String appVersion() { return "4.0.1" }
+String appModified() { return "2021-09-12"}
 String appAuthor() { return "Brian Beaird" }
 String gitBranch() { return "brbeaird" }
 String getAppImg(imgName) 	{ return "https://raw.githubusercontent.com/${gitBranch()}/SmartThings_MyQ/master/icons/$imgName" }
@@ -862,9 +862,6 @@ private login() {
 			return false
         }
    }
-   else{
-   	log.debug "No refresh needed."
-   }
     return true
 }
 
@@ -1042,6 +1039,10 @@ def sendLampCommand(myQDeviceId, myQAccountId, command) {
     return apiPut("https://account-devices-lamp.myq-cloud.com/api/v5.2/Accounts/${myQAccountId}/lamps/${myQDeviceId}/${command}")
 }
 
+//Transition for people who have not yet clicked through "modify devices" steps
+def getDefaultAccountId(){
+	return state.session.accountId
+}
 
 //Remove old unused pieces of state
 def stateCleanup(){

@@ -14,7 +14,7 @@
  *
  */
 metadata {
-	definition (name: "MyQ Garage Door Opener-NoSensor", namespace: "brbeaird", author: "Brian Beaird", vid: "generic-contact-4", ocfdevicetype: "oic.d.garagedoor", mnmn: "SmartThings") {
+	definition (name: "MyQ Garage Door Opener-NoSensor", namespace: "brbeaird", author: "Brian Beaird", ocfDeviceType: "oic.d.garagedoor", vid: "9a894a1f-5648-3799-ab9f-4a157697ef5a", mnmn: "SmartThingsCommunity") {
 		capability "Door Control"
 		capability "Garage Door Control"
         capability "Actuator"
@@ -59,20 +59,20 @@ metadata {
 
 def open()  {
     openPrep()
-    parent.sendDoorCommand(getMyQDeviceId(), device.currentState("myQAccountId").value, "open")
+    parent.sendDoorCommand(getMyQDeviceId(), getMyQAccountId(), "open")
 }
 def close() {
     closePrep()
-    parent.sendDoorCommand(getMyQDeviceId(), device.currentState("myQAccountId").value, "close")
+    parent.sendDoorCommand(getMyQDeviceId(), getMyQAccountId(), "close")
 }
 
 def sendOpen()  {
     openPrep()
-    parent.sendDoorCommand(getMyQDeviceId(), device.currentState("myQAccountId").value,"open")
+    parent.sendDoorCommand(getMyQDeviceId(), getMyQAccountId(),"open")
 }
 def sendClose() {
     closePrep()
-    parent.sendDoorCommand(getMyQDeviceId(), device.currentState("myQAccountId").value,"close")
+    parent.sendDoorCommand(getMyQDeviceId(), getMyQAccountId(),"close")
 }
 
 def openPrep(){
@@ -103,6 +103,14 @@ def getMyQDeviceId(){
     }
 }
 
+def getMyQAccountId(){
+    if (device.currentState("myQAccountId")?.value)
+    	return device.currentState("myQAccountId").value
+	else{
+        return parent.getDefaultAccountId()
+    }
+}
+
 def updateMyQDeviceId(Id, account) {
 	log.debug "Setting MyQID to ${Id}, accountId to ${account}"
     sendEvent(name: "myQDeviceId", value: Id, display: true , displayed: true)
@@ -114,5 +122,5 @@ def log(msg){
 }
 
 def showVersion(){
-	return "4.0.0"
+	return "4.0.1"
 }

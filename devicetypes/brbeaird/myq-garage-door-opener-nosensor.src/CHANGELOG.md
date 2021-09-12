@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.0.1 (2021-09-12)
+
+### Fixed
+ - Fixed missing vid for custom handler
+
 ## 4.0.0 (2021-09-09)
 
 ### Changed
@@ -8,7 +13,7 @@
 ## 3.2.0 (2021-08-04)
 
 ### Changed
- - Update custom handler for new app - suppot buttons and automations
+ - Update custom handler for new app - support buttons and automations
 
 ## 3.1.0 (2019-10-18)
 
