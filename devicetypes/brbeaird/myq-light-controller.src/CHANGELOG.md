@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.0.1 (2021-09-12)
+
+### Changed
+ - Added more backwards-compatibility for AccountId
+
 ## 4.0.0 (2021-09-09)
 
 ### Changed

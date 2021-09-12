@@ -123,13 +123,13 @@ def push() {
 
 def open()  {
     parent.notify("Garage door open command called.")
-    if (parent.sendDoorCommand(getMyQDeviceId(), device.currentState("myQAccountId").value, "open"))
+    if (parent.sendDoorCommand(getMyQDeviceId(), getMyQAccountId(), "open"))
     	updateDeviceStatus("opening")
     runIn(20, refresh, [overwrite: true])	//Force a sync with tilt sensor after 20 seconds
 }
 def close() {
     parent.notify("Garage door close command called.")
-	parent.sendDoorCommand(getMyQDeviceId(), device.currentState("myQAccountId").value, "close")
+	parent.sendDoorCommand(getMyQDeviceId(), getMyQAccountId(), "close")
 //	updateDeviceStatus("closing")			// Now handled in the parent (in case we have an Acceleration sensor, we can handle "waiting" state)
     runIn(30, refresh, [overwrite: true]) //Force a sync with tilt sensor after 30 seconds
 }
@@ -141,6 +141,14 @@ def getMyQDeviceId(){
         def newId = device.deviceNetworkId.split("\\|")[2]
         sendEvent(name: "myQDeviceId", value: newId, display: true , displayed: true)
         return newId
+    }
+}
+
+def getMyQAccountId(){
+    if (device.currentState("myQAccountId")?.value)
+    	return device.currentState("myQAccountId").value
+	else{
+        return parent.getDefaultAccountId()
     }
 }
 
@@ -258,5 +266,5 @@ def log(msg){
 }
 
 def showVersion(){
-	return "4.0.0"
+	return "4.0.1"
 }

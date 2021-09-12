@@ -42,13 +42,13 @@ metadata {
 
 def on() {
 	log.debug "Light turned on"
-    if (parent.sendLampCommand(getMyQDeviceId(), device.currentState("myQAccountId")?.value,"on"))
+    if (parent.sendLampCommand(getMyQDeviceId(), getMyQAccountId(),"on"))
     	updateDeviceStatus("on")
 
 }
 def off() {
 	log.debug "Light turned off"
-    if (parent.sendLampCommand(getMyQDeviceId(), device.currentState("myQAccountId")?.value,"off"))
+    if (parent.sendLampCommand(getMyQDeviceId(), getMyQAccountId(),"off"))
     	updateDeviceStatus("off")
 }
 
@@ -76,6 +76,14 @@ def getMyQDeviceId(){
     }
 }
 
+def getMyQAccountId(){
+    if (device.currentState("myQAccountId")?.value)
+    	return device.currentState("myQAccountId").value
+	else{
+        return parent.getDefaultAccountId()
+    }
+}
+
 def updateMyQDeviceId(Id, account) {
 	log.debug "Setting MyQID to ${Id}, accountId to ${account}"
     sendEvent(name: "myQDeviceId", value: Id, display: true , displayed: true)
@@ -83,5 +91,5 @@ def updateMyQDeviceId(Id, account) {
 }
 
 def showVersion(){
-	return "4.0.0"
+	return "4.0.1"
 }
