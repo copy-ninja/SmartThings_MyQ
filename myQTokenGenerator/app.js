@@ -32,7 +32,7 @@ const promptForCredentials = () => {
 const getToken = async () => {
     try {
 
-        const MYQ_API_CLIENT_ID = "IOS_CGI_MYQ";
+      const MYQ_API_CLIENT_ID = "IOS_CGI_MYQ";
         const MYQ_API_CLIENT_SECRET = "VUQ0RFhuS3lQV3EyNUJTdw==";
         const MYQ_API_REDIRECT_URI = "com.myqops://ios";
         let pkceObj = pkceChallenge();
@@ -63,8 +63,7 @@ const getToken = async () => {
         const requestVerificationToken = loginPageHtml.querySelector("input[name=__RequestVerificationToken]")?.getAttribute("value");
 
         if(!requestVerificationToken) {
-            logger.error('Unable to retrieve verification token from login page.')
-          return null;
+            throw({message: 'Unable to retrieve verification token from login page.'})
         }
 
 
@@ -86,8 +85,7 @@ const getToken = async () => {
 
         let redirectUrl = loginResponse.headers.get("location")
         if (!redirectUrl){
-            logger.error('MyQ login failed with email/password combination.')
-          return null;
+            throw({message: 'MyQ login failed with email/password combination.'})
         }
 
         // Cleanup the cookie so we can complete the login process by removing spurious additions
@@ -106,8 +104,7 @@ const getToken = async () => {
 
         const redirectResponseUrl = new URL(redirectResponse.headers.get("location") ?? "");
         if (!redirectResponseUrl){
-            logger.error('Oauth redirect failed.')
-          return null;
+          throw({message: 'Oauth redirect failed.'})
         }
 
         // Create the request to get our access and refresh tokens.
@@ -134,16 +131,22 @@ const getToken = async () => {
         }, true);
 
         const token = await tokenResponse.json();
-        logger.info('Success! Copy and paste the token below into the MyQToken app setting of the SmartApp.')
+        logger.info('Success! The token below has been copied to your clipboard. Paste it into the MyQToken app setting of the SmartApp.')
+        require('child_process').spawn('clip').stdin.end(token.refresh_token)
         logger.info(token.refresh_token)
       } catch (error) {
         logger.error(error.message);
       }
+      finally{
+        pauseAtEnd();
+      }
+}
 
-      rl.question('Press any key to exit. ', (key) => {
-            rl.close();
-            process.exit(0);
-        })
+function pauseAtEnd(){
+    rl.question('', (key) => {
+      rl.close();
+      process.exit(0);
+  })
 }
 
 function trimSetCookie(setCookie){
