@@ -131,9 +131,12 @@ const getToken = async () => {
         }, true);
 
         const token = await tokenResponse.json();
-        logger.info('Success! The token below has been copied to your clipboard. Paste it into the MyQToken app setting of the SmartApp.')
-        require('child_process').spawn('clip').stdin.end(token.refresh_token)
         logger.info(token.refresh_token)
+        try {
+          require('child_process').spawn('clip').stdin.end(token.refresh_token)
+          logger.info('Success! The token above has been copied to your clipboard. Paste it into the MyQToken app setting of the SmartApp.')
+        } catch (error) {}
+
       } catch (error) {
         logger.error(error.message);
       }
