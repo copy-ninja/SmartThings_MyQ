@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.1.0 (2021-09-24)
+
+### Added
+ - Added full oauth support within the SmartApp
+
 ## 4.0.1 (2021-09-12)
 
 ### Changed
