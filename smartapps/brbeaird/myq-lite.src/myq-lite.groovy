@@ -743,7 +743,7 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
                 try{
                 	def openButton = addChildDevice("brbeaird", "MyQ Action Switch", door + " Opener", getHubID(), [name: doorName + " Opener", label: doorName + " Opener"])
                     openButton.off()
-                	state.installMsg = state.installMsg + doorName + ": created action switch device. \r\n\r\n"
+                	state.installMsg = state.installMsg + doorName + ": created open action switch device. \r\n\r\n"
                 	subscribe(openButton, "switch.on", doorButtonOpenHandler)
                 }
                 catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
@@ -762,10 +762,9 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
 
             if (!existingCloseButtonDev){
                 try{
-                    log.debug "Switch needs updating to new Action Type version"
-                    existingCloseButtonDev.deviceType = "MyQ Action Switch"
                     def closeButton = addChildDevice("brbeaird", "MyQ Action Switch", door + " Closer", getHubID(), [name: doorName + " Closer", label: doorName + " Closer"])
                     closeButton.off()
+                    state.installMsg = state.installMsg + doorName + ": created close action switch device. \r\n\r\n"
                     subscribe(closeButton, "switch.on", doorButtonCloseHandler)
                 }
                 catch(physicalgraph.app.exception.UnknownDeviceTypeException e)
