@@ -763,7 +763,7 @@ def createChilDevices(door, sensor, doorName, prefPushButtons){
             if (!existingCloseButtonDev){
                 try{
                     log.debug "Switch needs updating to new Action Type version"
-                    existingDev.deviceType = "MyQ Action Switch"
+                    existingCloseButtonDev.deviceType = "MyQ Action Switch"
                     def closeButton = addChildDevice("brbeaird", "MyQ Action Switch", door + " Closer", getHubID(), [name: doorName + " Closer", label: doorName + " Closer"])
                     closeButton.off()
                     subscribe(closeButton, "switch.on", doorButtonCloseHandler)
