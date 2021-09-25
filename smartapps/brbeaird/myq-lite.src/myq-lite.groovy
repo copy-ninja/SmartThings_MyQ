@@ -20,10 +20,10 @@
 import java.security.MessageDigest
 import groovy.transform.Field
 
-include 'asynchttp_v1'
+include 'asynchttp'
 
-String appVersion() { return "4.0.1" }
-String appModified() { return "2021-09-12"}
+String appVersion() { return "4.1.0" }
+String appModified() { return "2021-09-25"}
 String appAuthor() { return "Brian Beaird" }
 String gitBranch() { return "brbeaird" }
 String getAppImg(imgName) 	{ return "https://raw.githubusercontent.com/${gitBranch()}/SmartThings_MyQ/master/icons/$imgName" }
