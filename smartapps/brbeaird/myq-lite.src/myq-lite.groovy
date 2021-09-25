@@ -416,7 +416,7 @@ def getVersionInfo(oldVersion, newVersion){
         ]
     ]
     def callbackMethod = oldVersion == 'versionCheck' ? 'updateCheck' : 'handleVersionUpdateResponse'
-    asynchttp_v1.post(callbackMethod, params)
+    asynchttp.post(callbackMethod, params)
 }
 
 //When version response received (async), update state with the data
