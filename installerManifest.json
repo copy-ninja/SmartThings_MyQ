@@ -19,7 +19,7 @@
             "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
             "published": true,
             "oAuth": true,
-            "version": "4.0.1",
+            "version": "4.1.0",
             "appSettings": {},
             "appUrl": "smartapps/brbeaird/myq-lite.src/myq-lite.groovy"
         },
@@ -66,11 +66,11 @@
 	        "optional": true
 	    },
 	    {
-	        "name": "Virtual Switch",
+	        "name": "MyQ Action Switch",
 	        "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
 	        "published": true,
 	        "oAuth": false,
-	        "appUrl": "devicetypes/brbeaird/virtual-switch.src/virtual-switch.groovy",
+	        "appUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/devicetypes/brbeaird/myq-action-switch.src/myq-action-switch.groovy",
 	        "appSettings": {},
 	        "version": "1.0.0",
 	        "optional": true
