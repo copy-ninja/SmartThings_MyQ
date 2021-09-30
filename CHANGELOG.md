@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.1.1 (2021-09-30)
+
+### Fixed
+ - Fixed logic where refresh was happening too frequently
+
+### Changed
+ - Added clearer error messaging (MyQ command errors are now passed straight through)
+
 ## 4.1.0 (2021-09-24)
 
 ### Added

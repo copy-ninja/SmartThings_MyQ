@@ -19,7 +19,7 @@
             "iconUrl": "https://raw.githubusercontent.com/brbeaird/SmartThings_MyQ/master/icons/myq.png",
             "published": true,
             "oAuth": true,
-            "version": "4.1.0",
+            "version": "4.1.1",
             "appSettings": {},
             "appUrl": "smartapps/brbeaird/myq-lite.src/myq-lite.groovy"
         },

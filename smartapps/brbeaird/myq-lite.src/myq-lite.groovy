@@ -22,8 +22,8 @@ import groovy.transform.Field
 
 include 'asynchttp'
 
-String appVersion() { return "4.1.0" }
-String appModified() { return "2021-09-25"}
+String appVersion() { return "4.1.1" }
+String appModified() { return "2021-09-30"}
 String appAuthor() { return "Brian Beaird" }
 String gitBranch() { return "brbeaird" }
 String getAppImg(imgName) 	{ return "https://raw.githubusercontent.com/${gitBranch()}/SmartThings_MyQ/master/icons/$imgName" }
@@ -933,6 +933,7 @@ private login() {
 
    //If we do not have a refresh token and a manual one wasn't entered, automatically fetch a new one using the email/password oauth flow
    if (!state.oauth?.refreshToken && !manualRefreshToken){
+   	log.debug "No refresh token found. Getting new one."
        if (!getNewAccessToken()){
            return
        }
@@ -1097,8 +1098,8 @@ private apiPut(apiPath, apiBody = [], actionText = "") {
             log.debug "Device already in desired state. Command ignored."
         	return true
 		}
-        sendNotificationEvent("Warning: MyQ command failed - ${e.response.status}")
-        if (prefDoorErrorNotify){sendPush("Warning: MyQ command failed for ${actionText} - ${e}")}
+        sendNotificationEvent("MyQ command failed - ${e.response.data?.description}")
+        if (prefDoorErrorNotify){sendPush("MyQ command ${actionText} failed - ${e.response.data?.description}")}
         return false
     }
 }
@@ -1116,8 +1117,7 @@ def sendDoorCommand(myQDeviceId, myQAccountId, command) {
         }
     }
     state.lastCommandSent = now()
-    return apiPut("https://account-devices-gdo.myq-cloud.com/api/v5.2/Accounts/${myQAccountId}/door_openers/${myQDeviceId}/${command}")
-    return true
+    return apiPut("https://account-devices-gdo.myq-cloud.com/api/v5.2/Accounts/${myQAccountId}/door_openers/${myQDeviceId}/${command}", '', "${command}")
 }
 
 def sendLampCommand(myQDeviceId, myQAccountId, command) {
@@ -1133,7 +1133,7 @@ def sendLampCommand(myQDeviceId, myQAccountId, command) {
         }
     }
     state.lastCommandSent = now()
-    return apiPut("https://account-devices-lamp.myq-cloud.com/api/v5.2/Accounts/${myQAccountId}/lamps/${myQDeviceId}/${command}")
+    return apiPut("https://account-devices-lamp.myq-cloud.com/api/v5.2/Accounts/${myQAccountId}/lamps/${myQDeviceId}/${command}", '', "${command}")
 }
 
 //Transition for people who have not yet clicked through "modify devices" steps
@@ -1322,11 +1322,11 @@ private getNewAccessToken(){
         httpPost([ uri: authEndpoint + tokenPath, headers: tokenHeaders, body: tokenRequestBody]) { response ->
             //log.debug "Token response ${response.status}"
             if (response.status == 200) {
-                state.oauth.refreshToken = refreshToken
                 state.oauth.lastRefresh = now()
                 state.oauth.access_token = response.data.access_token
                 state.oauth.expiration = now() + (response.data.expires_in * 1000)
                 refreshToken = response.data.refresh_token
+                state.oauth.refreshToken = refreshToken
                 log.info "Successfully generated new access/refresh tokens"
                 return true
             } else {
