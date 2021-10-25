@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.1.2 (2021-10-25)
+
+### Added
+ - Added ability to specify redirect auth server
+
+ ### Changed
+ - Changed default redirect auth URL to https
+
 ## 4.1.1 (2021-09-30)
 
 ### Fixed

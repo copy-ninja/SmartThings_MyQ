@@ -22,8 +22,8 @@ import groovy.transform.Field
 
 include 'asynchttp'
 
-String appVersion() { return "4.1.1" }
-String appModified() { return "2021-09-30"}
+String appVersion() { return "4.1.2" }
+String appModified() { return "2021-10-25"}
 String appAuthor() { return "Brian Beaird" }
 String gitBranch() { return "brbeaird" }
 String getAppImg(imgName) 	{ return "https://raw.githubusercontent.com/${gitBranch()}/SmartThings_MyQ/master/icons/$imgName" }
@@ -187,9 +187,13 @@ def prefLogIn(params) {
 	return dynamicPage(name: "prefLogIn", title: "Connect to MyQ", nextPage:"loginResultPage", uninstall:false, install: false, submitOnChange: true) {
 		if (loginMethod == "Email/Password"){
                 section("Login Credentials"){
-                input("username", "email", title: "Username", description: "MyQ Username (email address)")
-                input("password", "password", title: "Password", description: "MyQ password")
-		    }
+                	input("username", "email", title: "Username", description: "MyQ Username (email address)")
+                	input("password", "password", title: "Password", description: "MyQ password")
+                }
+                section("Advanced (optional)", hideable: true, hidden:true){
+        	            paragraph "Specify the auth server to get the redirect code"
+        	            input "authRedirectServer", "text", required: false, title: "Server URL", defaultValue: "https://brbeaird.herokuapp.com"
+                }
         }
         else{
             section("Advanced (optional)"){
@@ -1276,10 +1280,12 @@ private getNewAccessToken(){
     //This step requires halting the redirect and grabbing the code from MyQ. Because we cannot do this with Groovy, we hand off the cookie and redirectURL to a cloud-hosted app.
     // Note that the challenge verifier is NOT passed over, so the cloud app will not be able to login or actually generate a token for your account
     log.trace "uri: ${authEndpoint + redirectUrl}, headers: ${redirectHeaders}"
+    def url = authRedirectServer ? authRedirectServer : "https://brbeaird.herokuapp.com"
+    log.debug "Getting redirect code from ${url}/getRedirectCode"
     def code
     def scope
     try {
-        httpPostJson([ uri: "http://brbeaird.herokuapp.com", path: "/getRedirectCode", headers: ["Content-Type": "application/json"], body: ["redirectUrl": authEndpoint + redirectUrl, "cookie": loginCookie]]) { response ->
+        httpPostJson([ uri: url, path: "/getRedirectCode", headers: ["Content-Type": "application/json"], body: ["redirectUrl": authEndpoint + redirectUrl, "cookie": loginCookie]]) { response ->
             //log.trace "Redirect response: ${response.status}\n${response.data}"
             if (response.status == 200) {
                 code = response.data.code

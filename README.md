@@ -50,8 +50,10 @@ If you have not set up the GitHub integration yet or do not know about it, take 
 In the future, should you wish to update, simply repeat steps 2 and 3. The only difference is you will see the device types/SmartApp show up in the "Obsolete (updated in GitHub)" column instead.
 
 ### Authentication
-First of all, special thanks to hjdhjd and the work at [homebridge-myq](https://github.com/hjdhjd/homebridge-myq) for figuring all of this out and documenting it so well. 
+First of all, special thanks to hjdhjd and the work at [homebridge-myq](https://github.com/hjdhjd/homebridge-myq) for figuring all of this out and documenting it so well.
 The newest version of the MyQ API uses an OAuth flow. The SmartApp can handle most of this on its own, but there is one step that requires halting a web redirect to grab a code out of the URL. This is something the SmartThings groovy implemlentation cannot do. As a workaround, I now have the SmartApp make a callout to a 3rd-party endpoint I am hosting (http://brbeaird.herokuapp.com/getRedirectCode). The SmartApp passes in a URL and cookie from an auth'd MyQ session, and in return, the endpoint passes back a code. The SmartApp then uses that code to generate the OAuth access code and refresh token. It is important to note that because no part of your email, password, or the SmartApp-generated PKCE challenge verifier is passed over, the endpoint does not have the ability to login as you or generate a token itself. Also note that the endpoint is only called when a refresh token is not available, which is typically only upon initial install. Otherwise, callouts should be very rare, and the SmartApp will be able to cycle through refresh tokens on its own.
+
+If you would like to host this auth redirect server yourself, you can find the code at https://github.com/brbeaird/MyQRedirectCode. You can then specify your server's URL in the "Advanced (optional)" section on the Username/password input page of the SmartApp setup.
 
 Still, if you would prefer to avoid the need to make this callout, I have left in the option to generate a refresh token on your own and provide it to the SmartApp. I also included some javascript code and pre-compiled binaries to do that. Instructions are below.
 
@@ -61,12 +63,12 @@ This involves logging into MyQ to get an access token. You can then enter that t
 2. On Linux or MacOS, you will need run the appropriate chmod commands and enable it to be run. For MacOS:
    1. Make sure your system allows running these files: System preferences > Security & Privacy > give permission to run
    2. From the terminal, navigate to the directory of the utility and run `chmod u+x myqtokengenerator-macos`
-   3. Run `./myqtokengenerator-macos`   
+   3. Run `./myqtokengenerator-macos`
 4. On Windows, double-click and run, granting permissions as needed.
 5. At the prompt, enter your MyQ username and password. If successful, the utility will output an access token.
-   ![SmartApp List](/icons/TokenGenerator.png "Token Generator") 
+   ![SmartApp List](/icons/TokenGenerator.png "Token Generator")
 6. Back in the SmartApp setup, choose the "Manual Token" Login method, then paste in your token. You might find it easier to do this via web browser of the computer you used to generate the token (https://my.smartthings.com).
-   
+
 
 ### Overview
 This SmartApp integrates Chamberlain/LiftMaster MyQ doors and plug-in lamp module controllers into SmartThings. It creates a garage door device and/or a light device in your list of Things and allows you to control the device...
