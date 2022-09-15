@@ -1,4 +1,6 @@
 
+## NOTICE - September 2022: Groovy is set to be retired on October 15th. At that point, this SmartApp will no longer function. A replacement integration using an Edge driver is in progress.
+
 # SmartThings MyQ Lite SmartApp
 
 ### Current Notes
