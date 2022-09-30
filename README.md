@@ -1,5 +1,6 @@
 
-## NOTICE - September 2022: Groovy is set to be retired on October 15th. At that point, this SmartApp will no longer function. A replacement integration using an Edge driver is in progress.
+
+## This SmartApp has been deprecated. Groovy is set to gradually be phased out between September 30 - Early 2023. Over that time, this SmartApp will eventually no longer function. A new integration using the Edge driver platform is available here: https://github.com/brbeaird/SmartThings-MyQ-Edge.
 
 # SmartThings MyQ Lite SmartApp
 
