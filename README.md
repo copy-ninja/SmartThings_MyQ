@@ -1,8 +1,8 @@
 
 
-## This SmartApp has been deprecated. Groovy is set to gradually be phased out between September 30 - Early 2023. Over that time, this SmartApp will eventually no longer function. A new integration using the Edge driver platform is available here: https://github.com/brbeaird/SmartThings-MyQ-Edge.
+## Notice: This SmartApp (and all others using Groovy) is obsolete. A new integration using the Edge driver platform is available here: https://github.com/brbeaird/SmartThings-MyQ-Edge.
 
-# SmartThings MyQ Lite SmartApp
+# SmartThings MyQ Lite SmartApp (Obsolete)
 
 ### Current Notes
 * Please note this SmartApp cannot read the status of the MyQ door using the MyQ tilt sensor. Getting the door status will require a separate SmartThings-compatible sensor. It's an unfortunate hassle but is the only way we can do this without polling MyQ for status (which they will not allow done from the SmartThings cloud).
